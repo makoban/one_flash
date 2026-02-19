@@ -31,22 +31,22 @@ const COLOR_THEMES: Array<{
   colors: string[];
 }> = [
   {
-    value: "minimal",
-    label: "ミニマル",
-    description: "白を基調とした清潔感のあるシンプルなデザイン",
-    colors: ["#ffffff", "#4f46e5", "#374151"],
+    value: "simple",
+    label: "シンプル",
+    description: "白を基調とした清潔感のあるすっきりしたデザイン",
+    colors: ["#ffffff", "#374151", "#e5e7eb"],
+  },
+  {
+    value: "colorful",
+    label: "カラフル",
+    description: "鮮やかな色使いで楽しく親しみやすいデザイン",
+    colors: ["#7c3aed", "#ec4899", "#f59e0b"],
   },
   {
     value: "business",
     label: "ビジネス",
     description: "紺を基調とした信頼感のあるプロフェッショナルなデザイン",
-    colors: ["#f8fafc", "#2563eb", "#1e293b"],
-  },
-  {
-    value: "casual",
-    label: "カジュアル",
-    description: "温かみのある色使いで親しみやすいデザイン",
-    colors: ["#fffbf7", "#7c3aed", "#44403c"],
+    colors: ["#0c1524", "#c9a96e", "#1a3a5c"],
   },
 ];
 
@@ -81,7 +81,7 @@ const INITIAL_FORM_DATA: SiteFormData = {
   catchphrase: "",
   description: "",
   contactInfo: "",
-  colorTheme: "minimal",
+  colorTheme: "simple",
   email: "",
   subdomain: "",
 };

@@ -27,22 +27,22 @@ const COLOR_THEMES: Array<{
   preview: { bg: string; accent: string; text: string };
 }> = [
   {
-    value: "minimal",
-    label: "ミニマル",
-    description: "白を基調とした清潔感のあるシンプルなデザイン",
-    preview: { bg: "#ffffff", accent: "#4f46e5", text: "#374151" },
+    value: "simple",
+    label: "シンプル",
+    description: "白を基調とした清潔感のあるすっきりしたデザイン",
+    preview: { bg: "#ffffff", accent: "#374151", text: "#111827" },
+  },
+  {
+    value: "colorful",
+    label: "カラフル",
+    description: "鮮やかな色使いで楽しく親しみやすいデザイン",
+    preview: { bg: "#fefce8", accent: "#7c3aed", text: "#1e1b4b" },
   },
   {
     value: "business",
     label: "ビジネス",
     description: "紺を基調とした信頼感のあるプロフェッショナルなデザイン",
-    preview: { bg: "#f8fafc", accent: "#2563eb", text: "#1e293b" },
-  },
-  {
-    value: "casual",
-    label: "カジュアル",
-    description: "温かみのある色使いで親しみやすいデザイン",
-    preview: { bg: "#fffbf7", accent: "#7c3aed", text: "#44403c" },
+    preview: { bg: "#f8fafc", accent: "#c9a96e", text: "#0c1524" },
   },
 ];
 
@@ -53,7 +53,7 @@ const INITIAL_FORM_DATA: SiteFormData = {
   catchphrase: "",
   description: "",
   contactInfo: "",
-  colorTheme: "minimal",
+  colorTheme: "simple",
   email: "",
   subdomain: "",
 };

@@ -2,7 +2,7 @@
  * /revise ページ
  *
  * 修正フォーム。メールで送られた修正用URL（トークン付き）からアクセスする。
- * 6つの項目別編集フィールドとフリーワード指示欄を分離して表示。
+ * AI指示（フリーワード）をメインUIとし、6項目の直接編集は折りたたみで分離。
  *
  * URL形式: /revise?token=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
  */
@@ -67,7 +67,7 @@ const FIELD_CONFIG: Array<{
   {
     key: "colorTheme",
     label: "サイトの雰囲気",
-    placeholder: "例: もっとシンプルに / ビジネス寄りに / 温かみのある感じに",
+    placeholder: "例: もっとシンプルに / カラフルに / ビジネス寄りに",
     type: "input",
   },
   {
@@ -82,8 +82,9 @@ function ReviseContent() {
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
 
-  const [fields, setFields] = useState<RevisionFields>(EMPTY_FIELDS);
   const [freeInstruction, setFreeInstruction] = useState("");
+  const [fields, setFields] = useState<RevisionFields>(EMPTY_FIELDS);
+  const [fieldsOpen, setFieldsOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<{
@@ -102,15 +103,17 @@ function ReviseContent() {
   function buildInstruction(): string {
     const parts: string[] = [];
 
+    // AI指示を最優先
+    if (freeInstruction.trim()) {
+      parts.push(freeInstruction.trim());
+    }
+
+    // 6項目の変更があれば追記
     for (const config of FIELD_CONFIG) {
       const value = fields[config.key].trim();
       if (value) {
-        parts.push(`【${config.label}】${value}`);
+        parts.push(`【${config.label}の変更】${value}`);
       }
-    }
-
-    if (freeInstruction.trim()) {
-      parts.push(`【その他の修正指示】${freeInstruction.trim()}`);
     }
 
     return parts.join("\n");
@@ -129,7 +132,7 @@ function ReviseContent() {
 
     const instruction = buildInstruction();
     if (!instruction) {
-      setError("修正内容を1つ以上入力してください");
+      setError("修正内容を入力してください");
       return;
     }
 
@@ -165,8 +168,8 @@ function ReviseContent() {
         publicUrl: data.publicUrl ?? "",
         freeRevisionsRemaining: data.freeRevisionsRemaining ?? 0,
       });
-      setFields(EMPTY_FIELDS);
       setFreeInstruction("");
+      setFields(EMPTY_FIELDS);
     } catch (err: unknown) {
       const message =
         err instanceof Error ? err.message : "エラーが発生しました。もう一度お試しください。";
@@ -183,7 +186,7 @@ function ReviseContent() {
         <div className="text-center mb-8">
           <h1 className="text-2xl font-bold text-gray-900">サイトの修正</h1>
           <p className="mt-2 text-sm text-gray-500">
-            修正したい項目だけ入力してください。空欄の項目は変更されません。
+            AIに修正したい内容を伝えてください
           </p>
         </div>
 
@@ -218,69 +221,19 @@ function ReviseContent() {
         {/* 修正フォーム */}
         {token && (
           <form onSubmit={handleSubmit}>
-            {/* セクション1: 6項目の個別編集 */}
+            {/* メインエリア: AI指示 */}
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8 mb-6">
-              <div className="flex items-center gap-2 mb-1">
-                <div className="w-6 h-6 bg-indigo-100 text-indigo-600 rounded-full text-xs font-bold flex items-center justify-center flex-shrink-0">
-                  1
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-8 h-8 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center flex-shrink-0">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
                 </div>
-                <h2 className="text-base font-bold text-gray-900">項目ごとの修正</h2>
-              </div>
-              <p className="text-xs text-gray-400 mb-6 ml-8">
-                変更したい項目だけ入力。空欄は変更されません。
-              </p>
-
-              <div className="space-y-5">
-                {FIELD_CONFIG.map((config) => (
-                  <div key={config.key}>
-                    <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                      {config.label}
-                    </label>
-                    {config.type === "textarea" ? (
-                      <textarea
-                        value={fields[config.key]}
-                        onChange={(e) =>
-                          setFields((prev) => ({
-                            ...prev,
-                            [config.key]: e.target.value,
-                          }))
-                        }
-                        placeholder={config.placeholder}
-                        rows={3}
-                        className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 resize-none placeholder:text-gray-400"
-                        disabled={isSubmitting}
-                      />
-                    ) : (
-                      <input
-                        type="text"
-                        value={fields[config.key]}
-                        onChange={(e) =>
-                          setFields((prev) => ({
-                            ...prev,
-                            [config.key]: e.target.value,
-                          }))
-                        }
-                        placeholder={config.placeholder}
-                        className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 placeholder:text-gray-400"
-                        disabled={isSubmitting}
-                      />
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* セクション2: フリーワード指示 */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8 mb-6">
-              <div className="flex items-center gap-2 mb-1">
-                <div className="w-6 h-6 bg-indigo-100 text-indigo-600 rounded-full text-xs font-bold flex items-center justify-center flex-shrink-0">
-                  2
+                <div>
+                  <h2 className="text-base font-bold text-gray-900">AIに修正を指示</h2>
+                  <p className="text-xs text-gray-400">デザイン・テキスト・レイアウト、何でも自由に伝えてください</p>
                 </div>
-                <h2 className="text-base font-bold text-gray-900">その他の修正指示</h2>
               </div>
-              <p className="text-xs text-gray-400 mb-4 ml-8">
-                デザインの変更、レイアウトの調整など自由に記入できます
-              </p>
 
               <textarea
                 value={freeInstruction}
@@ -289,10 +242,10 @@ function ReviseContent() {
                     setFreeInstruction(e.target.value);
                   }
                 }}
-                placeholder={"例:\n・全体的にもっとシンプルにしてほしい\n・キャッチコピーをもっと目立たせて\n・連絡先セクションを大きくして\n・背景色をもう少し明るくして"}
-                rows={5}
+                placeholder={"例:\n・全体的にもっとシンプルにしてほしい\n・キャッチコピーをもっと目立たせて\n・連絡先セクションを大きくして\n・背景色をもう少し明るくして\n・カラフルな感じにして"}
+                rows={6}
                 maxLength={MAX_INSTRUCTION_LENGTH}
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 resize-none placeholder:text-gray-400"
+                className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm text-gray-900 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 resize-none placeholder:text-gray-400"
                 disabled={isSubmitting}
               />
               <div className="flex justify-between items-center mt-1.5">
@@ -311,11 +264,84 @@ function ReviseContent() {
               </div>
             </div>
 
+            {/* 折りたたみ: 項目ごとの直接編集 */}
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 mb-6 overflow-hidden">
+              <button
+                type="button"
+                onClick={() => setFieldsOpen(!fieldsOpen)}
+                className="w-full flex items-center justify-between p-5 text-left hover:bg-gray-50 transition-colors"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-gray-100 text-gray-500 rounded-full flex items-center justify-center flex-shrink-0">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium text-gray-700">項目ごとに直接編集</span>
+                    <p className="text-xs text-gray-400">屋号・キャッチコピー・連絡先などを個別に変更</p>
+                  </div>
+                </div>
+                <svg
+                  className={`w-5 h-5 text-gray-400 transition-transform ${fieldsOpen ? "rotate-180" : ""}`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+
+              {fieldsOpen && (
+                <div className="px-5 pb-5 space-y-5 border-t border-gray-100 pt-4">
+                  <p className="text-xs text-gray-400">
+                    変更したい項目だけ入力。空欄の項目は変更されません。
+                  </p>
+                  {FIELD_CONFIG.map((config) => (
+                    <div key={config.key}>
+                      <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                        {config.label}
+                      </label>
+                      {config.type === "textarea" ? (
+                        <textarea
+                          value={fields[config.key]}
+                          onChange={(e) =>
+                            setFields((prev) => ({
+                              ...prev,
+                              [config.key]: e.target.value,
+                            }))
+                          }
+                          placeholder={config.placeholder}
+                          rows={3}
+                          className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 resize-none placeholder:text-gray-400"
+                          disabled={isSubmitting}
+                        />
+                      ) : (
+                        <input
+                          type="text"
+                          value={fields[config.key]}
+                          onChange={(e) =>
+                            setFields((prev) => ({
+                              ...prev,
+                              [config.key]: e.target.value,
+                            }))
+                          }
+                          placeholder={config.placeholder}
+                          className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 placeholder:text-gray-400"
+                          disabled={isSubmitting}
+                        />
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
             {/* 送信ボタン */}
             <button
               type="submit"
               disabled={isSubmitting || !hasAnyInput()}
-              className="w-full py-3 px-6 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
+              className="w-full py-3.5 px-6 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
             >
               {isSubmitting ? (
                 <span className="flex items-center justify-center gap-2">
@@ -349,7 +375,7 @@ function ReviseContent() {
             {/* 注意事項 */}
             <div className="mt-6 pt-6 border-t border-gray-100">
               <p className="text-xs text-gray-400 leading-relaxed text-center">
-                無料修正は2回まで。3回目以降は500円/回となります。
+                無料修正は月2回まで。3回目以降は500円/回となります。
                 修正はAIが自動で行うため、イメージと異なる場合があります。
                 その場合は再度修正をご依頼ください。
               </p>

@@ -115,7 +115,7 @@ export interface SiteRow {
   revision_token: string;
   revision_count: number;
   stripe_session_id: string;
-  color_theme: "minimal" | "business" | "casual";
+  color_theme: "simple" | "colorful" | "business";
   created_at: Date;
   updated_at: Date;
   [key: string]: unknown;

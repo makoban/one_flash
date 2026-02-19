@@ -28,9 +28,9 @@ interface PreviewSectionProps {
 type DeviceTab = "pc" | "mobile";
 
 const THEME_LABELS: Record<SiteFormData["colorTheme"], string> = {
-  minimal: "ミニマル",
+  simple: "シンプル",
+  colorful: "カラフル",
   business: "ビジネス",
-  casual: "カジュアル",
 };
 
 // ---------------------------------------------------------------------------
@@ -155,63 +155,20 @@ export default function PreviewSection({
         {/* 右: 編集パネル（1/3幅） */}
         <div className="lg:col-span-1">
           <div className="bg-white rounded-2xl border border-gray-200 shadow-sm sticky top-20">
+            {/* AI指示エリア（メイン） */}
             <div className="p-4 border-b border-gray-100">
-              <h3 className="text-sm font-bold text-gray-900">入力内容</h3>
+              <h3 className="text-sm font-bold text-gray-900">AIに修正を指示</h3>
               <p className="text-xs text-gray-400 mt-0.5">
-                クリックして編集 → 再生成
+                どんな変更でも自由に伝えてください
               </p>
             </div>
 
-            <div className="p-4 space-y-3 max-h-[60vh] overflow-y-auto">
-              {/* サイト名 */}
-              <EditableField
-                label="屋号・事業名"
-                value={editData.siteName}
-                isEditing={editingField === "siteName"}
-                onStartEdit={() => setEditingField("siteName")}
-                onEndEdit={() => setEditingField(null)}
-                onChange={(v) => setEditData((prev) => ({ ...prev, siteName: v }))}
-                type="input"
-              />
-
-              {/* キャッチコピー */}
-              <EditableField
-                label="キャッチコピー"
-                value={editData.catchphrase}
-                isEditing={editingField === "catchphrase"}
-                onStartEdit={() => setEditingField("catchphrase")}
-                onEndEdit={() => setEditingField(null)}
-                onChange={(v) => setEditData((prev) => ({ ...prev, catchphrase: v }))}
-                type="input"
-              />
-
-              {/* 説明 */}
-              <EditableField
-                label="説明・本文"
-                value={editData.description}
-                isEditing={editingField === "description"}
-                onStartEdit={() => setEditingField("description")}
-                onEndEdit={() => setEditingField(null)}
-                onChange={(v) => setEditData((prev) => ({ ...prev, description: v }))}
-                type="textarea"
-              />
-
-              {/* 連絡先 */}
-              <EditableField
-                label="連絡先"
-                value={editData.contactInfo}
-                isEditing={editingField === "contactInfo"}
-                onStartEdit={() => setEditingField("contactInfo")}
-                onEndEdit={() => setEditingField(null)}
-                onChange={(v) => setEditData((prev) => ({ ...prev, contactInfo: v }))}
-                type="textarea"
-              />
-
-              {/* カラーテーマ */}
-              <div className="pt-1">
-                <label className="block text-xs font-medium text-gray-500 mb-1.5">カラーテーマ</label>
+            <div className="p-4 space-y-3">
+              {/* カラーテーマ切り替え */}
+              <div>
+                <label className="block text-xs font-medium text-gray-500 mb-1.5">テーマ</label>
                 <div className="flex gap-2">
-                  {(["minimal", "business", "casual"] as const).map((t) => (
+                  {(["simple", "colorful", "business"] as const).map((t) => (
                     <button
                       key={t}
                       type="button"
@@ -228,30 +185,25 @@ export default function PreviewSection({
                 </div>
               </div>
 
-              {/* 修正指示（自由記述） */}
-              <div className="pt-2">
-                <label className="block text-xs font-medium text-gray-500 mb-1.5">
-                  AIへの追加指示
-                </label>
+              {/* AI指示テキストエリア */}
+              <div>
                 <textarea
                   value={instruction}
                   onChange={(e) => setInstruction(e.target.value)}
                   placeholder={"例:\n・もっとシンプルにしてほしい\n・キャッチコピーをもっと目立たせて\n・連絡先セクションを大きく\n・全体的にもっと高級感を出して"}
-                  rows={4}
+                  rows={5}
                   maxLength={500}
-                  className="w-full px-3 py-2 text-sm text-gray-900 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 resize-none placeholder:text-gray-400"
+                  className="w-full px-3 py-2.5 text-sm text-gray-900 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 resize-none placeholder:text-gray-400"
                 />
                 <div className="flex justify-between mt-1">
                   <p className="text-[10px] text-gray-400">
-                    デザインやテキストの修正指示を自由に記入
+                    デザイン・テキスト・レイアウト何でもOK
                   </p>
                   <span className="text-[10px] text-gray-400">{instruction.length}/500</span>
                 </div>
               </div>
-            </div>
 
-            {/* 再生成ボタン */}
-            <div className="p-4 border-t border-gray-100">
+              {/* 再生成ボタン */}
               <button
                 type="button"
                 onClick={handleRegenerate}
@@ -279,6 +231,14 @@ export default function PreviewSection({
                 </p>
               )}
             </div>
+
+            {/* 入力内容の直接編集（折りたたみ） */}
+            <FieldsAccordion
+              editData={editData}
+              setEditData={setEditData}
+              editingField={editingField}
+              setEditingField={setEditingField}
+            />
           </div>
         </div>
 
@@ -399,6 +359,85 @@ function SmartphoneIcon() {
       <rect x="5" y="2" width="14" height="20" rx="2" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
       <path d="M12 18h.01" strokeWidth="2" strokeLinecap="round" />
     </svg>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// 入力内容の折りたたみパネル
+// ---------------------------------------------------------------------------
+
+function FieldsAccordion({
+  editData,
+  setEditData,
+  editingField,
+  setEditingField,
+}: {
+  editData: SiteFormData;
+  setEditData: React.Dispatch<React.SetStateAction<SiteFormData>>;
+  editingField: string | null;
+  setEditingField: (f: string | null) => void;
+}) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <div className="border-t border-gray-100">
+      <button
+        type="button"
+        onClick={() => setOpen(!open)}
+        className="w-full flex items-center justify-between p-4 text-left hover:bg-gray-50 transition-colors"
+      >
+        <span className="text-xs font-medium text-gray-500">入力内容を直接編集</span>
+        <svg
+          className={`w-4 h-4 text-gray-400 transition-transform ${open ? "rotate-180" : ""}`}
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+
+      {open && (
+        <div className="px-4 pb-4 space-y-3">
+          <EditableField
+            label="屋号・事業名"
+            value={editData.siteName}
+            isEditing={editingField === "siteName"}
+            onStartEdit={() => setEditingField("siteName")}
+            onEndEdit={() => setEditingField(null)}
+            onChange={(v) => setEditData((prev) => ({ ...prev, siteName: v }))}
+            type="input"
+          />
+          <EditableField
+            label="キャッチコピー"
+            value={editData.catchphrase}
+            isEditing={editingField === "catchphrase"}
+            onStartEdit={() => setEditingField("catchphrase")}
+            onEndEdit={() => setEditingField(null)}
+            onChange={(v) => setEditData((prev) => ({ ...prev, catchphrase: v }))}
+            type="input"
+          />
+          <EditableField
+            label="説明・本文"
+            value={editData.description}
+            isEditing={editingField === "description"}
+            onStartEdit={() => setEditingField("description")}
+            onEndEdit={() => setEditingField(null)}
+            onChange={(v) => setEditData((prev) => ({ ...prev, description: v }))}
+            type="textarea"
+          />
+          <EditableField
+            label="連絡先"
+            value={editData.contactInfo}
+            isEditing={editingField === "contactInfo"}
+            onStartEdit={() => setEditingField("contactInfo")}
+            onEndEdit={() => setEditingField(null)}
+            onChange={(v) => setEditData((prev) => ({ ...prev, contactInfo: v }))}
+            type="textarea"
+          />
+        </div>
+      )}
+    </div>
   );
 }
 

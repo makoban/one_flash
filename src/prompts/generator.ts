@@ -21,31 +21,59 @@ import type { SiteFormData } from "@/lib/gemini";
 // ---------------------------------------------------------------------------
 
 const COLOR_THEMES = {
-  minimal: {
-    label: "ミニマル・モダン",
+  simple: {
+    label: "シンプル・クリーン",
     heroStyle:
-      "洗練されたダーク背景にクリーンなタイポグラフィ。余白を贅沢に使い、DM Serif Displayの優雅なセリフ体で高級感を演出。モノトーン＋インディゴのアクセントで知的な印象。",
+      "白を基調としたクリーンで清潔感のあるデザイン。Noto Sans JPのすっきりしたゴシック体で読みやすさと信頼感を両立。余白を贅沢に使い、必要最小限の色で洗練された印象。",
     palette: {
       primary: "#111827",
-      accent: "#6366f1",
-      accentLight: "#a5b4fc",
-      heroBg: "linear-gradient(135deg, #0f0f0f 0%, #1a1a2e 50%, #16213e 100%)",
-      heroText: "#ffffff",
+      accent: "#374151",
+      accentLight: "#9ca3af",
+      heroBg: "linear-gradient(135deg, #ffffff 0%, #f9fafb 50%, #f3f4f6 100%)",
+      heroText: "#111827",
       sectionBg1: "#ffffff",
-      sectionBg2: "#fafafa",
-      sectionBgDark: "#0f0f0f",
+      sectionBg2: "#f9fafb",
+      sectionBgDark: "#111827",
       cardBg: "#ffffff",
-      cardBorder: "#f0f0f0",
-      textPrimary: "#111111",
-      textSecondary: "#555555",
-      textMuted: "#999999",
+      cardBorder: "#e5e7eb",
+      textPrimary: "#111827",
+      textSecondary: "#4b5563",
+      textMuted: "#9ca3af",
     },
     fonts: {
-      display: "DM Serif Display",
-      label: "Space Grotesk",
+      display: "Noto Sans JP",
+      label: "Inter",
       body: "Noto Sans JP",
       googleFontsUrl:
-        "https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Noto+Sans+JP:wght@300;400;500;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap",
+        "https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+JP:wght@300;400;500;700&display=swap",
+    },
+  },
+  colorful: {
+    label: "カラフル・ポップ",
+    heroStyle:
+      "鮮やかなグラデーションと明るい配色で楽しさ・親しみやすさを表現。Zen Maru Gothicの丸ゴシックとPoppinsの柔らかいサンセリフで、カジュアルで元気な雰囲気。",
+    palette: {
+      primary: "#1e1b4b",
+      accent: "#7c3aed",
+      accentLight: "#c4b5fd",
+      heroBg:
+        "linear-gradient(135deg, #7c3aed 0%, #ec4899 50%, #f59e0b 100%)",
+      heroText: "#ffffff",
+      sectionBg1: "#fefce8",
+      sectionBg2: "#fdf4ff",
+      sectionBgDark: "#1e1b4b",
+      cardBg: "#ffffff",
+      cardBorder: "#e9d5ff",
+      textPrimary: "#1e1b4b",
+      textSecondary: "#6b21a8",
+      textMuted: "#a78bfa",
+    },
+    fonts: {
+      display: "Zen Maru Gothic",
+      label: "Poppins",
+      body: "Zen Maru Gothic",
+      googleFontsUrl:
+        "https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Zen+Maru+Gothic:wght@300;400;500;700&display=swap",
     },
   },
   business: {
@@ -74,34 +102,6 @@ const COLOR_THEMES = {
       body: "Noto Serif JP",
       googleFontsUrl:
         "https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Noto+Serif+JP:wght@300;400;500;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap",
-    },
-  },
-  casual: {
-    label: "カジュアル・フレンドリー",
-    heroStyle:
-      "温かみのあるアースカラー。Loraの柔らかいセリフ体とZen Maru Gothicの丸ゴシックで親しみやすさと洗練を両立。カフェやサロンのような心地よい雰囲気。",
-    palette: {
-      primary: "#3d3229",
-      accent: "#b87333",
-      accentLight: "#daa06d",
-      heroBg:
-        "linear-gradient(160deg, #3d3229 0%, #5c4a3a 50%, #8b7355 100%)",
-      heroText: "#ffffff",
-      sectionBg1: "#faf7f2",
-      sectionBg2: "#f3ede4",
-      sectionBgDark: "#2c2420",
-      cardBg: "#ffffff",
-      cardBorder: "#e8e2d9",
-      textPrimary: "#2c2420",
-      textSecondary: "#6b5e53",
-      textMuted: "#a89e93",
-    },
-    fonts: {
-      display: "Lora",
-      label: "Poppins",
-      body: "Zen Maru Gothic",
-      googleFontsUrl:
-        "https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=Poppins:wght@300;400;500;600;700&family=Zen+Maru+Gothic:wght@300;400;500;700&display=swap",
     },
   },
 } as const;
@@ -166,6 +166,7 @@ STEP1で推定した業種に対応するルールを以下から選択し、そ
   - イタリック体は使わない（医療機関の信頼感を損なうため）
   - 電話番号をCTAの最優先に置く（tel:リンク必須）
   - カードタイプ: Aタイプ（左に4px border, accent色, rounded-lg）
+  - simpleテーマが選ばれている場合: accent色を #2a7ae4（ブルー系）にオーバーライド
   - businessテーマが選ばれている場合: accent色を #2a7ae4（ブルー系）にオーバーライド
   - 英字ラベルで「TREATMENT」「ABOUT」「ACCESS」等を使用
   - ヒーロー背景のオーバーレイに薄いグリッドまたは斜め線パターン（CSS only）
@@ -187,8 +188,8 @@ STEP1で推定した業種に対応するルールを以下から選択し、そ
   - グラデーションテキスト（background-clip: text）を見出しの一部に使用
   - CTAボタンはアウトラインスタイル（background: transparent, border 2px, hover時に塗り）
   - カードタイプ: Bタイプ（shadow-lg, rounded-2xl, hover時にtranslateY）
-  - casualテーマが選ばれている場合: accent色を #c9748a（ローズ）にオーバーライド
-  - minimalテーマが選ばれている場合: accent色を #9b8ec4（ラベンダー）にオーバーライド
+  - colorfulテーマが選ばれている場合: accent色を #c9748a（ローズ）にオーバーライド
+  - simpleテーマが選ばれている場合: accent色を #9b8ec4（ラベンダー）にオーバーライド
   - ヒーロー背景に細い斜め線または水玉パターンを薄く（opacity: 0.04）
 
 ------------------------------------------------------------
@@ -206,6 +207,7 @@ STEP1で推定した業種に対応するルールを以下から選択し、そ
   - 背景全体に大きな装飾英字（例: "CAFE", "RESTAURANT"）をopacity: 0.035〜0.05で薄く表示
   - 温かみ・手作り感を優先したセクション間隔
   - カードタイプ: Cタイプ（アイコン上置き, rounded-xl, shadow-sm）
+  - simpleテーマが選ばれている場合: accent色を #7a9e6e（オリーブグリーン）にオーバーライド
   - businessテーマが選ばれている場合: accent色を #7a9e6e（オリーブグリーン）にオーバーライド
   - セクション背景を交互に変え、同じ背景色を連続させない
   - 営業時間・定休日は clock / calendar-x アイコン付きで必ず表示
@@ -245,7 +247,7 @@ STEP1で推定した業種に対応するルールを以下から選択し、そ
 
 推奨アイコン（Lucide）: book-open, pencil, graduation-cap, music, palette, dumbbell, smile, users, star, heart
 デザイン特性:
-  - casualテーマが最も適切
+  - colorfulテーマが最も適切
   - 背景にCSSドットパターン（radial-gradient で小さなドット）でポップさを表現
   - カードタイプ: Bタイプ（shadow-lg, rounded-2xl）
   - 体験申込ボタンを複数箇所に配置（ヘッダー・ヒーロー・体験案内セクション）

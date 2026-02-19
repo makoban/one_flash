@@ -139,6 +139,6 @@ function validateFormData(formData: SiteFormData | undefined): string | null {
   if (!formData.catchphrase || formData.catchphrase.trim().length === 0) return "catchphrase is required";
   if (!formData.description || formData.description.trim().length === 0) return "description is required";
   if (!formData.contactInfo || formData.contactInfo.trim().length === 0) return "contactInfo is required";
-  if (!["minimal", "business", "casual"].includes(formData.colorTheme)) return "Invalid colorTheme";
+  if (!["simple", "colorful", "business"].includes(formData.colorTheme)) return "Invalid colorTheme";
   return null;
 }

@@ -22,7 +22,7 @@ const SAMPLE_FORM_DATA: SiteFormData = {
     "当院は2010年開業。腰痛・肩こりを専門とした整体院です。施術は完全予約制で、1回60分のていねいなカウンセリングと施術を行います。お客様一人ひとりの体の状態に合わせたオーダーメイドの施術が特長です。",
   contactInfo:
     "メール: info@yamada-seitai.jp\n電話: 03-1234-5678（10〜18時・水曜定休）\n住所: 東京都渋谷区〇〇1-2-3",
-  colorTheme: "minimal",
+  colorTheme: "simple",
   // 開発用プレビューページのため、email / subdomain はダミー値を設定
   email: "dev-preview@example.com",
   subdomain: "dev-preview",
@@ -145,9 +145,9 @@ export default function PreviewPage() {
                   }
                   className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 >
-                  <option value="minimal">ミニマル</option>
+                  <option value="simple">シンプル</option>
                   <option value="business">ビジネス</option>
-                  <option value="casual">カジュアル</option>
+                  <option value="colorful">カラフル</option>
                 </select>
               </div>
             </div>
