@@ -28,6 +28,14 @@ import crypto from "crypto";
 interface CreateCheckoutRequestBody {
   formData: SiteFormData;
   html: string;
+  utm?: {
+    utm_source?: string;
+    utm_medium?: string;
+    utm_campaign?: string;
+    utm_content?: string;
+    utm_term?: string;
+  };
+  sessionId?: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -37,7 +45,7 @@ interface CreateCheckoutRequestBody {
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     const body = (await request.json()) as CreateCheckoutRequestBody;
-    const { formData, html } = body;
+    const { formData, html, utm, sessionId } = body;
 
     // --- バリデーション ---
     if (!html || typeof html !== "string") {
@@ -100,6 +108,12 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         catchphrase: formData.catchphrase,
         contactInfo: formData.contactInfo,
         description: formData.description.substring(0, 500),
+        ...(utm?.utm_source && { utm_source: utm.utm_source }),
+        ...(utm?.utm_medium && { utm_medium: utm.utm_medium }),
+        ...(utm?.utm_campaign && { utm_campaign: utm.utm_campaign }),
+        ...(utm?.utm_content && { utm_content: utm.utm_content }),
+        ...(utm?.utm_term && { utm_term: utm.utm_term }),
+        ...(sessionId && { session_id: sessionId }),
       },
     });
 

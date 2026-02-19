@@ -23,6 +23,7 @@ import {
   updateSubscriptionStatus,
   updateSiteIsActive,
   query,
+  insertAdEvent,
 } from "@/lib/db";
 import { getDraftHTML, deleteDraftHTML, deactivateSite, reactivateSite } from "@/lib/r2";
 import { sendSiteCompletionEmail } from "@/lib/email";
@@ -221,6 +222,18 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session): Promis
       console.error("[webhook/stripe] Failed to send email:", err);
     }
   }
+
+  // --- Step 6: subscribed イベント記録 ---
+  await insertAdEvent({
+    eventType: "subscribed",
+    userId: user.id,
+    utmSource: metadata.utm_source,
+    utmMedium: metadata.utm_medium,
+    utmCampaign: metadata.utm_campaign,
+    utmContent: metadata.utm_content,
+    utmTerm: metadata.utm_term,
+    sessionId: metadata.session_id,
+  }).catch((err: unknown) => console.warn("[webhook/stripe] Failed to record ad event:", err));
 
   console.log(`[webhook/stripe] Checkout completed: ${subdomain} → ${publicUrl}`);
 }

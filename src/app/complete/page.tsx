@@ -9,10 +9,12 @@
  */
 
 import { Suspense } from "react";
+import ConversionTracker from "@/components/ConversionTracker";
 
 function CompleteContent() {
   return (
     <main className="min-h-screen bg-gradient-to-br from-slate-50 to-indigo-50 flex items-center justify-center px-4">
+      <ConversionTracker />
       <div className="max-w-md w-full bg-white rounded-2xl shadow-sm border border-gray-100 p-8 text-center">
         {/* 成功アイコン */}
         <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">

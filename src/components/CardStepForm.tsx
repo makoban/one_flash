@@ -67,6 +67,7 @@ function generateSubdomain(): string {
 interface CardStepFormProps {
   onSubmit: (formData: SiteFormData) => Promise<void>;
   isSubmitting: boolean;
+  onFirstInteraction?: () => void;
 }
 
 type FormErrors = Partial<Record<keyof SiteFormData, string>>;
@@ -89,7 +90,7 @@ const INITIAL_FORM_DATA: SiteFormData = {
 // メインコンポーネント
 // ---------------------------------------------------------------------------
 
-export default function CardStepForm({ onSubmit, isSubmitting }: CardStepFormProps) {
+export default function CardStepForm({ onSubmit, isSubmitting, onFirstInteraction }: CardStepFormProps) {
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState<SiteFormData>(INITIAL_FORM_DATA);
   const [errors, setErrors] = useState<FormErrors>({});
@@ -109,10 +110,15 @@ export default function CardStepForm({ onSubmit, isSubmitting }: CardStepFormPro
   }, [currentStep]);
 
   // --- フォームフィールド更新 ---
+  const [interacted, setInteracted] = useState(false);
   function handleChange(field: keyof SiteFormData, value: string): void {
     setFormData((prev) => ({ ...prev, [field]: value }));
     if (errors[field]) {
       setErrors((prev) => ({ ...prev, [field]: undefined }));
+    }
+    if (!interacted) {
+      setInteracted(true);
+      onFirstInteraction?.();
     }
   }
 

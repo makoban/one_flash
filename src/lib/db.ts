@@ -210,6 +210,26 @@ CREATE TABLE IF NOT EXISTS opf_revisions (
   status VARCHAR(20) DEFAULT 'pending',
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+CREATE TABLE IF NOT EXISTS opf_ad_events (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES opf_users(id),
+  event_type TEXT NOT NULL,
+  utm_source TEXT,
+  utm_medium TEXT,
+  utm_campaign TEXT,
+  utm_content TEXT,
+  utm_term TEXT,
+  session_id TEXT,
+  page_url TEXT,
+  referrer TEXT,
+  user_agent TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_opf_ad_events_event_type ON opf_ad_events(event_type);
+CREATE INDEX IF NOT EXISTS idx_opf_ad_events_created_at ON opf_ad_events(created_at);
+CREATE INDEX IF NOT EXISTS idx_opf_ad_events_session_id ON opf_ad_events(session_id);
 `;
 
 /** opf_* テーブルが存在しなければ作成する */
@@ -310,5 +330,58 @@ export async function updateSiteIsActive(subdomain: string, isActive: boolean): 
   await query(
     `UPDATE opf_sites SET is_active = $2, updated_at = NOW() WHERE subdomain = $1`,
     [subdomain, isActive]
+  );
+}
+
+// ---------------------------------------------------------------------------
+// opf_ad_events CRUD
+// ---------------------------------------------------------------------------
+
+export interface OpfAdEventRow {
+  id: string;
+  user_id: string | null;
+  event_type: string;
+  utm_source: string | null;
+  utm_medium: string | null;
+  utm_campaign: string | null;
+  utm_content: string | null;
+  utm_term: string | null;
+  session_id: string | null;
+  page_url: string | null;
+  referrer: string | null;
+  user_agent: string | null;
+  created_at: Date;
+  [key: string]: unknown;
+}
+
+export async function insertAdEvent(params: {
+  eventType: string;
+  userId?: string;
+  utmSource?: string;
+  utmMedium?: string;
+  utmCampaign?: string;
+  utmContent?: string;
+  utmTerm?: string;
+  sessionId?: string;
+  pageUrl?: string;
+  referrer?: string;
+  userAgent?: string;
+}): Promise<void> {
+  await query(
+    `INSERT INTO opf_ad_events (event_type, user_id, utm_source, utm_medium, utm_campaign, utm_content, utm_term, session_id, page_url, referrer, user_agent)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
+    [
+      params.eventType,
+      params.userId ?? null,
+      params.utmSource ?? null,
+      params.utmMedium ?? null,
+      params.utmCampaign ?? null,
+      params.utmContent ?? null,
+      params.utmTerm ?? null,
+      params.sessionId ?? null,
+      params.pageUrl ?? null,
+      params.referrer ?? null,
+      params.userAgent ?? null,
+    ]
   );
 }

@@ -15,6 +15,7 @@ import Link from "next/link";
 import CardStepForm from "@/components/CardStepForm";
 import PreviewSection from "@/app/create/PreviewSection";
 import type { SiteFormData } from "@/lib/gemini";
+import { trackEvent, getUtmParams, getSessionId } from "@/lib/utm";
 
 // ---------------------------------------------------------------------------
 // 型定義
@@ -60,6 +61,15 @@ export default function CreatePage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isRegenerating, setIsRegenerating] = useState(false);
   const [regenerationsLeft, setRegenerationsLeft] = useState(MAX_REGENERATIONS);
+
+  // form_start イベント（初回のみ）
+  const [formStartTracked, setFormStartTracked] = useState(false);
+  function trackFormStart() {
+    if (!formStartTracked) {
+      trackEvent("form_start");
+      setFormStartTracked(true);
+    }
+  }
 
   // --- フォーム送信処理 ---
   async function handleFormSubmit(data: SiteFormData): Promise<void> {
@@ -110,13 +120,19 @@ export default function CreatePage() {
     setError(null);
     setIsPublishing(true);
 
+    // checkout_start イベント
+    trackEvent("checkout_start");
+
     try {
+      const utm = getUtmParams();
       const response = await fetch("/api/create-checkout-session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           formData,
           html: previewData.html,
+          utm,
+          sessionId: getSessionId(),
         }),
       });
 
@@ -162,7 +178,7 @@ export default function CreatePage() {
 
       {/* 状態別コンテンツ */}
       {pageState === "form" && (
-        <CardStepForm onSubmit={handleFormSubmit} isSubmitting={isSubmitting} />
+        <CardStepForm onSubmit={handleFormSubmit} isSubmitting={isSubmitting} onFirstInteraction={trackFormStart} />
       )}
 
       {pageState === "generating" && (

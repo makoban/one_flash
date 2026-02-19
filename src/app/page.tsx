@@ -8,6 +8,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import UtmCapture from "@/components/UtmCapture";
 
 const WORKER_BASE = "https://onepage-flash-router.ai-fudosan.workers.dev/s";
 
@@ -22,6 +23,7 @@ const SAMPLES = [
 export default function HomePage() {
   return (
     <main className="min-h-screen bg-[#0F0F1A] text-slate-100">
+      <UtmCapture trackPageView />
       {/* ナビゲーション */}
       <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md bg-[#0F0F1A]/80 border-b border-[#2D2D44]">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
