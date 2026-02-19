@@ -254,9 +254,10 @@ export default function HomePage() {
       <footer className="py-8 px-4 bg-gray-900 border-t border-gray-800">
         <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <span className="font-bold text-white">OnePage-Flash</span>
-          <p className="text-xs text-gray-500">
-            © 2026 OnePage-Flash. All rights reserved.
-          </p>
+          <div className="text-xs text-gray-500 text-center sm:text-right">
+            <p>© 2026 OnePage-Flash. All rights reserved.</p>
+            <p className="mt-1 text-gray-600">v0.1.0-prototype</p>
+          </div>
         </div>
       </footer>
     </main>
