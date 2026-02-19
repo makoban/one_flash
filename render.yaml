@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: onepage-flash
+    runtime: node
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: WORKER_URL
+        sync: false
+      - key: UPLOAD_SECRET
+        sync: false
+      - key: DATABASE_URL
+        sync: false
