@@ -5,11 +5,7 @@ services:
     plan: starter
     buildCommand: |
       apt-get update &&
-      apt-get install -y wget fonts-noto-cjk fonts-noto-cjk-extra --no-install-recommends &&
-      wget -qO /tmp/google-chrome.deb https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb &&
-      apt-get install -y /tmp/google-chrome.deb --no-install-recommends &&
-      rm /tmp/google-chrome.deb &&
-      google-chrome-stable --version &&
+      apt-get install -y fonts-noto-cjk fonts-noto-cjk-extra --no-install-recommends &&
       npm install && npm run build
     startCommand: npm start
     envVars:
