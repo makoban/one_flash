@@ -11,6 +11,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import CardStepForm from "@/components/CardStepForm";
 import PreviewSection from "@/app/create/PreviewSection";
 import type { SiteFormData } from "@/lib/gemini";
@@ -139,6 +140,13 @@ export default function CreatePage() {
     <main className="min-h-screen bg-gradient-to-br from-slate-50 to-indigo-50 py-10 px-4">
       {/* ヘッダー */}
       <div className="text-center mb-8">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-1 text-sm text-gray-400 hover:text-indigo-600 transition-colors mb-4"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+          トップページに戻る
+        </Link>
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">OnePage-Flash</h1>
         <p className="mt-2 text-sm text-gray-500">
           テキストを入力するだけで、10分でホームページが完成

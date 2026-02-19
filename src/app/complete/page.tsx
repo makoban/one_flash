@@ -45,7 +45,7 @@ function CompleteContent() {
         <div className="bg-gray-50 rounded-xl p-4 mb-4 text-left">
           <p className="text-xs text-gray-500 mb-1">お支払い内容</p>
           <p className="text-sm text-gray-700">初期制作費: <strong>1,980円</strong></p>
-          <p className="text-sm text-gray-700">月額利用料: <strong>380円/月</strong>（自動更新）</p>
+          <p className="text-sm text-gray-700">月額利用料: <strong>480円/月</strong>（自動更新）</p>
         </div>
 
         {/* 所要時間の案内 */}

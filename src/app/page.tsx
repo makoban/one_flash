@@ -79,7 +79,7 @@ export default function HomePage() {
           </p>
 
           <p className="text-sm text-slate-500 mb-10">
-            初期費用 1,980円 + 月額 380円 / いつでも解約可
+            初期費用 1,980円 + 月額 480円 / いつでも解約可
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -196,6 +196,83 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* 聞かれる6つの質問セクション */}
+      <section className="bg-[#0F0F1A] py-20 sm:py-28 px-4">
+        <div className="max-w-3xl mx-auto">
+          <h2 className="text-3xl sm:text-4xl font-bold text-center mb-4">
+            聞かれるのは<span className="text-amber-400">6つ</span>だけ
+          </h2>
+          <p className="text-center text-slate-400 mb-14">
+            この6つの質問に答えるだけで、AIがプロ品質のHPを自動生成します
+          </p>
+
+          <div className="space-y-4">
+            {[
+              {
+                num: "Q1",
+                question: "どんなお仕事をされていますか？屋号や事業名は？",
+                example: "例: 山田太郎整体院",
+                icon: "M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4",
+              },
+              {
+                num: "Q2",
+                question: "あなたのサービスの一番の強みを一言で表すと？",
+                example: "例: 10年以上の実績。つらい痛みを根本から改善します",
+                icon: "M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z",
+              },
+              {
+                num: "Q3",
+                question: "お客さんに一番伝えたいことは？（自由記述）",
+                example: "例: 当院は2010年開業。腰痛・肩こりを専門とした...",
+                icon: "M4 6h16M4 12h16M4 18h7",
+              },
+              {
+                num: "Q4",
+                question: "問い合わせの受付方法は？",
+                example: "例: 電話 03-1234-5678 / メール info@example.com",
+                icon: "M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z",
+              },
+              {
+                num: "Q5",
+                question: "サイトの雰囲気は？（3択から選ぶだけ）",
+                example: "ミニマル / ビジネス / カジュアル",
+                icon: "M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01",
+              },
+              {
+                num: "Q6",
+                question: "メールアドレスを教えてください",
+                example: "完成URLと修正リンクをお届けします",
+                icon: "M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z",
+              },
+            ].map((item) => (
+              <div
+                key={item.num}
+                className="flex items-start gap-4 p-5 bg-[#1E2035] rounded-2xl border border-[#2D2D44] hover:border-indigo-500/30 transition-colors duration-300"
+              >
+                <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center">
+                  <svg className="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={item.icon} />
+                  </svg>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-xs font-bold text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded-full">
+                      {item.num}
+                    </span>
+                    <span className="text-sm font-semibold text-slate-200">{item.question}</span>
+                  </div>
+                  <p className="text-xs text-slate-500">{item.example}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <p className="text-center mt-10 text-slate-400 text-sm">
+            所要時間は<span className="text-amber-400 font-bold">約5〜10分</span>。スマホからでもOK。
+          </p>
+        </div>
+      </section>
+
       {/* ステップセクション */}
       <section className="bg-[#1A1A2E] py-20 sm:py-28 px-4">
         <div className="max-w-5xl mx-auto">
@@ -262,7 +339,7 @@ export default function HomePage() {
               <span className="text-lg text-slate-400 ml-2">初期費用</span>
             </div>
             <div className="mb-6">
-              <span className="text-2xl font-bold text-slate-300">+ ¥380</span>
+              <span className="text-2xl font-bold text-slate-300">+ ¥480</span>
               <span className="text-slate-400">/月</span>
             </div>
             <p className="text-sm text-slate-500 mb-8">税込 / いつでも解約可 / 解約後も再開OK</p>

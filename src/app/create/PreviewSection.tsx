@@ -147,7 +147,7 @@ export default function PreviewSection({
               )}
             </button>
             <p className="text-center text-xs text-gray-400 mt-2">
-              初期制作費 1,980円 + 月額 380円/月
+              初期制作費 1,980円 + 月額 480円/月
             </p>
           </div>
         </div>
