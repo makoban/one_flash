@@ -13,13 +13,13 @@
  * Response:
  *   { pcImage: string, mobileImage: string }  // "data:image/png;base64,..." 形式
  *
- * Note:
- *   本番環境では puppeteer-core + @sparticuz/chromium に切り替えること。
- *   プロトタイプ段階では puppeteer（バンドル Chromium）を使用する。
+ * puppeteer-core + @sparticuz/chromium を使用。
+ * ローカル開発時はシステムの Chrome を自動検出する。
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import puppeteer, { Browser } from "puppeteer";
+import puppeteerCore, { Browser } from "puppeteer-core";
+import chromium from "@sparticuz/chromium";
 
 // Puppeteer は Node.js API を使用するため nodejs ランタイムを明示
 export const runtime = "nodejs";
@@ -60,17 +60,30 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     }
 
     console.log("[screenshot] Launching browser...");
-    browser = await puppeteer.launch({
+    const executablePath = process.env.NODE_ENV === "production"
+      ? await chromium.executablePath()
+      : (
+          // ローカル開発: システムの Chrome を探す
+          process.platform === "win32"
+            ? "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"
+            : process.platform === "darwin"
+              ? "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+              : "/usr/bin/google-chrome"
+        );
+
+    browser = await puppeteerCore.launch({
+      executablePath,
       headless: true,
-      args: [
-        "--no-sandbox",
-        "--disable-setuid-sandbox",
-        "--disable-dev-shm-usage",
-        "--disable-gpu",
-        // フォント・CDN のレンダリングを安定させるための追加フラグ
-        "--disable-web-security",
-        "--allow-file-access-from-files",
-      ],
+      args: process.env.NODE_ENV === "production"
+        ? chromium.args
+        : [
+            "--no-sandbox",
+            "--disable-setuid-sandbox",
+            "--disable-dev-shm-usage",
+            "--disable-gpu",
+            "--disable-web-security",
+            "--allow-file-access-from-files",
+          ],
     });
 
     // --- PC版スクリーンショット ---
