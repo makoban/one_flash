@@ -1,0 +1,16 @@
+name = "onepage-flash-router"
+main = "site-router.js"
+compatibility_date = "2024-01-01"
+
+# R2バケットのバインディング
+[[r2_buckets]]
+binding = "SITES_BUCKET"
+bucket_name = "onepage-flash-sites"
+
+# 環境変数
+[vars]
+SITE_DOMAIN = "oneflash.net"
+
+# UPLOAD_SECRET は `wrangler secret put UPLOAD_SECRET` で設定済み
+# 本番DNS設定後に routes を追加:
+# routes = [{ pattern = "*.oneflash.net/*", zone_name = "oneflash.net" }]
