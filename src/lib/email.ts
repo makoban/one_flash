@@ -10,18 +10,25 @@
 import { Resend } from "resend";
 
 // ---------------------------------------------------------------------------
-// 環境変数のバリデーション
+// Resend クライアント（遅延初期化: 環境変数未設定でもビルドを通す）
 // ---------------------------------------------------------------------------
-const resendApiKey = process.env.RESEND_API_KEY;
+let _resend: Resend | null = null;
 
-if (!resendApiKey) {
-  throw new Error("Missing environment variable: RESEND_API_KEY");
+function getResend(): Resend {
+  if (_resend) return _resend;
+  const resendApiKey = process.env.RESEND_API_KEY;
+  if (!resendApiKey) {
+    throw new Error("Missing environment variable: RESEND_API_KEY");
+  }
+  _resend = new Resend(resendApiKey);
+  return _resend;
 }
 
-// ---------------------------------------------------------------------------
-// Resend クライアント初期化
-// ---------------------------------------------------------------------------
-export const resend = new Resend(resendApiKey);
+export const resend = new Proxy({} as Resend, {
+  get(_, prop) {
+    return (getResend() as unknown as Record<string | symbol, unknown>)[prop];
+  },
+});
 
 // ---------------------------------------------------------------------------
 // 定数
