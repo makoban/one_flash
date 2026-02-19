@@ -11,47 +11,39 @@
 import { Pool, PoolClient, QueryResult, QueryResultRow } from "pg";
 
 // ---------------------------------------------------------------------------
-// 環境変数のバリデーション
-// ---------------------------------------------------------------------------
-const databaseUrl = process.env.DATABASE_URL;
-
-if (!databaseUrl) {
-  throw new Error("Missing environment variable: DATABASE_URL");
-}
-
-// ---------------------------------------------------------------------------
-// コネクションプール初期化
+// コネクションプール（遅延初期化: 環境変数未設定でもビルドを通す）
 // ---------------------------------------------------------------------------
 
-/**
- * PostgreSQL コネクションプール
- *
- * Next.js の開発環境ではホットリロードのたびにモジュールが再評価されるため、
- * グローバルキャッシュを使ってプールの多重生成を防ぐ。
- */
 const globalForPg = globalThis as unknown as { pgPool?: Pool };
 
-const pool: Pool =
-  globalForPg.pgPool ??
-  new Pool({
+function getPool(): Pool {
+  if (globalForPg.pgPool) return globalForPg.pgPool;
+
+  const databaseUrl = process.env.DATABASE_URL;
+  if (!databaseUrl) {
+    throw new Error("Missing environment variable: DATABASE_URL");
+  }
+
+  const pool = new Pool({
     connectionString: databaseUrl,
     ssl:
       process.env.NODE_ENV === "production"
         ? { rejectUnauthorized: false }
         : false,
-    // 最大コネクション数（Vercel Serverless Functions の制約を考慮）
     max: 10,
-    // アイドルタイムアウト: 30秒
     idleTimeoutMillis: 30_000,
-    // 接続タイムアウト: 10秒
     connectionTimeoutMillis: 10_000,
   });
 
-if (process.env.NODE_ENV !== "production") {
   globalForPg.pgPool = pool;
+  return pool;
 }
 
-export default pool;
+export default new Proxy({} as Pool, {
+  get(_, prop) {
+    return (getPool() as unknown as Record<string | symbol, unknown>)[prop];
+  },
+});
 
 // ---------------------------------------------------------------------------
 // ヘルパー関数
@@ -74,7 +66,7 @@ export async function query<T extends QueryResultRow = QueryResultRow>(
   text: string,
   params?: unknown[]
 ): Promise<QueryResult<T>> {
-  return pool.query<T>(text, params);
+  return getPool().query<T>(text, params);
 }
 
 /**
@@ -92,7 +84,7 @@ export async function query<T extends QueryResultRow = QueryResultRow>(
 export async function withTransaction<T>(
   fn: (client: PoolClient) => Promise<T>
 ): Promise<T> {
-  const client = await pool.connect();
+  const client = await getPool().connect();
   try {
     await client.query("BEGIN");
     const result = await fn(client);

@@ -7,21 +7,28 @@
 import Stripe from "stripe";
 
 // ---------------------------------------------------------------------------
-// 環境変数のバリデーション
+// Stripeクライアント（遅延初期化: 環境変数未設定でもビルドを通す）
 // ---------------------------------------------------------------------------
-const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+let _stripe: Stripe | null = null;
 
-if (!stripeSecretKey) {
-  throw new Error("Missing Stripe environment variable: STRIPE_SECRET_KEY");
+export function getStripe(): Stripe {
+  if (_stripe) return _stripe;
+  const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+  if (!stripeSecretKey) {
+    throw new Error("Missing Stripe environment variable: STRIPE_SECRET_KEY");
+  }
+  _stripe = new Stripe(stripeSecretKey, {
+    apiVersion: "2026-01-28.clover",
+    typescript: true,
+  });
+  return _stripe;
 }
 
-// ---------------------------------------------------------------------------
-// Stripeクライアント初期化
-// ---------------------------------------------------------------------------
-export const stripe = new Stripe(stripeSecretKey, {
-  // Stripe API バージョンを固定することで予期しない破壊的変更を防ぐ
-  apiVersion: "2026-01-28.clover",
-  typescript: true,
+/** 後方互換: 既存コードから stripe を参照できるようにする */
+export const stripe = new Proxy({} as Stripe, {
+  get(_, prop) {
+    return (getStripe() as unknown as Record<string | symbol, unknown>)[prop];
+  },
 });
 
 // ---------------------------------------------------------------------------

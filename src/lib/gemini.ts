@@ -11,37 +11,46 @@
 import { GoogleGenerativeAI, GenerativeModel } from "@google/generative-ai";
 
 // ---------------------------------------------------------------------------
-// 環境変数のバリデーション
+// Gemini クライアント（遅延初期化: 環境変数未設定でもビルドを通す）
 // ---------------------------------------------------------------------------
-const geminiApiKey = process.env.GEMINI_API_KEY;
+let _genAI: GoogleGenerativeAI | null = null;
 
-if (!geminiApiKey) {
-  throw new Error("Missing Gemini environment variable: GEMINI_API_KEY");
+function getGenAI(): GoogleGenerativeAI {
+  if (_genAI) return _genAI;
+  const geminiApiKey = process.env.GEMINI_API_KEY;
+  if (!geminiApiKey) {
+    throw new Error("Missing Gemini environment variable: GEMINI_API_KEY");
+  }
+  _genAI = new GoogleGenerativeAI(geminiApiKey);
+  return _genAI;
 }
 
-// ---------------------------------------------------------------------------
-// Gemini クライアント初期化
-// ---------------------------------------------------------------------------
-const genAI = new GoogleGenerativeAI(geminiApiKey);
-
 /** コンテンツ生成・修正に使用するモデル */
-export const geminiModel: GenerativeModel = genAI.getGenerativeModel({
-  model: "gemini-2.0-flash",
-  generationConfig: {
-    // JSON出力が必要なモデレーションプロンプトで使用
-    // 個別呼び出し時に上書き可能
-    temperature: 0.7,
-    maxOutputTokens: 8192,
+export const geminiModel: GenerativeModel = new Proxy({} as GenerativeModel, {
+  get(_, prop) {
+    const model = getGenAI().getGenerativeModel({
+      model: "gemini-2.0-flash",
+      generationConfig: {
+        temperature: 0.7,
+        maxOutputTokens: 8192,
+      },
+    });
+    return (model as unknown as Record<string | symbol, unknown>)[prop];
   },
 });
 
 /** コンテンツモデレーション専用モデル（低temperature・JSON出力）*/
-export const moderationModel: GenerativeModel = genAI.getGenerativeModel({
-  model: "gemini-2.0-flash",
-  generationConfig: {
-    temperature: 0.1, // モデレーションは判定の一貫性を重視
-    maxOutputTokens: 256,
-    responseMimeType: "application/json",
+export const moderationModel: GenerativeModel = new Proxy({} as GenerativeModel, {
+  get(_, prop) {
+    const model = getGenAI().getGenerativeModel({
+      model: "gemini-2.0-flash",
+      generationConfig: {
+        temperature: 0.1,
+        maxOutputTokens: 256,
+        responseMimeType: "application/json",
+      },
+    });
+    return (model as unknown as Record<string | symbol, unknown>)[prop];
   },
 });
 
