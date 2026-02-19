@@ -116,8 +116,129 @@ export function getSitePublicUrl(slug: string): string {
 }
 
 // ---------------------------------------------------------------------------
-// TODO: 本格実装時に追加する機能
+// ドラフト HTML 管理（決済完了前の一時保存）
 // ---------------------------------------------------------------------------
-// - バリデーション: スラッグの文字種制限（英数字・ハイフンのみ）
-// - 衝突チェック: 既存スラッグとの重複確認
-// - アセット管理: OGP画像などの追加ファイルアップロード対応
+
+/**
+ * 決済完了前のHTMLをドラフトとして R2 に一時保存する
+ * @param draftId - UUID形式のドラフトID
+ * @param htmlContent - 保存するHTML文字列
+ */
+export async function uploadDraftHTML(draftId: string, htmlContent: string): Promise<void> {
+  const { client, bucket } = getR2Config();
+  const command = new PutObjectCommand({
+    Bucket: bucket,
+    Key: `_drafts/${draftId}/index.html`,
+    Body: htmlContent,
+    ContentType: "text/html; charset=utf-8",
+  });
+  await client.send(command);
+}
+
+/**
+ * ドラフトHTMLを取得する
+ * @param draftId - UUID形式のドラフトID
+ * @returns HTML文字列 or null
+ */
+export async function getDraftHTML(draftId: string): Promise<string | null> {
+  try {
+    const { client, bucket } = getR2Config();
+    const command = new GetObjectCommand({
+      Bucket: bucket,
+      Key: `_drafts/${draftId}/index.html`,
+    });
+    const response = await client.send(command);
+    return (await response.Body?.transformToString("utf-8")) ?? null;
+  } catch (error: unknown) {
+    if (error instanceof Error && error.name === "NoSuchKey") return null;
+    throw error;
+  }
+}
+
+/**
+ * ドラフトHTMLを削除する
+ * @param draftId - UUID形式のドラフトID
+ */
+export async function deleteDraftHTML(draftId: string): Promise<void> {
+  const { client, bucket } = getR2Config();
+  const command = new DeleteObjectCommand({
+    Bucket: bucket,
+    Key: `_drafts/${draftId}/index.html`,
+  });
+  await client.send(command);
+}
+
+// ---------------------------------------------------------------------------
+// サブスク解約時のサイト非公開化
+// ---------------------------------------------------------------------------
+
+/**
+ * サイトを非公開にする（HTMLをバックアップし「非公開」ページに差し替え）
+ * @param slug - サイトのスラッグ
+ * @param siteName - サイト名（非公開ページに表示）
+ */
+export async function deactivateSite(slug: string, siteName: string): Promise<void> {
+  const { client, bucket } = getR2Config();
+
+  // 現在のHTMLをバックアップ
+  const currentHtml = await getSiteHTML(slug);
+  if (currentHtml) {
+    await client.send(new PutObjectCommand({
+      Bucket: bucket,
+      Key: `${slug}/index.html.bak`,
+      Body: currentHtml,
+      ContentType: "text/html; charset=utf-8",
+    }));
+  }
+
+  // 非公開ページに差し替え
+  const unavailableHtml = buildUnavailablePage(siteName);
+  await uploadSiteHTML(slug, unavailableHtml);
+}
+
+/**
+ * サイトを再公開する（バックアップからHTMLを復元）
+ * @param slug - サイトのスラッグ
+ * @returns 復元成功したか
+ */
+export async function reactivateSite(slug: string): Promise<boolean> {
+  try {
+    const { client, bucket } = getR2Config();
+    const command = new GetObjectCommand({
+      Bucket: bucket,
+      Key: `${slug}/index.html.bak`,
+    });
+    const response = await client.send(command);
+    const backupHtml = await response.Body?.transformToString("utf-8");
+    if (!backupHtml) return false;
+
+    await uploadSiteHTML(slug, backupHtml);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function buildUnavailablePage(siteName: string): string {
+  return `<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${siteName} - 現在非公開</title>
+  <style>
+    body { font-family: sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; background: #f8f9fa; color: #333; }
+    .container { text-align: center; padding: 40px; }
+    h1 { font-size: 1.5rem; margin-bottom: 0.5rem; }
+    p { color: #666; font-size: 0.9rem; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>このサイトは現在非公開です</h1>
+    <p>「${siteName}」は現在ご利用いただけません。</p>
+    <p style="margin-top:2rem;font-size:0.75rem;color:#999;">Powered by OnePage-Flash</p>
+  </div>
+</body>
+</html>`;
+}

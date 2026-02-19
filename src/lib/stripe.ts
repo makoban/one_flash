@@ -35,27 +35,11 @@ export const stripe = new Proxy({} as Stripe, {
 // 定数
 // ---------------------------------------------------------------------------
 
-/** サービス料金（日本円・税込） */
-export const PRICE_AMOUNT = 5000;
+/** 初期制作費（日本円・税込） - 一回のみ */
+export const INITIAL_FEE = 1980;
 
-/** 修正1回の料金（3回目以降） */
-export const REVISION_PRICE_AMOUNT = 500;
+/** 月額利用料（日本円・税込） - 毎月 */
+export const MONTHLY_FEE = 380;
 
 /** Stripe に設定する通貨コード */
 export const CURRENCY = "jpy";
-
-// ---------------------------------------------------------------------------
-// TODO: 本格実装時に追加するヘルパー関数
-// ---------------------------------------------------------------------------
-// export async function createCheckoutSession(params: {
-//   siteFormData: SiteFormData;
-//   successUrl: string;
-//   cancelUrl: string;
-// }): Promise<Stripe.Checkout.Session> { ... }
-//
-// export async function createRevisionCheckoutSession(params: {
-//   siteId: string;
-//   revisionToken: string;
-//   successUrl: string;
-//   cancelUrl: string;
-// }): Promise<Stripe.Checkout.Session> { ... }

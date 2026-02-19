@@ -101,10 +101,8 @@ export default function CreatePage() {
     }
   }
 
-  // --- 公開（デモ版: 決済なしでR2にアップロード） ---
+  // --- 公開（Stripe Checkout セッション作成 → 決済ページへリダイレクト） ---
   const [isPublishing, setIsPublishing] = useState(false);
-  const [publishedUrl, setPublishedUrl] = useState<string | null>(null);
-  const [sitePassword, setSitePassword] = useState<string | null>(null);
 
   async function handlePublish(): Promise<void> {
     if (!previewData || !formData) return;
@@ -112,37 +110,27 @@ export default function CreatePage() {
     setIsPublishing(true);
 
     try {
-      const response = await fetch("/api/publish", {
+      const response = await fetch("/api/create-checkout-session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          html: previewData.html,
-          subdomain: formData.subdomain,
           formData,
-          email: formData.email,
-          password: sitePassword,
+          html: previewData.html,
         }),
       });
 
       if (!response.ok) {
         const errorData = (await response.json()) as { error?: string };
-        throw new Error(errorData.error ?? "公開に失敗しました");
+        throw new Error(errorData.error ?? "決済セッションの作成に失敗しました");
       }
 
-      const result = (await response.json()) as {
-        url: string;
-        password?: string;
-      };
-      setPublishedUrl(result.url);
-      if (result.password) {
-        setSitePassword(result.password);
-      }
-      setPageState("complete");
+      const { url } = (await response.json()) as { url: string };
+      // Stripe Checkout ページへリダイレクト
+      window.location.href = url;
     } catch (err: unknown) {
       const message =
-        err instanceof Error ? err.message : "公開に失敗しました。もう一度お試しください。";
+        err instanceof Error ? err.message : "エラーが発生しました。もう一度お試しください。";
       setError(message);
-    } finally {
       setIsPublishing(false);
     }
   }
@@ -187,12 +175,9 @@ export default function CreatePage() {
       )}
 
       {pageState === "complete" && formData && (
-        <CompleteView
-          subdomain={formData.subdomain}
-          publishedUrl={publishedUrl}
-          password={sitePassword}
-          onEdit={() => setPageState("preview")}
-        />
+        <div className="max-w-lg mx-auto text-center py-16 px-4">
+          <p className="text-gray-500">決済ページへリダイレクト中...</p>
+        </div>
       )}
     </main>
   );
@@ -333,110 +318,3 @@ function GeneratingView() {
   );
 }
 
-// ---------------------------------------------------------------------------
-// 完了ビュー（モック）
-// ---------------------------------------------------------------------------
-
-function CompleteView({
-  subdomain,
-  publishedUrl,
-  password,
-  onEdit,
-}: {
-  subdomain: string;
-  publishedUrl: string | null;
-  password: string | null;
-  onEdit: () => void;
-}) {
-  const siteUrl = publishedUrl ?? `https://${subdomain}.oneflash.net`;
-
-  return (
-    <div className="max-w-lg mx-auto text-center py-16 px-4">
-      {/* 完了アイコン */}
-      <div className="flex items-center justify-center w-20 h-20 bg-green-100 rounded-full mx-auto mb-6">
-        <svg
-          className="w-10 h-10 text-green-500"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-          aria-hidden="true"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M5 13l4 4L19 7"
-          />
-        </svg>
-      </div>
-
-      <h2 className="text-2xl font-bold text-gray-900 mb-2">
-        サイトを公開しました！
-      </h2>
-      <p className="text-gray-500 text-sm mb-6">
-        あなたのホームページが公開されました
-      </p>
-
-      {/* 公開URL */}
-      <div className="bg-indigo-50 border border-indigo-100 rounded-xl p-5 text-left mb-4">
-        <p className="text-xs text-indigo-500 font-semibold uppercase tracking-wide mb-1">
-          公開URL
-        </p>
-        <a
-          href={siteUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-indigo-700 font-mono text-sm break-all hover:underline"
-        >
-          {siteUrl}
-        </a>
-      </div>
-
-      {/* パスワード表示 */}
-      {password && (
-        <div className="bg-green-50 border border-green-200 rounded-xl p-5 text-left mb-4">
-          <p className="text-xs text-green-600 font-semibold uppercase tracking-wide mb-1">
-            修正用パスワード（大切に保管してください）
-          </p>
-          <div className="flex items-center gap-3">
-            <p className="text-green-800 font-mono text-lg font-bold tracking-widest">
-              {password}
-            </p>
-            <button
-              type="button"
-              onClick={() => navigator.clipboard.writeText(password)}
-              className="text-xs text-green-600 bg-green-100 px-2 py-1 rounded hover:bg-green-200 transition-colors"
-            >
-              コピー
-            </button>
-          </div>
-          <p className="mt-2 text-xs text-green-500">
-            サイトID: {subdomain}
-          </p>
-          <p className="mt-1 text-xs text-green-500">
-            このパスワードで後からサイトを修正できます
-          </p>
-        </div>
-      )}
-
-      {/* 修正・再公開ボタン */}
-      <button
-        type="button"
-        onClick={onEdit}
-        className="w-full py-3 px-6 border-2 border-indigo-200 text-indigo-600 rounded-xl font-bold text-sm hover:bg-indigo-50 hover:border-indigo-300 transition-colors mb-4"
-      >
-        今すぐ修正する
-      </button>
-
-      {/* デモモード表示 */}
-      <div className="bg-amber-50 border border-amber-200 rounded-xl p-5 text-left">
-        <p className="text-sm font-semibold text-amber-800 mb-1">
-          デモモード
-        </p>
-        <p className="text-sm text-amber-700">
-          本番では決済後に公開。パスワードはメールで送信されます。
-        </p>
-      </div>
-    </div>
-  );
-}

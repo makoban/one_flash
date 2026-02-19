@@ -140,14 +140,14 @@ export default function PreviewSection({
               {isPublishing ? (
                 <span className="flex items-center justify-center gap-2">
                   <SpinnerIcon />
-                  公開中...
+                  決済画面へ移動中...
                 </span>
               ) : (
-                "このサイトを公開する"
+                "このサイトを公開する（決済へ進む）"
               )}
             </button>
             <p className="text-center text-xs text-gray-400 mt-2">
-              デモ版: 決済なしで即公開されます
+              初期制作費 1,980円 + 月額 380円/月
             </p>
           </div>
         </div>

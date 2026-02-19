@@ -37,9 +37,16 @@ function CompleteContent() {
         </h1>
 
         <p className="text-gray-600 mb-6">
-          ただいまAIがあなたのホームページを作成しています。
+          サブスクリプション登録が完了しました。
+          ただいまあなたのホームページを公開しています。
           完成したURLをメールでお送りしますので、しばらくお待ちください。
         </p>
+
+        <div className="bg-gray-50 rounded-xl p-4 mb-4 text-left">
+          <p className="text-xs text-gray-500 mb-1">お支払い内容</p>
+          <p className="text-sm text-gray-700">初期制作費: <strong>1,980円</strong></p>
+          <p className="text-sm text-gray-700">月額利用料: <strong>380円/月</strong>（自動更新）</p>
+        </div>
 
         {/* 所要時間の案内 */}
         <div className="bg-indigo-50 rounded-xl p-4 mb-6">
@@ -75,7 +82,7 @@ function CompleteContent() {
           {[
             "登録メールアドレスに完成通知が届きます",
             "メール内のURLからサイトを確認できます",
-            "修正が必要な場合は修正用URLからご依頼ください（無料2回）",
+            "修正が必要な場合はメール内の修正用URLからご依頼ください",
           ].map((step, index) => (
             <div key={index} className="flex items-start gap-3">
               <span className="w-5 h-5 bg-indigo-100 text-indigo-600 rounded-full text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
