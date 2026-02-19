@@ -19,7 +19,6 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import puppeteerCore, { Browser } from "puppeteer-core";
-import chromium from "@sparticuz/chromium";
 
 // Puppeteer は Node.js API を使用するため nodejs ランタイムを明示
 export const runtime = "nodejs";
@@ -60,30 +59,31 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     }
 
     console.log("[screenshot] Launching browser...");
-    const executablePath = process.env.NODE_ENV === "production"
-      ? await chromium.executablePath()
-      : (
-          // ローカル開発: システムの Chrome を探す
-          process.platform === "win32"
-            ? "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"
-            : process.platform === "darwin"
-              ? "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
-              : "/usr/bin/google-chrome"
-        );
+    // Chrome実行パスの決定:
+    // 1. 環境変数 CHROME_PATH があればそれを使う（Render等）
+    // 2. Windowsならシステムの Chrome
+    // 3. macOS なら /Applications/Google Chrome.app
+    // 4. Linux なら google-chrome-stable（Render の apt でインストール）
+    const executablePath =
+      process.env.CHROME_PATH ||
+      (process.platform === "win32"
+        ? "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"
+        : process.platform === "darwin"
+          ? "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+          : "/usr/bin/google-chrome-stable");
 
     browser = await puppeteerCore.launch({
       executablePath,
       headless: true,
-      args: process.env.NODE_ENV === "production"
-        ? chromium.args
-        : [
-            "--no-sandbox",
-            "--disable-setuid-sandbox",
-            "--disable-dev-shm-usage",
-            "--disable-gpu",
-            "--disable-web-security",
-            "--allow-file-access-from-files",
-          ],
+      args: [
+        "--no-sandbox",
+        "--disable-setuid-sandbox",
+        "--disable-dev-shm-usage",
+        "--disable-gpu",
+        "--disable-web-security",
+        "--allow-file-access-from-files",
+        "--font-render-hinting=none",
+      ],
     });
 
     // --- PC版スクリーンショット ---

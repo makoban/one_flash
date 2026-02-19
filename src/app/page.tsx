@@ -3,19 +3,20 @@
  *
  * OnePage-Flash のサービス紹介LP。
  * ダークテーマ・プレミアムデザイン。
- * 作品例は iframe で実際のサイトを縮小表示し、リンクで実物を見せる。
+ * 作品例はスクリーンショット画像で表示し、リンクで実物を見せる。
  */
 
 import Link from "next/link";
+import Image from "next/image";
 
 const WORKER_BASE = "https://onepage-flash-router.ai-fudosan.workers.dev/s";
 
 const SAMPLES = [
-  { slug: "sample-tax", label: "税理士事務所", time: "8分" },
-  { slug: "sample-bloom", label: "美容室", time: "11分" },
-  { slug: "sample-karada", label: "整体院", time: "7分" },
-  { slug: "sample-komorebi", label: "カフェ", time: "9分" },
-  { slug: "sample-shanti", label: "ヨガスタジオ", time: "6分" },
+  { slug: "sample-tax", label: "税理士事務所", time: "8分", img: "/samples/pc-1.png" },
+  { slug: "sample-bloom", label: "美容室", time: "11分", img: "/samples/pc-2.png" },
+  { slug: "sample-karada", label: "整体院", time: "7分", img: "/samples/pc-3.png" },
+  { slug: "sample-komorebi", label: "カフェ", time: "9分", img: "/samples/pc-4.png" },
+  { slug: "sample-shanti", label: "ヨガスタジオ", time: "6分", img: "/samples/pc-5.png" },
 ];
 
 export default function HomePage() {
@@ -118,15 +119,14 @@ export default function HomePage() {
                 rel="noopener noreferrer"
                 className="group block rounded-2xl overflow-hidden border border-[#2D2D44] hover:border-amber-500/50 transition-all duration-300 bg-[#1E2035]"
               >
-                {/* iframe 縮小表示 */}
-                <div className="relative w-full h-64 overflow-hidden bg-white">
-                  <iframe
-                    src={`${WORKER_BASE}/${s.slug}`}
-                    title={s.label}
-                    className="absolute top-0 left-0 w-[1280px] h-[800px] border-0 pointer-events-none"
-                    style={{ transform: "scale(0.25)", transformOrigin: "top left" }}
-                    loading="lazy"
-                    sandbox="allow-same-origin"
+                {/* スクリーンショット画像 */}
+                <div className="relative w-full h-48 sm:h-56 overflow-hidden">
+                  <Image
+                    src={s.img}
+                    alt={`${s.label}のホームページ`}
+                    width={640}
+                    height={360}
+                    className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"
                   />
                 </div>
                 {/* ラベル */}
