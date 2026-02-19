@@ -3,17 +3,19 @@
  *
  * OnePage-Flash のサービス紹介LP。
  * ダークテーマ・プレミアムデザイン。
+ * 作品例は iframe で実際のサイトを縮小表示し、リンクで実物を見せる。
  */
 
 import Link from "next/link";
-import Image from "next/image";
 
-const GALLERY_ITEMS = [
-  { id: 1, label: "税理士事務所", time: "8分", src: "/samples/pc-1.png" },
-  { id: 2, label: "美容室", time: "11分", src: "/samples/pc-2.png" },
-  { id: 3, label: "整体院", time: "7分", src: "/samples/pc-3.png" },
-  { id: 4, label: "カフェ", time: "9分", src: "/samples/pc-4.png" },
-  { id: 5, label: "ヨガスタジオ", time: "6分", src: "/samples/pc-5.png" },
+const WORKER_BASE = "https://onepage-flash-router.ai-fudosan.workers.dev/s";
+
+const SAMPLES = [
+  { slug: "sample-tax", label: "税理士事務所", time: "8分" },
+  { slug: "sample-bloom", label: "美容室", time: "11分" },
+  { slug: "sample-karada", label: "整体院", time: "7分" },
+  { slug: "sample-komorebi", label: "カフェ", time: "9分" },
+  { slug: "sample-shanti", label: "ヨガスタジオ", time: "6分" },
 ];
 
 export default function HomePage() {
@@ -43,10 +45,9 @@ export default function HomePage() {
       </nav>
 
       {/* ヒーローセクション */}
-      <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16">
-        {/* 背景グラデーション */}
+      <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden pt-16">
+        {/* 背景 */}
         <div className="absolute inset-0 bg-gradient-to-br from-indigo-900/20 via-transparent to-violet-900/20" />
-        {/* グリッドパターン */}
         <div
           className="absolute inset-0 opacity-[0.07]"
           style={{
@@ -56,29 +57,28 @@ export default function HomePage() {
           }}
         />
 
-        <div className="relative z-10 text-center max-w-4xl mx-auto px-4">
+        <div className="relative z-10 text-center max-w-3xl mx-auto px-4">
           <p className="inline-block px-4 py-1.5 bg-amber-500/10 text-amber-400 border border-amber-500/20 text-xs font-semibold rounded-full mb-8 tracking-wider">
             AI POWERED HP BUILDER
           </p>
 
-          <h1 className="text-4xl sm:text-5xl lg:text-7xl font-black leading-[1.1] mb-6">
-            ホームページ、
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black leading-[1.3] mb-6">
+            いまどきホームページなんて
             <br />
-            まだ
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-amber-500">
-              「後回し」
+              「1,980円」
             </span>
-            にしてますか？
+            で作る時代。
           </h1>
 
-          <p className="text-xl sm:text-2xl font-bold text-amber-400 mb-4">
-            今日、1,980円で終わらせてください。
+          <p className="text-lg sm:text-xl text-slate-300 leading-relaxed mb-3">
+            シンプル・最小機能で十分。
+            <br />
+            AIがあなたのホームページを10分で作ります。
           </p>
 
-          <p className="text-base sm:text-lg text-slate-400 leading-relaxed max-w-2xl mx-auto mb-10">
-            テキストを入力するだけ。AIが10分でプロ品質のホームページを生成します。
-            <br className="hidden sm:block" />
-            コーディング不要。デザイン知識不要。月380円で、ずっと公開し続けられます。
+          <p className="text-sm text-slate-500 mb-10">
+            初期費用 1,980円 + 月額 380円 / いつでも解約可
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -96,27 +96,71 @@ export default function HomePage() {
               既存サイトを修正する
             </Link>
           </div>
+        </div>
+      </section>
 
-          {/* 実績バッジ */}
-          <div className="flex flex-wrap justify-center gap-x-8 gap-y-3 mt-14 text-sm text-slate-500">
-            <span className="flex items-center gap-2">
-              <svg className="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
-              平均制作時間 <span className="text-slate-300 font-semibold">8.5分</span>
-            </span>
-            <span className="flex items-center gap-2">
-              <svg className="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-              稼働中サイト <span className="text-slate-300 font-semibold">24/7</span>
-            </span>
-            <span className="flex items-center gap-2">
-              <svg className="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
-              SSL証明書 <span className="text-slate-300 font-semibold">無料付与</span>
-            </span>
+      {/* 作品例セクション — iframe で実サイト縮小表示 */}
+      <section className="bg-[#1A1A2E] py-20 sm:py-28 px-4">
+        <div className="max-w-6xl mx-auto">
+          <h2 className="text-3xl sm:text-4xl font-bold text-center mb-3">
+            AIが作った<span className="text-amber-400">作品例</span>
+          </h2>
+          <p className="text-center text-slate-400 mb-14">
+            すべて実際にAIが生成したホームページです。クリックで実物が見れます。
+          </p>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {SAMPLES.map((s) => (
+              <a
+                key={s.slug}
+                href={`${WORKER_BASE}/${s.slug}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group block rounded-2xl overflow-hidden border border-[#2D2D44] hover:border-amber-500/50 transition-all duration-300 bg-[#1E2035]"
+              >
+                {/* iframe 縮小表示 */}
+                <div className="relative w-full h-64 overflow-hidden bg-white">
+                  <iframe
+                    src={`${WORKER_BASE}/${s.slug}`}
+                    title={s.label}
+                    className="absolute top-0 left-0 w-[1280px] h-[800px] border-0 pointer-events-none"
+                    style={{ transform: "scale(0.25)", transformOrigin: "top left" }}
+                    loading="lazy"
+                    sandbox="allow-same-origin"
+                  />
+                </div>
+                {/* ラベル */}
+                <div className="p-4 flex items-center justify-between">
+                  <div>
+                    <span className="text-slate-200 font-semibold text-sm">{s.label}</span>
+                    <span className="ml-2 text-amber-400 text-xs font-medium">
+                      {s.time}で完成
+                    </span>
+                  </div>
+                  <span className="text-slate-500 group-hover:text-amber-400 text-xs transition-colors">
+                    実物を見る →
+                  </span>
+                </div>
+              </a>
+            ))}
+
+            {/* 最後のカード: CTA */}
+            <Link
+              href="/create"
+              className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-[#2D2D44] hover:border-amber-500/50 transition-all duration-300 p-8 min-h-[320px]"
+            >
+              <div className="w-16 h-16 rounded-full bg-amber-500/10 flex items-center justify-center mb-4">
+                <svg className="w-8 h-8 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
+              </div>
+              <span className="text-amber-400 font-bold text-lg">あなたのサイトを作る</span>
+              <span className="text-slate-500 text-sm mt-2">10分で完成します</span>
+            </Link>
           </div>
         </div>
       </section>
 
       {/* お悩みセクション */}
-      <section className="bg-[#1A1A2E] py-20 sm:py-28 px-4">
+      <section className="bg-[#0F0F1A] py-20 sm:py-28 px-4">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-3xl sm:text-4xl font-bold text-center mb-4">
             こんな<span className="text-amber-400">お悩み</span>、ありませんか？
@@ -127,10 +171,10 @@ export default function HomePage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {[
-              { icon: "M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z", text: "制作会社に見積もりを取ったら10万円以上と言われた" },
-              { icon: "M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z", text: "忙しすぎて、HPのことまで手が回らない" },
-              { icon: "M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z", text: "自分で作ろうとしたけど、デザインが上手くいかない" },
-              { icon: "M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z", text: "ネットで検索しても自分のお店が出てこない" },
+              { icon: "M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z", text: "制作会社に頼んだら\n10万円以上と言われた" },
+              { icon: "M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z", text: "忙しすぎて\nHPのことまで手が回らない" },
+              { icon: "M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z", text: "自分で作ろうとしたけど\nデザインが上手くいかない" },
+              { icon: "M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z", text: "ネットで検索しても\n自分のお店が出てこない" },
             ].map((item) => (
               <div
                 key={item.text}
@@ -141,53 +185,14 @@ export default function HomePage() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={item.icon} />
                   </svg>
                 </div>
-                <p className="text-slate-300 leading-relaxed">{item.text}</p>
+                <p className="text-slate-300 leading-relaxed whitespace-pre-line">{item.text}</p>
               </div>
             ))}
           </div>
 
           <p className="text-center mt-10 text-lg text-slate-300">
-            <span className="text-amber-400 font-bold">OnePage-Flash</span> なら、すべて解決できます。
+            <span className="text-amber-400 font-bold">OnePage-Flash</span> なら、すべて解決。
           </p>
-        </div>
-      </section>
-
-      {/* ギャラリーセクション */}
-      <section className="bg-[#0F0F1A] py-20 sm:py-28 overflow-hidden px-4">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl sm:text-4xl font-bold text-center mb-4">
-            こんなホームページが
-            <span className="text-amber-400">10分</span>で完成します
-          </h2>
-          <p className="text-center text-slate-400 mb-14">
-            実際にAIが生成したサイトのスクリーンショット
-          </p>
-
-          <div className="flex gap-6 overflow-x-auto pb-6 snap-x snap-mandatory scrollbar-thin scrollbar-thumb-slate-700 -mx-4 px-4">
-            {GALLERY_ITEMS.map((item) => (
-              <div
-                key={item.id}
-                className="flex-shrink-0 w-72 sm:w-80 snap-start rounded-2xl overflow-hidden border border-[#2D2D44] hover:border-amber-500/40 transition-all duration-300 hover:scale-[1.02] bg-[#1E2035] shadow-xl"
-              >
-                <div className="h-48 sm:h-56 overflow-hidden bg-[#1E2035]">
-                  <Image
-                    src={item.src}
-                    alt={`${item.label}のホームページ`}
-                    width={320}
-                    height={224}
-                    className="w-full h-full object-cover object-top hover:scale-105 transition-transform duration-500"
-                  />
-                </div>
-                <div className="p-4 flex items-center justify-between">
-                  <span className="text-slate-200 font-semibold text-sm">{item.label}</span>
-                  <span className="flex items-center gap-1 text-amber-400 text-xs font-medium">
-                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
-                    {item.time}で完成
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
         </div>
       </section>
 
@@ -204,24 +209,24 @@ export default function HomePage() {
                 step: "1",
                 icon: "M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z",
                 title: "質問に答える",
-                description: "6つの質問にテキストで回答。サイト名、キャッチコピー、説明文、連絡先を入力するだけ。",
+                desc: "6つの質問にテキストで回答。\nサイト名、キャッチコピー、\n説明文、連絡先を入力するだけ。",
               },
               {
                 step: "2",
                 icon: "M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z",
                 title: "AIが即座に生成",
-                description: "AIがプロ品質のホームページを自動生成。スクリーンショットでプレビュー確認。気に入らなければ再生成OK。",
+                desc: "AIがプロ品質のHPを自動生成。\nプレビューで確認。\n気に入らなければ再生成OK。",
               },
               {
                 step: "3",
                 icon: "M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z",
                 title: "決済して即公開",
-                description: "プレビューに納得したら決済。あなた専用のURLで即座にサイトが公開されます。",
+                desc: "プレビューに納得したら決済。\nあなた専用のURLで\n即座にサイトが公開されます。",
               },
             ].map((item) => (
               <div
                 key={item.step}
-                className="relative flex flex-col items-center text-center p-8 bg-[#1E2035] rounded-2xl border border-[#2D2D44] hover:border-indigo-500/40 transition-colors duration-300"
+                className="relative flex flex-col items-center text-center p-8 bg-[#1E2035] rounded-2xl border border-[#2D2D44]"
               >
                 <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 text-white text-sm font-bold flex items-center justify-center">
                   {item.step}
@@ -232,7 +237,7 @@ export default function HomePage() {
                   </svg>
                 </div>
                 <h3 className="text-lg font-bold mb-2">{item.title}</h3>
-                <p className="text-sm text-slate-400 leading-relaxed">{item.description}</p>
+                <p className="text-sm text-slate-400 leading-relaxed whitespace-pre-line">{item.desc}</p>
               </div>
             ))}
           </div>
@@ -301,8 +306,10 @@ export default function HomePage() {
           <h2 className="text-3xl sm:text-4xl font-bold mb-4">
             今日、ホームページを手に入れよう
           </h2>
-          <p className="text-slate-400 mb-10 text-lg">
-            あなたのお店・サービスを、もっと多くの人に届けませんか？
+          <p className="text-slate-400 mb-10 text-lg leading-relaxed">
+            あなたのお店・サービスを、
+            <br className="sm:hidden" />
+            もっと多くの人に届けませんか？
           </p>
 
           <Link
