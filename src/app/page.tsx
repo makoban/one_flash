@@ -407,14 +407,51 @@ export default function HomePage() {
       </section>
 
       {/* フッター */}
-      <footer className="py-8 px-4 border-t border-[#2D2D44]">
-        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <span className="font-bold text-slate-400">
-            OnePage<span className="text-amber-400/70">-Flash</span>
-          </span>
-          <div className="text-xs text-slate-600 text-center sm:text-right">
-            <p>&copy; 2026 OnePage-Flash. All rights reserved.</p>
-            <p className="mt-1">v0.1.0-prototype</p>
+      <footer className="bg-[#0A0A14] py-12 px-4 border-t border-[#2D2D44]">
+        <div className="max-w-4xl mx-auto">
+          <div className="flex flex-col sm:flex-row justify-between gap-8 mb-10">
+            <div className="max-w-xs">
+              <span className="font-black text-lg tracking-tight">
+                OnePage<span className="text-amber-400">-Flash</span>
+              </span>
+              <p className="text-sm text-slate-500 leading-relaxed mt-3">
+                テキストを入力するだけで、AIが10分でプロ品質のホームページを生成するサービスです。
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-8 text-sm">
+              <div>
+                <div className="text-slate-300 font-medium mb-3">サービス</div>
+                <div className="space-y-2">
+                  <Link href="/create" className="block text-slate-500 hover:text-white transition-colors">HP作成</Link>
+                  <Link href="/edit" className="block text-slate-500 hover:text-white transition-colors">サイト修正</Link>
+                </div>
+              </div>
+              <div>
+                <div className="text-slate-300 font-medium mb-3">法的情報</div>
+                <div className="space-y-2">
+                  <Link href="/legal/terms" className="block text-slate-500 hover:text-white transition-colors">利用規約</Link>
+                  <Link href="/legal/privacy" className="block text-slate-500 hover:text-white transition-colors">プライバシーポリシー</Link>
+                  <Link href="/legal/tokushoho" className="block text-slate-500 hover:text-white transition-colors">特定商取引法に基づく表記</Link>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="border-t border-[#2D2D44] pt-6">
+            <div className="flex flex-col sm:flex-row justify-between items-center gap-3 text-xs text-slate-600">
+              <p>&copy; 2026 OnePage-Flash（株式会社バンテックス）</p>
+              <div className="flex items-center gap-4">
+                <span className="flex items-center gap-1.5">
+                  <svg className="w-3 h-3 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
+                  Stripe 安全決済
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <svg className="w-3 h-3 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                  SSL暗号化
+                </span>
+              </div>
+            </div>
           </div>
         </div>
       </footer>
