@@ -22,7 +22,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       `SELECT COUNT(*) as count FROM opf_subscriptions WHERE status = 'active'`
     );
     const activeSubs = parseInt(activeSubsResult.rows[0]?.count ?? "0", 10);
-    const mrr = activeSubs * 380;
+    const mrr = activeSubs * 480;
 
     const totalUsersResult = await query<{ count: string }>(
       `SELECT COUNT(*) as count FROM opf_users`

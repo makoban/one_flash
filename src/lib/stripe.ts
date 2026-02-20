@@ -36,10 +36,10 @@ export const stripe = new Proxy({} as Stripe, {
 // ---------------------------------------------------------------------------
 
 /** 初期制作費（日本円・税込） - 一回のみ */
-export const INITIAL_FEE = 2980;
+export const INITIAL_FEE = 3980;
 
 /** 月額利用料（日本円・税込） - 毎月（初月無料: trial_period_days で制御） */
-export const MONTHLY_FEE = 380;
+export const MONTHLY_FEE = 480;
 
 /** Stripe に設定する通貨コード */
 export const CURRENCY = "jpy";
