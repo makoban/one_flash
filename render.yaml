@@ -5,8 +5,7 @@ services:
     plan: starter
     buildCommand: |
       export NODE_OPTIONS="--max-old-space-size=2048" &&
-      apt-get update &&
-      apt-get install -y fonts-noto-cjk fonts-noto-cjk-extra --no-install-recommends &&
+      (apt-get update && apt-get install -y fonts-noto-cjk fonts-noto-cjk-extra --no-install-recommends || echo "Font install skipped (cached)") &&
       npm install &&
       npm run build
     startCommand: npm start
