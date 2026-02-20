@@ -29,6 +29,13 @@ interface PreviewData {
   html: string;
 }
 
+interface HistoryEntry {
+  id: number;
+  previewData: PreviewData;
+  instruction: string;
+  timestamp: Date;
+}
+
 // ---------------------------------------------------------------------------
 // 生成中に順に表示するメッセージ
 // ---------------------------------------------------------------------------
@@ -47,7 +54,7 @@ const MESSAGE_INTERVAL_MS = 2000;
 // 再生成の最大回数（プロトタイプ用）
 // ---------------------------------------------------------------------------
 
-const MAX_REGENERATIONS = 10;
+const MAX_REGENERATIONS = 6;
 
 // ---------------------------------------------------------------------------
 // メインページコンポーネント
@@ -61,6 +68,10 @@ export default function CreatePage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isRegenerating, setIsRegenerating] = useState(false);
   const [regenerationsLeft, setRegenerationsLeft] = useState(MAX_REGENERATIONS);
+
+  // 履歴管理
+  const [history, setHistory] = useState<HistoryEntry[]>([]);
+  const [currentHistoryIndex, setCurrentHistoryIndex] = useState(-1);
 
   // form_start イベント（初回のみ）
   const [formStartTracked, setFormStartTracked] = useState(false);
@@ -81,6 +92,14 @@ export default function CreatePage() {
     try {
       const preview = await generateAndScreenshot(data);
       setPreviewData(preview);
+      const entry: HistoryEntry = {
+        id: 1,
+        previewData: preview,
+        instruction: "初回生成",
+        timestamp: new Date(),
+      };
+      setHistory([entry]);
+      setCurrentHistoryIndex(0);
       setPageState("preview");
     } catch (err: unknown) {
       const message =
@@ -103,12 +122,32 @@ export default function CreatePage() {
       const preview = await generateAndScreenshot(updatedData, instruction);
       setPreviewData(preview);
       setRegenerationsLeft((prev) => prev - 1);
+      // 履歴に追加
+      setHistory((prev) => {
+        const entry: HistoryEntry = {
+          id: prev.length + 1,
+          previewData: preview,
+          instruction: instruction || "再生成",
+          timestamp: new Date(),
+        };
+        return [...prev, entry];
+      });
+      setCurrentHistoryIndex((prev) => prev + 1);
     } catch (err: unknown) {
       const message =
         err instanceof Error ? err.message : "再生成に失敗しました。もう一度お試しください。";
       setError(message);
     } finally {
       setIsRegenerating(false);
+    }
+  }
+
+  // --- 履歴から復元 ---
+  function handleRestoreFromHistory(historyId: number): void {
+    const entry = history.find((h) => h.id === historyId);
+    if (entry) {
+      setPreviewData(entry.previewData);
+      setCurrentHistoryIndex(history.indexOf(entry));
     }
   }
 
@@ -195,6 +234,9 @@ export default function CreatePage() {
           onPublish={handlePublish}
           isRegenerating={isRegenerating}
           isPublishing={isPublishing}
+          history={history}
+          currentHistoryIndex={currentHistoryIndex}
+          onRestoreFromHistory={handleRestoreFromHistory}
         />
       )}
 

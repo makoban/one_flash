@@ -215,7 +215,6 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session): Promis
         siteName,
         publicUrl,
         revisionUrl,
-        freeRevisionsRemaining: 2,
       });
       console.log(`[webhook/stripe] Email sent to ${customerEmail}`);
     } catch (err) {

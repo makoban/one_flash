@@ -51,17 +51,16 @@ const SERVICE_NAME = "OnePage-Flash";
  * @param params.siteName - 生成されたサイト名
  * @param params.publicUrl - 生成サイトの公開URL
  * @param params.revisionUrl - 修正用URL（トークン付き）
- * @param params.freeRevisionsRemaining - 残り無料修正回数
+ * @param params.billingPortalUrl - Stripe Billing Portal URL（オプション）
  */
 export async function sendSiteCompletionEmail(params: {
   to: string;
   siteName: string;
   publicUrl: string;
   revisionUrl: string;
-  freeRevisionsRemaining: number;
+  billingPortalUrl?: string;
 }): Promise<void> {
-  const { to, siteName, publicUrl, revisionUrl, freeRevisionsRemaining } =
-    params;
+  const { to, siteName, publicUrl, revisionUrl, billingPortalUrl } = params;
 
   await resend.emails.send({
     from: FROM_EMAIL,
@@ -71,7 +70,7 @@ export async function sendSiteCompletionEmail(params: {
       siteName,
       publicUrl,
       revisionUrl,
-      freeRevisionsRemaining,
+      billingPortalUrl,
     }),
   });
 }
@@ -83,17 +82,14 @@ export async function sendSiteCompletionEmail(params: {
  * @param params.siteName - サイト名
  * @param params.publicUrl - 公開URL
  * @param params.revisionUrl - 修正用URL
- * @param params.freeRevisionsRemaining - 残り無料修正回数
  */
 export async function sendRevisionCompletionEmail(params: {
   to: string;
   siteName: string;
   publicUrl: string;
   revisionUrl: string;
-  freeRevisionsRemaining: number;
 }): Promise<void> {
-  const { to, siteName, publicUrl, revisionUrl, freeRevisionsRemaining } =
-    params;
+  const { to, siteName, publicUrl, revisionUrl } = params;
 
   await resend.emails.send({
     from: FROM_EMAIL,
@@ -103,7 +99,6 @@ export async function sendRevisionCompletionEmail(params: {
       siteName,
       publicUrl,
       revisionUrl,
-      freeRevisionsRemaining,
     }),
   });
 }
@@ -116,9 +111,21 @@ function buildSiteCompletionEmailHtml(params: {
   siteName: string;
   publicUrl: string;
   revisionUrl: string;
-  freeRevisionsRemaining: number;
+  billingPortalUrl?: string;
 }): string {
-  const { siteName, publicUrl, revisionUrl, freeRevisionsRemaining } = params;
+  const { siteName, publicUrl, revisionUrl, billingPortalUrl } = params;
+
+  const billingSection = billingPortalUrl
+    ? `
+    <hr style="border: none; border-top: 1px solid #e8e8e8; margin: 24px 0;">
+
+    <h3 style="font-size: 16px; margin: 0 0 12px;">お支払い・契約管理</h3>
+    <p style="margin: 0 0 16px; font-size: 14px; color: #666;">請求履歴の確認、お支払い方法の変更、ご契約の管理は以下からお手続きいただけます。</p>
+
+    <a href="${billingPortalUrl}" style="display: inline-block; border: 2px solid #667eea; color: #667eea; padding: 10px 20px; border-radius: 6px; text-decoration: none; font-weight: bold;">
+      お支払い管理ページ
+    </a>`
+    : "";
 
   return `
 <!DOCTYPE html>
@@ -149,14 +156,14 @@ function buildSiteCompletionEmailHtml(params: {
     <hr style="border: none; border-top: 1px solid #e8e8e8; margin: 24px 0;">
 
     <h3 style="font-size: 16px; margin: 0 0 12px;">修正について</h3>
-    <p style="margin: 0 0 8px;">無料修正が <strong>${freeRevisionsRemaining}回</strong> 残っています。</p>
-    <p style="margin: 0 0 16px; font-size: 14px; color: #666;">修正希望の場合は以下のURLからご依頼ください（3回目以降は500円/回）。</p>
+    <p style="margin: 0 0 16px; font-size: 14px; color: #666;">修正が必要な場合は以下のURLからご依頼ください。サブスクリプション期間中は修正が可能です。</p>
 
     <a href="${revisionUrl}" style="display: inline-block; border: 2px solid #667eea; color: #667eea; padding: 10px 20px; border-radius: 6px; text-decoration: none; font-weight: bold;">
       修正を依頼する
     </a>
 
     <p style="margin: 16px 0 0; font-size: 11px; color: #bbb;">このURLは修正用の専用URLです。第三者と共有しないようご注意ください。</p>
+    ${billingSection}
   </div>
 
   <div style="background: #f8f9fa; padding: 16px; border-radius: 0 0 12px 12px; text-align: center;">
@@ -171,9 +178,8 @@ function buildRevisionCompletionEmailHtml(params: {
   siteName: string;
   publicUrl: string;
   revisionUrl: string;
-  freeRevisionsRemaining: number;
 }): string {
-  const { siteName, publicUrl, revisionUrl, freeRevisionsRemaining } = params;
+  const { siteName, publicUrl, revisionUrl } = params;
 
   return `
 <!DOCTYPE html>
@@ -198,11 +204,6 @@ function buildRevisionCompletionEmailHtml(params: {
         サイトを確認する
       </a>
     </div>
-
-    <p style="font-size: 14px; color: #666;">
-      無料修正の残り回数: <strong>${freeRevisionsRemaining}回</strong>
-      ${freeRevisionsRemaining === 0 ? "（3回目以降は500円/回となります）" : ""}
-    </p>
 
     <a href="${revisionUrl}" style="display: inline-block; border: 2px solid #667eea; color: #667eea; padding: 10px 20px; border-radius: 6px; text-decoration: none; font-weight: bold;">
       さらに修正を依頼する

@@ -21,7 +21,14 @@ interface PreviewData {
   html: string;
 }
 
-const MAX_REGENERATIONS = 10;
+interface HistoryEntry {
+  id: number;
+  previewData: PreviewData;
+  instruction: string;
+  timestamp: Date;
+}
+
+const MAX_REGENERATIONS = 6;
 
 export default function EditPage() {
   const [pageState, setPageState] = useState<PageState>("login");
@@ -35,6 +42,8 @@ export default function EditPage() {
   const [isPublishing, setIsPublishing] = useState(false);
   const [regenerationsLeft, setRegenerationsLeft] = useState(MAX_REGENERATIONS);
   const [publishedUrl, setPublishedUrl] = useState<string | null>(null);
+  const [history, setHistory] = useState<HistoryEntry[]>([]);
+  const [currentHistoryIndex, setCurrentHistoryIndex] = useState(-1);
 
   // --- URLからサブドメインを抽出 ---
   function extractSubdomain(input: string): string {
@@ -98,7 +107,11 @@ export default function EditPage() {
         mobileImage: string;
       };
 
-      setPreviewData({ pcImage, mobileImage, html: data.html });
+      const preview = { pcImage, mobileImage, html: data.html };
+      setPreviewData(preview);
+      const entry: HistoryEntry = { id: 1, previewData: preview, instruction: "現在のサイト", timestamp: new Date() };
+      setHistory([entry]);
+      setCurrentHistoryIndex(0);
       setPageState("preview");
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "エラーが発生しました";
@@ -141,13 +154,28 @@ export default function EditPage() {
         mobileImage: string;
       };
 
-      setPreviewData({ pcImage, mobileImage, html });
+      const preview = { pcImage, mobileImage, html };
+      setPreviewData(preview);
       setRegenerationsLeft((prev) => prev - 1);
+      setHistory((prev) => {
+        const entry: HistoryEntry = { id: prev.length + 1, previewData: preview, instruction: instruction || "再生成", timestamp: new Date() };
+        return [...prev, entry];
+      });
+      setCurrentHistoryIndex((prev) => prev + 1);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "再生成に失敗しました";
       setError(message);
     } finally {
       setIsRegenerating(false);
+    }
+  }
+
+  // --- 履歴から復元 ---
+  function handleRestoreFromHistory(historyId: number): void {
+    const entry = history.find((h) => h.id === historyId);
+    if (entry) {
+      setPreviewData(entry.previewData);
+      setCurrentHistoryIndex(history.indexOf(entry));
     }
   }
 
@@ -268,6 +296,9 @@ export default function EditPage() {
           onPublish={handlePublish}
           isRegenerating={isRegenerating}
           isPublishing={isPublishing}
+          history={history}
+          currentHistoryIndex={currentHistoryIndex}
+          onRestoreFromHistory={handleRestoreFromHistory}
         />
       )}
 

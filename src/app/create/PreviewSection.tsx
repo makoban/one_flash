@@ -2,7 +2,7 @@
  * PreviewSection コンポーネント
  *
  * 左: スクリーンショットプレビュー（PC/スマホ切り替え）
- * 右: 入力内容の編集パネル（各項目をインライン編集 → 再生成）
+ * 右: AI指示を主要UIとした編集パネル + 履歴
  */
 
 "use client";
@@ -14,6 +14,17 @@ import type { SiteFormData } from "@/lib/gemini";
 // 型定義
 // ---------------------------------------------------------------------------
 
+interface HistoryEntry {
+  id: number;
+  previewData: {
+    pcImage: string;
+    mobileImage: string;
+    html: string;
+  };
+  instruction: string;
+  timestamp: Date;
+}
+
 interface PreviewSectionProps {
   pcImage: string;
   mobileImage: string;
@@ -23,6 +34,9 @@ interface PreviewSectionProps {
   onPublish: () => void;
   isRegenerating: boolean;
   isPublishing?: boolean;
+  history: HistoryEntry[];
+  currentHistoryIndex: number;
+  onRestoreFromHistory: (historyId: number) => void;
 }
 
 type DeviceTab = "pc" | "mobile";
@@ -46,11 +60,15 @@ export default function PreviewSection({
   onPublish,
   isRegenerating,
   isPublishing = false,
+  history,
+  currentHistoryIndex,
+  onRestoreFromHistory,
 }: PreviewSectionProps) {
   const [activeTab, setActiveTab] = useState<DeviceTab>("pc");
   const [editData, setEditData] = useState<SiteFormData>(formData);
   const [editingField, setEditingField] = useState<string | null>(null);
   const [instruction, setInstruction] = useState("");
+  const [historyOpen, setHistoryOpen] = useState(false);
 
   const currentImage = activeTab === "pc" ? pcImage : mobileImage;
 
@@ -75,7 +93,7 @@ export default function PreviewSection({
       <div className="text-center mb-6">
         <h2 className="text-xl font-bold text-gray-900">プレビュー</h2>
         <p className="mt-1 text-sm text-gray-500">
-          内容を修正して再生成、または公開へ進めます
+          AIに修正指示を出して再生成、または公開へ進めます
         </p>
       </div>
 
@@ -147,7 +165,7 @@ export default function PreviewSection({
               )}
             </button>
             <p className="text-center text-xs text-gray-400 mt-2">
-              初期制作費 1,980円 + 月額 480円/月
+              初期制作費 2,980円 + 月額 380円/月（初月無料）
             </p>
           </div>
         </div>
@@ -155,18 +173,41 @@ export default function PreviewSection({
         {/* 右: 編集パネル（1/3幅） */}
         <div className="lg:col-span-1">
           <div className="bg-white rounded-2xl border border-gray-200 shadow-sm sticky top-20">
-            {/* AI指示エリア（メイン） */}
-            <div className="p-4 border-b border-gray-100">
-              <h3 className="text-sm font-bold text-gray-900">AIに修正を指示</h3>
-              <p className="text-xs text-gray-400 mt-0.5">
-                どんな変更でも自由に伝えてください
-              </p>
-            </div>
 
-            <div className="p-4 space-y-3">
+            {/* === AI指示エリア（メイン・強調） === */}
+            <div className="p-5 bg-gradient-to-b from-indigo-50 to-white rounded-t-2xl border-b border-indigo-100">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 bg-indigo-600 text-white rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-gray-900">AIに修正を指示</h3>
+                  <p className="text-xs text-indigo-500 font-medium">
+                    ここに入力するだけでデザインが変わります
+                  </p>
+                </div>
+              </div>
+
+              <textarea
+                value={instruction}
+                onChange={(e) => setInstruction(e.target.value)}
+                placeholder={"例:\n・もっとシンプルにしてほしい\n・キャッチコピーをもっと目立たせて\n・連絡先セクションを大きく\n・全体的にもっと高級感を出して\n・アイコンを増やして華やかに"}
+                rows={6}
+                maxLength={500}
+                className="w-full px-4 py-3 text-sm text-gray-900 bg-white border-2 border-indigo-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 resize-none placeholder:text-gray-400 shadow-inner"
+              />
+              <div className="flex justify-between mt-1.5">
+                <p className="text-[10px] text-indigo-400 font-medium">
+                  デザイン・テキスト・レイアウト何でもOK
+                </p>
+                <span className="text-[10px] text-gray-400">{instruction.length}/500</span>
+              </div>
+
               {/* カラーテーマ切り替え */}
-              <div>
-                <label className="block text-xs font-medium text-gray-500 mb-1.5">テーマ</label>
+              <div className="mt-3">
+                <label className="block text-xs font-medium text-gray-500 mb-1.5">テーマ変更</label>
                 <div className="flex gap-2">
                   {(["simple", "colorful", "business"] as const).map((t) => (
                     <button
@@ -176,7 +217,7 @@ export default function PreviewSection({
                       className={`flex-1 py-2 px-2 rounded-lg text-xs font-medium transition-all ${
                         editData.colorTheme === t
                           ? "bg-indigo-600 text-white shadow-sm"
-                          : "bg-gray-50 text-gray-600 hover:bg-gray-100 border border-gray-200"
+                          : "bg-white text-gray-600 hover:bg-gray-100 border border-gray-200"
                       }`}
                     >
                       {THEME_LABELS[t]}
@@ -185,33 +226,15 @@ export default function PreviewSection({
                 </div>
               </div>
 
-              {/* AI指示テキストエリア */}
-              <div>
-                <textarea
-                  value={instruction}
-                  onChange={(e) => setInstruction(e.target.value)}
-                  placeholder={"例:\n・もっとシンプルにしてほしい\n・キャッチコピーをもっと目立たせて\n・連絡先セクションを大きく\n・全体的にもっと高級感を出して"}
-                  rows={5}
-                  maxLength={500}
-                  className="w-full px-3 py-2.5 text-sm text-gray-900 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 resize-none placeholder:text-gray-400"
-                />
-                <div className="flex justify-between mt-1">
-                  <p className="text-[10px] text-gray-400">
-                    デザイン・テキスト・レイアウト何でもOK
-                  </p>
-                  <span className="text-[10px] text-gray-400">{instruction.length}/500</span>
-                </div>
-              </div>
-
               {/* 再生成ボタン */}
               <button
                 type="button"
                 onClick={handleRegenerate}
                 disabled={isRegenerating || regenerationsLeft <= 0}
-                className={`w-full py-3 px-4 rounded-xl font-bold text-sm transition-all ${
+                className={`w-full mt-4 py-3.5 px-4 rounded-xl font-bold text-sm transition-all ${
                   hasChanges && !isRegenerating && regenerationsLeft > 0
-                    ? "bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm"
-                    : "border-2 border-gray-200 text-gray-500 hover:border-indigo-300 hover:text-indigo-600 hover:bg-indigo-50"
+                    ? "bg-indigo-600 text-white hover:bg-indigo-700 shadow-md hover:shadow-lg"
+                    : "bg-indigo-500 text-white hover:bg-indigo-600 shadow-sm"
                 } disabled:opacity-40 disabled:cursor-not-allowed`}
               >
                 {isRegenerating ? (
@@ -219,10 +242,14 @@ export default function PreviewSection({
                     <SpinnerIcon />
                     再生成中...
                   </span>
-                ) : hasChanges ? (
-                  `変更を反映して再生成（残り${regenerationsLeft}回）`
                 ) : (
-                  `デザインを変えて再生成（残り${regenerationsLeft}回）`
+                  <span className="flex items-center justify-center gap-2">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    {hasChanges ? "変更を反映して再生成" : "デザインを変えて再生成"}
+                    <span className="text-xs opacity-80">（残り{regenerationsLeft}回）</span>
+                  </span>
                 )}
               </button>
               {regenerationsLeft <= 0 && (
@@ -232,7 +259,71 @@ export default function PreviewSection({
               )}
             </div>
 
-            {/* 入力内容の直接編集（折りたたみ） */}
+            {/* === 履歴 === */}
+            {history.length > 1 && (
+              <div className="border-b border-gray-100">
+                <button
+                  type="button"
+                  onClick={() => setHistoryOpen(!historyOpen)}
+                  className="w-full flex items-center justify-between p-4 text-left hover:bg-gray-50 transition-colors"
+                >
+                  <div className="flex items-center gap-2">
+                    <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span className="text-xs font-medium text-gray-600">
+                      生成履歴（{history.length}件）
+                    </span>
+                  </div>
+                  <svg
+                    className={`w-4 h-4 text-gray-400 transition-transform ${historyOpen ? "rotate-180" : ""}`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+
+                {historyOpen && (
+                  <div className="px-4 pb-4 space-y-1.5">
+                    {history.map((entry, index) => (
+                      <button
+                        key={entry.id}
+                        type="button"
+                        onClick={() => onRestoreFromHistory(entry.id)}
+                        disabled={isRegenerating}
+                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-all ${
+                          index === currentHistoryIndex
+                            ? "bg-indigo-50 border border-indigo-200"
+                            : "bg-gray-50 border border-transparent hover:bg-gray-100 hover:border-gray-200"
+                        } disabled:opacity-50`}
+                      >
+                        <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${
+                          index === currentHistoryIndex
+                            ? "bg-indigo-600 text-white"
+                            : "bg-gray-200 text-gray-600"
+                        }`}>
+                          {entry.id}
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <p className={`text-xs truncate ${
+                            index === currentHistoryIndex ? "text-indigo-700 font-medium" : "text-gray-600"
+                          }`}>
+                            {entry.instruction}
+                          </p>
+                        </div>
+                        {index === currentHistoryIndex && (
+                          <span className="text-[10px] text-indigo-500 font-medium flex-shrink-0">表示中</span>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* === 入力内容の直接編集（折りたたみ） === */}
             <FieldsAccordion
               editData={editData}
               setEditData={setEditData}
@@ -386,7 +477,12 @@ function FieldsAccordion({
         onClick={() => setOpen(!open)}
         className="w-full flex items-center justify-between p-4 text-left hover:bg-gray-50 transition-colors"
       >
-        <span className="text-xs font-medium text-gray-500">入力内容を直接編集</span>
+        <div className="flex items-center gap-2">
+          <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+          </svg>
+          <span className="text-xs font-medium text-gray-500">入力内容を直接編集</span>
+        </div>
         <svg
           className={`w-4 h-4 text-gray-400 transition-transform ${open ? "rotate-180" : ""}`}
           fill="none"

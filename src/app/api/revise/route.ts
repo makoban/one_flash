@@ -145,7 +145,6 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         siteName: site.site_name,
         publicUrl,
         revisionUrl,
-        freeRevisionsRemaining: newRemainingFreeRevisions,
       });
     }
 

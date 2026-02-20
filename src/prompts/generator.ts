@@ -395,10 +395,16 @@ ${theme.heroStyle}
 - Bタイプ（BEAUTY・SCHOOL・GENERAL）: shadow-lg、rounded-2xl、bg-cardBg、hover時にtranslateY(-6px) + shadow-xl
 - Cタイプ（FOOD・CONSTRUCTION）: アイコンを上部に配置（アイコン背景: w-12 h-12 rounded-xl bg-accent/12）、rounded-xl、shadow-sm
 
-### アイコン装飾ルール
-- 特徴カード内のアイコン: w-12 h-12 rounded-xl、背景アクセント色opacity-12%（例: background: rgba(accent_rgb, 0.12)）、アイコン自体は w-6 h-6 アクセント色
+### アイコン装飾ルール（リッチに使うこと）
+- 特徴カード内のアイコン: w-14 h-14 rounded-2xl、背景アクセント色opacity-12%（例: background: rgba(accent_rgb, 0.12)）、アイコン自体は w-7 h-7 アクセント色
 - 連絡先アイコン: w-5 h-5 + テキスト を flex items-center gap-3 で横並び
-- 1カードに2個以上のアイコン禁止
+- ヘッダー: サイト名の左にブランドアイコン（業種推奨アイコンの1つ）を配置
+- フッター: 連絡先各項目にアイコンを付与（phone, mail, map-pin, clock 等）
+- セクション見出し: 英字ラベルの左に小さなアイコン（w-4 h-4）を添える
+- CTAボタン: テキスト左にアイコン（例: phone, mail, arrow-right）を配置
+- ヒーローセクション: スクロールインジケーターに chevron-down アイコンを使用
+- 各セクションに最低1つはLucideアイコンを使用すること（装飾含む）
+- 1カードに2個以上のアイコンは禁止（ただしCTAボタンのアイコンは別カウント）
 
 ### 連絡先アイコンマッピング（必ずこの対応で使用）
 - 電話番号 → phone（tel:リンク必須）
@@ -442,6 +448,40 @@ ${theme.heroStyle}
 - ドットパターン背景（SCHOOL推奨）: background-image: radial-gradient(circle, ${p.accent}22 1px, transparent 1px); background-size: 24px 24px
 - overflow-x: hidden を body に設定
 - フッター: ダーク背景（${p.sectionBgDark}）、サイト名 + コピーライト「© 2026 ${formData.siteName}」+ 小さく "Powered by OnePage-Flash"
+
+### 追加リッチ装飾（必ず取り入れること）
+- セクション区切り: セクション間に装飾的な区切り要素を入れる。以下のいずれかを使用:
+  - SVGウェーブ区切り: CSSで曲線的な区切り線（::before / ::after で表現）
+  - グラデーションライン: 横幅40%の細いグラデーションライン（mx-auto, h-px, accent→transparent）
+  - ドット区切り: 3つの小さなドット（w-1.5 h-1.5 rounded-full）を横並びで配置
+- アイコンバッジ: 特徴カードのアイコンは単なる丸背景ではなく、グラデーション背景やリング装飾（ring-2 ring-accent/20）を加えてリッチに
+- 見出しの装飾: セクション見出しの下に装飾ライン（w-16 h-1 bg-gradient-to-r from-accent to-accentLight rounded-full）を配置
+- ヒーロー装飾: ヒーロー内に複数の装飾要素を配置（薄い円形グラデーション、radial-gradient重ね、幾何学的なCSS図形をopacity: 0.03〜0.08で）
+- カード装飾: カードの左上または右上に小さなアクセント装飾（w-12 h-12 の薄いグラデーション円）を配置（position: absolute）
+- 統計・実績数字がある場合: 大きなフォントサイズ（text-4xl〜text-5xl）+ font-weight: 700 で目立たせ、単位は小さく表示
+- CTAセクション: CTAボタンの周囲に薄いリング装飾やパルスアニメーション（@keyframes pulse）を追加
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+【日本語テキスト品質ルール（必須）】
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+### 文字・テキストの扱い
+- 日本語テキストが途中で途切れたり、文字化けしたりしないこと
+- HTMLエンティティ（&amp; &lt; &gt; 等）を不必要に使わない。日本語テキストはそのまま記述
+- 全角・半角の混在に注意: 電話番号は半角数字、日本語の括弧は全角「」を使用
+- lang="ja" を html タグに必ず設定
+
+### 改行・レイアウト
+- 長い日本語テキストは適切な箇所で改行（word-break: break-all は使わない）
+- overflow-wrap: break-word を body に設定（長いURLやメールアドレスの折り返し）
+- テーブルレイアウトは使わない（すべてFlexboxまたはGrid）
+- 日本語テキストの幅: max-w-prose（65ch）またはmax-w-2xl を設定し、一行が長くなりすぎないようにする
+- 連絡先情報の各項目（電話・メール・住所・営業時間）は改行して見やすく整理する
+
+### フォントレンダリング
+- -webkit-font-smoothing: antialiased を body に設定
+- text-rendering: optimizeLegibility を body に設定
+- font-feature-settings: "palt" を日本語フォントに設定（プロポーショナルメトリクス）
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 【レスポンシブ（必須）】

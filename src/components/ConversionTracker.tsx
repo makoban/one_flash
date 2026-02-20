@@ -23,8 +23,8 @@ export default function ConversionTracker() {
     // GA4 イベント
     window.gtag("event", "purchase", {
       currency: "JPY",
-      value: 1980,
-      items: [{ item_name: "OnePage-Flash 初期制作", price: 1980, quantity: 1 }],
+      value: 2980,
+      items: [{ item_name: "OnePage-Flash 初期制作", price: 2980, quantity: 1 }],
     });
 
     // Google Ads コンバージョン（環境変数が設定されている場合のみ）
@@ -33,7 +33,7 @@ export default function ConversionTracker() {
     if (awId && awLabel) {
       window.gtag("event", "conversion", {
         send_to: `${awId}/${awLabel}`,
-        value: 1980,
+        value: 2980,
         currency: "JPY",
       });
     }

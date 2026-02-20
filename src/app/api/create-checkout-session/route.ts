@@ -11,8 +11,8 @@
  *   5. 決済完了後は Webhook (stripe/route.ts) がドラフトを本公開する
  *
  * 料金体系:
- *   - 初期制作費 ¥1,980（一回のみ・初回請求に含む）
- *   - 月額利用料 ¥380/月（毎月自動課金）
+ *   - 初期制作費 ¥2,980（一回のみ・初回請求に含む）
+ *   - 月額利用料 ¥380/月（毎月自動課金・初月無料）
  */
 
 import { NextRequest, NextResponse } from "next/server";
@@ -96,6 +96,9 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         },
       ],
       mode: "subscription",
+      subscription_data: {
+        trial_period_days: 30,
+      },
       success_url: `${appUrl}/complete?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${appUrl}/create`,
       customer_email: formData.email || undefined,

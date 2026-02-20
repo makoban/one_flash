@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "OnePage-Flash - 10分でホームページが完成",
-  description: "テキストを打ち込むだけ。AIが美しいホームページを自動生成します。初期1,980円 + 月額480円。",
+  description: "テキストを打ち込むだけ。AIが美しいホームページを自動生成します。初期2,980円 + 月額380円（初月無料）。",
 };
 
 const GA_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;

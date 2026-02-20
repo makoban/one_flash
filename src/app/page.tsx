@@ -69,7 +69,7 @@ export default function HomePage() {
             いまどきホームページなんて
             <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-amber-500">
-              「1,980円」
+              「2,980円」
             </span>
             で作る時代。
           </h1>
@@ -81,7 +81,7 @@ export default function HomePage() {
           </p>
 
           <p className="text-sm text-slate-500 mb-10">
-            初期費用 1,980円 + 月額 480円 / いつでも解約可
+            初期費用 2,980円 + 月額 380円/月（初月無料）/ いつでも解約可
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -337,13 +337,14 @@ export default function HomePage() {
             </span>
 
             <div className="mb-2">
-              <span className="text-5xl sm:text-6xl font-black">¥1,980</span>
+              <span className="text-5xl sm:text-6xl font-black">¥2,980</span>
               <span className="text-lg text-slate-400 ml-2">初期費用</span>
             </div>
-            <div className="mb-6">
-              <span className="text-2xl font-bold text-slate-300">+ ¥480</span>
+            <div className="mb-3">
+              <span className="text-2xl font-bold text-slate-300">+ ¥380</span>
               <span className="text-slate-400">/月</span>
             </div>
+            <p className="text-sm text-amber-400 font-medium mb-1">初月無料</p>
             <p className="text-sm text-slate-500 mb-8">税込 / いつでも解約可 / 解約後も再開OK</p>
 
             <ul className="space-y-3 text-sm text-slate-300 mb-8 text-left">
