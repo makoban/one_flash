@@ -171,6 +171,11 @@ async function captureScreenshot(
       timeout: NETWORK_IDLE_TIMEOUT_MS,
     });
 
+    // Google Fonts のレンダリング完了を待つ
+    await page.evaluate(() => document.fonts.ready);
+    // 追加の安全マージン（フォントレンダリングが反映されるまで）
+    await new Promise((resolve) => setTimeout(resolve, 500));
+
     const pageHeight = await page.evaluate(
       (mh: number) =>
         Math.min(document.documentElement.scrollHeight, mh),

@@ -334,7 +334,7 @@ ${pageLengthRule}
 
 ### Tailwind Config（head内の<script>で設定）
 tailwind.config に以下を設定すること:
-- fontFamily を拡張: sans='${f.body}, sans-serif'、display='${f.display}, serif'、label='${f.label}, sans-serif'
+- fontFamily を拡張: sans='${f.body}, sans-serif'、display='${f.display}, ${f.body}, serif'、label='${f.label}, ${f.body}, sans-serif'
 - テーマカラーを拡張: brand色として50〜900のカラースケールを定義（アクセント色 ${p.accent} を500として展開）
 
 ### Lucideアイコンの使用方法
