@@ -230,6 +230,22 @@ CREATE TABLE IF NOT EXISTS opf_ad_events (
 CREATE INDEX IF NOT EXISTS idx_opf_ad_events_event_type ON opf_ad_events(event_type);
 CREATE INDEX IF NOT EXISTS idx_opf_ad_events_created_at ON opf_ad_events(created_at);
 CREATE INDEX IF NOT EXISTS idx_opf_ad_events_session_id ON opf_ad_events(session_id);
+
+CREATE TABLE IF NOT EXISTS opf_drafts (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  draft_id VARCHAR(255) UNIQUE NOT NULL,
+  html TEXT NOT NULL,
+  metadata JSONB,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  expires_at TIMESTAMPTZ DEFAULT NOW() + INTERVAL '24 hours'
+);
+
+CREATE TABLE IF NOT EXISTS opf_html_backups (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  subdomain VARCHAR(63) UNIQUE NOT NULL,
+  html TEXT NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
 `;
 
 /** opf_* テーブルが存在しなければ作成する */

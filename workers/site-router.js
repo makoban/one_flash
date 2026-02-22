@@ -29,6 +29,12 @@ export default {
     if (url.pathname === "/_api/verify" && request.method === "POST") {
       return handleVerify(request, env);
     }
+    if (url.pathname === "/_api/get-html" && request.method === "POST") {
+      return handleGetHtml(request, env);
+    }
+    if (url.pathname === "/_api/update-html" && request.method === "POST") {
+      return handleUpdateHtml(request, env);
+    }
 
     // --- パスベースルーティング（デモ用: /s/{slug}） ---
     const pathMatch = url.pathname.match(/^\/s\/([a-z0-9][a-z0-9-]+[a-z0-9])\/?$/);
@@ -194,6 +200,64 @@ async function handleVerify(request, env) {
   } catch (error) {
     console.error("Verify error:", error);
     return jsonResponse({ error: "Verification failed" }, 500);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// HTML取得API: POST /_api/get-html
+// Body: { subdomain, secret }
+// → { html } or 404
+// ---------------------------------------------------------------------------
+async function handleGetHtml(request, env) {
+  try {
+    const body = await request.json();
+    const { subdomain, secret } = body;
+
+    if (!env.UPLOAD_SECRET || secret !== env.UPLOAD_SECRET) {
+      return jsonResponse({ error: "Unauthorized" }, 401);
+    }
+    if (!subdomain) {
+      return jsonResponse({ error: "subdomain is required" }, 400);
+    }
+
+    const object = await env.SITES_BUCKET.get(`${subdomain}/index.html`);
+    if (!object) {
+      return jsonResponse({ error: "Not found" }, 404);
+    }
+
+    const html = await object.text();
+    return jsonResponse({ html }, 200);
+  } catch (error) {
+    console.error("GetHtml error:", error);
+    return jsonResponse({ error: "Failed to get HTML" }, 500);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// HTML更新API: POST /_api/update-html
+// Body: { subdomain, html, secret }
+// メタデータは更新しない（deactivate/reactivate用）
+// ---------------------------------------------------------------------------
+async function handleUpdateHtml(request, env) {
+  try {
+    const body = await request.json();
+    const { subdomain, html, secret } = body;
+
+    if (!env.UPLOAD_SECRET || secret !== env.UPLOAD_SECRET) {
+      return jsonResponse({ error: "Unauthorized" }, 401);
+    }
+    if (!subdomain || !html) {
+      return jsonResponse({ error: "subdomain and html are required" }, 400);
+    }
+
+    await env.SITES_BUCKET.put(`${subdomain}/index.html`, html, {
+      httpMetadata: { contentType: "text/html; charset=utf-8" },
+    });
+
+    return jsonResponse({ success: true }, 200);
+  } catch (error) {
+    console.error("UpdateHtml error:", error);
+    return jsonResponse({ error: "Failed to update HTML" }, 500);
   }
 }
 

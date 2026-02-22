@@ -1,171 +1,114 @@
 /**
- * Cloudflare R2 クライアント初期化モジュール
+ * R2 操作モジュール（Worker API + DB 経由）
  *
- * R2 は S3互換API を提供しているため @aws-sdk/client-s3 を使用。
- * エンドポイントURL形式: https://<ACCOUNT_ID>.r2.cloudflarestorage.com
+ * R2 への直接アクセス（S3 API）は使用せず、
+ * Cloudflare Worker の API エンドポイント経由で R2 を操作する。
+ * ドラフト HTML と HTML バックアップは PostgreSQL に保存する。
  *
- * 保存キー形式: <site-slug>/index.html
- * 例: abc123/index.html → https://abc123.info-page.jp でアクセス可能
+ * これにより R2_ACCOUNT_ID 等の環境変数が不要になる。
  */
 
-import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
+import { query } from "./db";
 
 // ---------------------------------------------------------------------------
-// R2 S3クライアント（遅延初期化）
+// Worker API ヘルパー
 // ---------------------------------------------------------------------------
 
-let _r2Client: S3Client | null = null;
-let _bucketName: string | null = null;
-
-function getR2Config() {
-  if (_r2Client && _bucketName) return { client: _r2Client, bucket: _bucketName };
-
-  const accountId = process.env.R2_ACCOUNT_ID;
-  const accessKeyId = process.env.R2_ACCESS_KEY_ID;
-  const secretAccessKey = process.env.R2_SECRET_ACCESS_KEY;
-  const bucketName = process.env.R2_BUCKET_NAME;
-
-  if (!accountId || !accessKeyId || !secretAccessKey || !bucketName) {
-    throw new Error(
-      "Missing R2 environment variables: R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_BUCKET_NAME"
-    );
+function getWorkerConfig() {
+  const workerUrl = process.env.WORKER_URL;
+  const uploadSecret = process.env.UPLOAD_SECRET;
+  if (!workerUrl || !uploadSecret) {
+    throw new Error("Missing environment variables: WORKER_URL, UPLOAD_SECRET");
   }
+  return { workerUrl, uploadSecret };
+}
 
-  _r2Client = new S3Client({
-    region: "auto",
-    endpoint: `https://${accountId}.r2.cloudflarestorage.com`,
-    credentials: { accessKeyId, secretAccessKey },
+async function workerFetch(endpoint: string, body: Record<string, unknown>): Promise<Response> {
+  const { workerUrl, uploadSecret } = getWorkerConfig();
+  return fetch(`${workerUrl}${endpoint}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ ...body, secret: uploadSecret }),
   });
-  _bucketName = bucketName;
-
-  return { client: _r2Client, bucket: _bucketName };
 }
 
 // ---------------------------------------------------------------------------
-// ヘルパー関数
+// サイト HTML 操作（Worker 経由）
 // ---------------------------------------------------------------------------
 
 /**
- * R2 にHTMLファイルを保存する
- * @param slug - サイトのスラッグ（サブドメインと同一）
- * @param htmlContent - 保存するHTML文字列
+ * R2 に HTML ファイルを保存する（Worker /_api/update-html 経由）
  */
 export async function uploadSiteHTML(slug: string, htmlContent: string): Promise<void> {
-  const { client, bucket } = getR2Config();
-  const command = new PutObjectCommand({
-    Bucket: bucket,
-    Key: `${slug}/index.html`,
-    Body: htmlContent,
-    ContentType: "text/html; charset=utf-8",
-    CacheControl: "public, max-age=3600",
-  });
-
-  await client.send(command);
-}
-
-/**
- * R2 からHTMLファイルを取得する
- * @param slug - サイトのスラッグ
- * @returns HTML文字列
- */
-export async function getSiteHTML(slug: string): Promise<string | null> {
-  try {
-    const { client, bucket } = getR2Config();
-    const command = new GetObjectCommand({
-      Bucket: bucket,
-      Key: `${slug}/index.html`,
-    });
-
-    const response = await client.send(command);
-    const bodyContents = await response.Body?.transformToString("utf-8");
-    return bodyContents ?? null;
-  } catch (error: unknown) {
-    if (
-      error instanceof Error &&
-      "name" in error &&
-      error.name === "NoSuchKey"
-    ) {
-      return null;
-    }
-    throw error;
+  const res = await workerFetch("/_api/update-html", { subdomain: slug, html: htmlContent });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(`uploadSiteHTML failed: ${JSON.stringify(err)}`);
   }
 }
 
 /**
- * R2 からHTMLファイルを削除する（管理用）
- * @param slug - サイトのスラッグ
+ * R2 から HTML ファイルを取得する（Worker /_api/get-html 経由）
+ */
+export async function getSiteHTML(slug: string): Promise<string | null> {
+  const res = await workerFetch("/_api/get-html", { subdomain: slug });
+  if (res.status === 404) return null;
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(`getSiteHTML failed: ${JSON.stringify(err)}`);
+  }
+  const data = await res.json() as { html: string };
+  return data.html;
+}
+
+/**
+ * R2 から HTML ファイルを削除する（update-html で空ページに差し替え）
  */
 export async function deleteSiteHTML(slug: string): Promise<void> {
-  const { client, bucket } = getR2Config();
-  const command = new DeleteObjectCommand({
-    Bucket: bucket,
-    Key: `${slug}/index.html`,
-  });
-
-  await client.send(command);
+  // Worker に delete エンドポイントがないため、空ページで上書き
+  await uploadSiteHTML(slug, "<!-- deleted -->");
 }
 
 /**
  * サイトの公開URLを生成する
- * @param slug - サイトのスラッグ
- * @returns 公開URL文字列（例: https://abc123.info-page.jp）
  */
 export function getSitePublicUrl(slug: string): string {
-  const siteDomain = process.env.SITE_DOMAIN ?? "info-page.jp";
+  const siteDomain = process.env.SITE_DOMAIN ?? "oneflash.net";
   return `https://${slug}.${siteDomain}`;
 }
 
 // ---------------------------------------------------------------------------
-// ドラフト HTML 管理（決済完了前の一時保存）
+// ドラフト HTML 管理（PostgreSQL に保存）
 // ---------------------------------------------------------------------------
 
 /**
- * 決済完了前のHTMLをドラフトとして R2 に一時保存する
- * @param draftId - UUID形式のドラフトID
- * @param htmlContent - 保存するHTML文字列
+ * 決済完了前の HTML をドラフトとして DB に一時保存する
  */
 export async function uploadDraftHTML(draftId: string, htmlContent: string): Promise<void> {
-  const { client, bucket } = getR2Config();
-  const command = new PutObjectCommand({
-    Bucket: bucket,
-    Key: `_drafts/${draftId}/index.html`,
-    Body: htmlContent,
-    ContentType: "text/html; charset=utf-8",
-  });
-  await client.send(command);
+  await query(
+    `INSERT INTO opf_drafts (draft_id, html)
+     VALUES ($1, $2)
+     ON CONFLICT (draft_id) DO UPDATE SET html = EXCLUDED.html, created_at = NOW()`,
+    [draftId, htmlContent]
+  );
 }
 
 /**
- * ドラフトHTMLを取得する
- * @param draftId - UUID形式のドラフトID
- * @returns HTML文字列 or null
+ * ドラフト HTML を取得する
  */
 export async function getDraftHTML(draftId: string): Promise<string | null> {
-  try {
-    const { client, bucket } = getR2Config();
-    const command = new GetObjectCommand({
-      Bucket: bucket,
-      Key: `_drafts/${draftId}/index.html`,
-    });
-    const response = await client.send(command);
-    return (await response.Body?.transformToString("utf-8")) ?? null;
-  } catch (error: unknown) {
-    if (error instanceof Error && error.name === "NoSuchKey") return null;
-    throw error;
-  }
+  const result = await query<{ html: string }>(
+    `SELECT html FROM opf_drafts WHERE draft_id = $1`,
+    [draftId]
+  );
+  return result.rows[0]?.html ?? null;
 }
 
 /**
- * ドラフトHTMLを削除する
- * @param draftId - UUID形式のドラフトID
+ * ドラフト HTML を削除する
  */
 export async function deleteDraftHTML(draftId: string): Promise<void> {
-  const { client, bucket } = getR2Config();
-  const command = new DeleteObjectCommand({
-    Bucket: bucket,
-    Key: `_drafts/${draftId}/index.html`,
-  });
-  await client.send(command);
+  await query(`DELETE FROM opf_drafts WHERE draft_id = $1`, [draftId]);
 }
 
 // ---------------------------------------------------------------------------
@@ -173,22 +116,18 @@ export async function deleteDraftHTML(draftId: string): Promise<void> {
 // ---------------------------------------------------------------------------
 
 /**
- * サイトを非公開にする（HTMLをバックアップし「非公開」ページに差し替え）
- * @param slug - サイトのスラッグ
- * @param siteName - サイト名（非公開ページに表示）
+ * サイトを非公開にする（HTML を DB にバックアップし「非公開」ページに差し替え）
  */
 export async function deactivateSite(slug: string, siteName: string): Promise<void> {
-  const { client, bucket } = getR2Config();
-
-  // 現在のHTMLをバックアップ
+  // 現在の HTML を取得してバックアップ
   const currentHtml = await getSiteHTML(slug);
   if (currentHtml) {
-    await client.send(new PutObjectCommand({
-      Bucket: bucket,
-      Key: `${slug}/index.html.bak`,
-      Body: currentHtml,
-      ContentType: "text/html; charset=utf-8",
-    }));
+    await query(
+      `INSERT INTO opf_html_backups (subdomain, html)
+       VALUES ($1, $2)
+       ON CONFLICT (subdomain) DO UPDATE SET html = EXCLUDED.html, created_at = NOW()`,
+      [slug, currentHtml]
+    );
   }
 
   // 非公開ページに差し替え
@@ -197,26 +136,19 @@ export async function deactivateSite(slug: string, siteName: string): Promise<vo
 }
 
 /**
- * サイトを再公開する（バックアップからHTMLを復元）
- * @param slug - サイトのスラッグ
- * @returns 復元成功したか
+ * サイトを再公開する（DB のバックアップから HTML を復元）
  */
 export async function reactivateSite(slug: string): Promise<boolean> {
-  try {
-    const { client, bucket } = getR2Config();
-    const command = new GetObjectCommand({
-      Bucket: bucket,
-      Key: `${slug}/index.html.bak`,
-    });
-    const response = await client.send(command);
-    const backupHtml = await response.Body?.transformToString("utf-8");
-    if (!backupHtml) return false;
+  const result = await query<{ html: string }>(
+    `SELECT html FROM opf_html_backups WHERE subdomain = $1`,
+    [slug]
+  );
+  const backupHtml = result.rows[0]?.html;
+  if (!backupHtml) return false;
 
-    await uploadSiteHTML(slug, backupHtml);
-    return true;
-  } catch {
-    return false;
-  }
+  await uploadSiteHTML(slug, backupHtml);
+  // バックアップは残しておく（再度非公開→再公開に備えて）
+  return true;
 }
 
 function buildUnavailablePage(siteName: string): string {
