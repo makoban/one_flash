@@ -6,7 +6,7 @@
  *
  * クエリパラメータ:
  *   pw      - 管理パスワード（必須）
- *   service - "overview" (default) | "opf" | "fudosan" | "shoken"
+ *   service - "overview" (default) | "opf" | "fudosan" | "shoken" | "shigyo"
  */
 
 import { NextRequest, NextResponse } from "next/server";
@@ -88,6 +88,12 @@ export interface OverviewData {
     totalPurchases: number;
   } | null;
   shoken: {
+    thisMonthRevenue: number;
+    totalRevenue: number;
+    uniqueUsers: number;
+    totalPurchases: number;
+  } | null;
+  shigyo: {
     thisMonthRevenue: number;
     totalRevenue: number;
     uniqueUsers: number;
@@ -325,10 +331,11 @@ async function getOverviewData(): Promise<OverviewData> {
   monthStart.setHours(0, 0, 0, 0);
 
   // Promise.allSettled で一部失敗してもほかのデータを返せるようにする
-  const [opfResult, fudosanResult, shokenResult] = await Promise.allSettled([
+  const [opfResult, fudosanResult, shokenResult, shigyoResult] = await Promise.allSettled([
     getOpfStats(),
     getSupabasePurchaseStats("ai-fudosan"),
     getSupabasePurchaseStats("ai-shoken"),
+    getSupabasePurchaseStats("ai-shigyo"),
   ]);
 
   const opf =
@@ -366,25 +373,39 @@ async function getOverviewData(): Promise<OverviewData> {
         }
       : null;
 
+  const shigyo =
+    shigyoResult.status === "fulfilled"
+      ? {
+          thisMonthRevenue: shigyoResult.value.thisMonthRevenue,
+          totalRevenue: shigyoResult.value.totalRevenue,
+          uniqueUsers: shigyoResult.value.uniqueUsers,
+          totalPurchases: shigyoResult.value.totalPurchases,
+        }
+      : null;
+
   const grandTotalThisMonth =
     (opf?.thisMonthRevenue ?? 0) +
     (fudosan?.thisMonthRevenue ?? 0) +
-    (shoken?.thisMonthRevenue ?? 0);
+    (shoken?.thisMonthRevenue ?? 0) +
+    (shigyo?.thisMonthRevenue ?? 0);
 
   const grandTotalRevenue =
     (opf?.totalRevenue ?? 0) +
     (fudosan?.totalRevenue ?? 0) +
-    (shoken?.totalRevenue ?? 0);
+    (shoken?.totalRevenue ?? 0) +
+    (shigyo?.totalRevenue ?? 0);
 
   const grandTotalUsers =
     (opf?.totalUsers ?? 0) +
     (fudosan?.uniqueUsers ?? 0) +
-    (shoken?.uniqueUsers ?? 0);
+    (shoken?.uniqueUsers ?? 0) +
+    (shigyo?.uniqueUsers ?? 0);
 
   return {
     opf,
     fudosan,
     shoken,
+    shigyo,
     grandTotal: {
       thisMonthRevenue: grandTotalThisMonth,
       totalRevenue: grandTotalRevenue,
@@ -421,6 +442,11 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
       case "shoken": {
         const data = await getSupabasePurchaseStats("ai-shoken");
+        return NextResponse.json(data);
+      }
+
+      case "shigyo": {
+        const data = await getSupabasePurchaseStats("ai-shigyo");
         return NextResponse.json(data);
       }
 

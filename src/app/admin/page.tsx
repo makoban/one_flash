@@ -1,8 +1,8 @@
 /**
  * /admin 統合管理ダッシュボード
  *
- * 4タブ構成:
- *   [全体] [OnePage-Flash] [ai-fudosan] [ai-shoken]
+ * 5タブ構成:
+ *   [全体] [OnePage-Flash] [ai-fudosan] [ai-shoken] [ai-shigyo]
  *
  * パスワード認証付き（URL: /admin?pw=ADMIN_PASSWORD）。
  * アクティブなタブのみ30秒ごとに自動更新。
@@ -25,7 +25,7 @@ import type {
 // 型定義
 // ---------------------------------------------------------------------------
 
-type TabId = "overview" | "opf" | "fudosan" | "shoken";
+type TabId = "overview" | "opf" | "fudosan" | "shoken" | "shigyo";
 
 interface TabConfig {
   id: TabId;
@@ -38,6 +38,7 @@ const TABS: TabConfig[] = [
   { id: "opf", label: "OnePage-Flash", service: "opf" },
   { id: "fudosan", label: "ai-fudosan", service: "fudosan" },
   { id: "shoken", label: "ai-shoken", service: "shoken" },
+  { id: "shigyo", label: "ai-shigyo", service: "shigyo" },
 ];
 
 // Tailwindのクラスを動的に生成しないよう、静的マッピングを使用
@@ -46,6 +47,7 @@ const TAB_ACTIVE_STYLES: Record<TabId, string> = {
   opf: "bg-blue-100 text-blue-800 font-bold",
   fudosan: "bg-green-100 text-green-800 font-bold",
   shoken: "bg-amber-100 text-amber-800 font-bold",
+  shigyo: "bg-rose-100 text-rose-800 font-bold",
 };
 
 const TAB_INACTIVE_STYLE =
@@ -64,11 +66,13 @@ function AdminContent() {
   const [opfData, setOpfData] = useState<OpfStatsData | null>(null);
   const [fudosanData, setFudosanData] = useState<PurchaseStats | null>(null);
   const [shokenData, setShokenData] = useState<PurchaseStats | null>(null);
+  const [shigyoData, setShigyoData] = useState<PurchaseStats | null>(null);
 
   const [loadingOverview, setLoadingOverview] = useState(false);
   const [loadingOpf, setLoadingOpf] = useState(false);
   const [loadingFudosan, setLoadingFudosan] = useState(false);
   const [loadingShoken, setLoadingShoken] = useState(false);
+  const [loadingShigyo, setLoadingShigyo] = useState(false);
 
   const [authError, setAuthError] = useState<string | null>(null);
   const [tabError, setTabError] = useState<string | null>(null);
@@ -160,6 +164,19 @@ function AdminContent() {
     }
   }, [fetchService]);
 
+  const fetchShigyo = useCallback(async () => {
+    setLoadingShigyo(true);
+    setTabError(null);
+    try {
+      const data = (await fetchService("shigyo")) as PurchaseStats;
+      setShigyoData(data);
+    } catch {
+      setTabError("ai-shigyo データの取得に失敗しました");
+    } finally {
+      setLoadingShigyo(false);
+    }
+  }, [fetchService]);
+
   // ---------------------------------------------------------------------------
   // タブ切り替え時のフェッチ
   // ---------------------------------------------------------------------------
@@ -178,8 +195,11 @@ function AdminContent() {
       case "shoken":
         fetchShoken();
         break;
+      case "shigyo":
+        fetchShigyo();
+        break;
     }
-  }, [activeTab, fetchOverview, fetchOpf, fetchFudosan, fetchShoken]);
+  }, [activeTab, fetchOverview, fetchOpf, fetchFudosan, fetchShoken, fetchShigyo]);
 
   // 初回マウント時に Overview をフェッチ
   useEffect(() => {
@@ -196,6 +216,8 @@ function AdminContent() {
       fetchFudosan();
     } else if (activeTab === "shoken" && !shokenData) {
       fetchShoken();
+    } else if (activeTab === "shigyo" && !shigyoData) {
+      fetchShigyo();
     }
   }, [
     activeTab,
@@ -203,10 +225,12 @@ function AdminContent() {
     opfData,
     fudosanData,
     shokenData,
+    shigyoData,
     fetchOverview,
     fetchOpf,
     fetchFudosan,
     fetchShoken,
+    fetchShigyo,
   ]);
 
   // 30秒ごとにアクティブタブのみ自動更新
@@ -242,7 +266,8 @@ function AdminContent() {
     (activeTab === "overview" && loadingOverview) ||
     (activeTab === "opf" && loadingOpf) ||
     (activeTab === "fudosan" && loadingFudosan) ||
-    (activeTab === "shoken" && loadingShoken);
+    (activeTab === "shoken" && loadingShoken) ||
+    (activeTab === "shigyo" && loadingShigyo);
 
   return (
     <main className="min-h-screen bg-gray-50 px-4 py-8">
@@ -320,6 +345,15 @@ function AdminContent() {
             loading={loadingShoken}
             serviceName="ai-shoken"
             serviceLabel="ai-shoken"
+          />
+        )}
+
+        {activeTab === "shigyo" && (
+          <PurchaseTab
+            data={shigyoData}
+            loading={loadingShigyo}
+            serviceName="ai-shigyo"
+            serviceLabel="ai-shigyo"
           />
         )}
 
@@ -405,7 +439,7 @@ function OverviewTabContent({
     );
   }
 
-  const { grandTotal, opf, fudosan, shoken } = data;
+  const { grandTotal, opf, fudosan, shoken, shigyo } = data;
 
   return (
     <div className="space-y-6">
@@ -432,7 +466,7 @@ function OverviewTabContent({
       </div>
 
       {/* Row 2: サービス別サマリーカード */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* OnePage-Flash */}
         <ServiceSummaryCard
           label="OnePage-Flash"
@@ -476,6 +510,22 @@ function OverviewTabContent({
                   { key: "累計売上", value: formatYen(shoken.totalRevenue) },
                   { key: "ユニーク購入者", value: `${shoken.uniqueUsers}人` },
                   { key: "累計購入数", value: `${shoken.totalPurchases}件` },
+                ]
+              : null
+          }
+        />
+
+        {/* ai-shigyo */}
+        <ServiceSummaryCard
+          label="ai-shigyo"
+          colorBar="bg-rose-400"
+          items={
+            shigyo
+              ? [
+                  { key: "今月売上", value: formatYen(shigyo.thisMonthRevenue) },
+                  { key: "累計売上", value: formatYen(shigyo.totalRevenue) },
+                  { key: "ユニーク購入者", value: `${shigyo.uniqueUsers}人` },
+                  { key: "累計購入数", value: `${shigyo.totalPurchases}件` },
                 ]
               : null
           }
