@@ -1,46 +1,55 @@
 /**
- * /admin 管理ダッシュボード
+ * /admin 統合管理ダッシュボード
  *
- * MRR、ユーザー数、コンバージョンファネル、最近のイベントを1画面で確認。
+ * 4タブ構成:
+ *   [全体] [OnePage-Flash] [ai-fudosan] [ai-shoken]
+ *
  * パスワード認証付き（URL: /admin?pw=ADMIN_PASSWORD）。
+ * アクティブなタブのみ30秒ごとに自動更新。
  */
 
 "use client";
 
 import { useState, useEffect, useCallback, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
+import { KpiCard, formatYen } from "./AdminComponents";
+import { OpfTab } from "./OpfTab";
+import { PurchaseTab } from "./PurchaseTab";
+import type {
+  OpfStatsData,
+  PurchaseStats,
+  OverviewData,
+} from "../api/admin/stats/route";
 
 // ---------------------------------------------------------------------------
 // 型定義
 // ---------------------------------------------------------------------------
 
-interface StatsData {
-  overview: {
-    mrr: number;
-    activeSubs: number;
-    totalUsers: number;
-    totalSites: number;
-    activeSites: number;
-    newThisMonth: number;
-    canceledThisMonth: number;
-  };
-  subsByStatus: Record<string, number>;
-  funnel: Record<string, number>;
-  utmSources: Array<{ source: string; count: number }>;
-  recentEvents: Array<{
-    event_type: string;
-    utm_source: string | null;
-    session_id: string | null;
-    page_url: string | null;
-    created_at: string;
-  }>;
-  recentSites: Array<{
-    subdomain: string;
-    site_name: string | null;
-    is_active: boolean;
-    created_at: string;
-  }>;
+type TabId = "overview" | "opf" | "fudosan" | "shoken";
+
+interface TabConfig {
+  id: TabId;
+  label: string;
+  service: string;
 }
+
+const TABS: TabConfig[] = [
+  { id: "overview", label: "全体", service: "overview" },
+  { id: "opf", label: "OnePage-Flash", service: "opf" },
+  { id: "fudosan", label: "ai-fudosan", service: "fudosan" },
+  { id: "shoken", label: "ai-shoken", service: "shoken" },
+];
+
+// Tailwindのクラスを動的に生成しないよう、静的マッピングを使用
+const TAB_ACTIVE_STYLES: Record<TabId, string> = {
+  overview: "bg-indigo-100 text-indigo-800 font-bold",
+  opf: "bg-blue-100 text-blue-800 font-bold",
+  fudosan: "bg-green-100 text-green-800 font-bold",
+  shoken: "bg-amber-100 text-amber-800 font-bold",
+};
+
+const TAB_INACTIVE_STYLE =
+  "bg-white text-gray-500 hover:bg-gray-50 font-medium";
 
 // ---------------------------------------------------------------------------
 // メインコンポーネント
@@ -50,222 +59,324 @@ function AdminContent() {
   const searchParams = useSearchParams();
   const pw = searchParams.get("pw") ?? "";
 
-  const [data, setData] = useState<StatsData | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<TabId>("overview");
+  const [overviewData, setOverviewData] = useState<OverviewData | null>(null);
+  const [opfData, setOpfData] = useState<OpfStatsData | null>(null);
+  const [fudosanData, setFudosanData] = useState<PurchaseStats | null>(null);
+  const [shokenData, setShokenData] = useState<PurchaseStats | null>(null);
 
-  const fetchStats = useCallback(async () => {
-    setLoading(true);
-    try {
-      const res = await fetch(`/api/admin/stats?pw=${encodeURIComponent(pw)}`);
-      if (!res.ok) {
-        if (res.status === 401) {
-          setError("認証に失敗しました。正しいパスワードをURLに含めてください。\n例: /admin?pw=your_password");
-        } else {
-          const body = (await res.json()) as { error?: string };
-          setError(body.error ?? "データの取得に失敗しました");
-        }
-        return;
+  const [loadingOverview, setLoadingOverview] = useState(false);
+  const [loadingOpf, setLoadingOpf] = useState(false);
+  const [loadingFudosan, setLoadingFudosan] = useState(false);
+  const [loadingShoken, setLoadingShoken] = useState(false);
+
+  const [authError, setAuthError] = useState<string | null>(null);
+  const [tabError, setTabError] = useState<string | null>(null);
+
+  // ---------------------------------------------------------------------------
+  // フェッチヘルパー
+  // ---------------------------------------------------------------------------
+
+  const fetchService = useCallback(
+    async (service: string) => {
+      const res = await fetch(
+        `/api/admin/stats?pw=${encodeURIComponent(pw)}&service=${service}`
+      );
+      if (res.status === 401) {
+        throw new Error("auth");
       }
-      const json = (await res.json()) as StatsData;
-      setData(json);
-      setError(null);
-    } catch {
-      setError("通信エラー");
+      if (!res.ok) {
+        const body = (await res.json()) as { error?: string };
+        throw new Error(body.error ?? "fetch error");
+      }
+      return res.json();
+    },
+    [pw]
+  );
+
+  // ---------------------------------------------------------------------------
+  // Overview フェッチ
+  // ---------------------------------------------------------------------------
+
+  const fetchOverview = useCallback(async () => {
+    setLoadingOverview(true);
+    setTabError(null);
+    try {
+      const data = (await fetchService("overview")) as OverviewData;
+      setOverviewData(data);
+    } catch (e: unknown) {
+      if (e instanceof Error && e.message === "auth") {
+        setAuthError(
+          "認証に失敗しました。正しいパスワードをURLに含めてください。\n例: /admin?pw=your_password"
+        );
+      } else {
+        setTabError("概要データの取得に失敗しました");
+      }
     } finally {
-      setLoading(false);
+      setLoadingOverview(false);
     }
-  }, [pw]);
+  }, [fetchService]);
 
+  // ---------------------------------------------------------------------------
+  // タブ別フェッチ
+  // ---------------------------------------------------------------------------
+
+  const fetchOpf = useCallback(async () => {
+    setLoadingOpf(true);
+    setTabError(null);
+    try {
+      const data = (await fetchService("opf")) as OpfStatsData;
+      setOpfData(data);
+    } catch {
+      setTabError("OnePage-Flash データの取得に失敗しました");
+    } finally {
+      setLoadingOpf(false);
+    }
+  }, [fetchService]);
+
+  const fetchFudosan = useCallback(async () => {
+    setLoadingFudosan(true);
+    setTabError(null);
+    try {
+      const data = (await fetchService("fudosan")) as PurchaseStats;
+      setFudosanData(data);
+    } catch {
+      setTabError("ai-fudosan データの取得に失敗しました");
+    } finally {
+      setLoadingFudosan(false);
+    }
+  }, [fetchService]);
+
+  const fetchShoken = useCallback(async () => {
+    setLoadingShoken(true);
+    setTabError(null);
+    try {
+      const data = (await fetchService("shoken")) as PurchaseStats;
+      setShokenData(data);
+    } catch {
+      setTabError("ai-shoken データの取得に失敗しました");
+    } finally {
+      setLoadingShoken(false);
+    }
+  }, [fetchService]);
+
+  // ---------------------------------------------------------------------------
+  // タブ切り替え時のフェッチ
+  // ---------------------------------------------------------------------------
+
+  const fetchActiveTab = useCallback(() => {
+    switch (activeTab) {
+      case "overview":
+        fetchOverview();
+        break;
+      case "opf":
+        fetchOpf();
+        break;
+      case "fudosan":
+        fetchFudosan();
+        break;
+      case "shoken":
+        fetchShoken();
+        break;
+    }
+  }, [activeTab, fetchOverview, fetchOpf, fetchFudosan, fetchShoken]);
+
+  // 初回マウント時に Overview をフェッチ
   useEffect(() => {
-    fetchStats();
-    // 30秒ごとに自動更新
-    const interval = setInterval(fetchStats, 30_000);
-    return () => clearInterval(interval);
-  }, [fetchStats]);
+    fetchOverview();
+  }, [fetchOverview]);
 
-  if (error) {
+  // タブ切り替え時にデータがなければフェッチ
+  useEffect(() => {
+    if (activeTab === "overview" && !overviewData) {
+      fetchOverview();
+    } else if (activeTab === "opf" && !opfData) {
+      fetchOpf();
+    } else if (activeTab === "fudosan" && !fudosanData) {
+      fetchFudosan();
+    } else if (activeTab === "shoken" && !shokenData) {
+      fetchShoken();
+    }
+  }, [
+    activeTab,
+    overviewData,
+    opfData,
+    fudosanData,
+    shokenData,
+    fetchOverview,
+    fetchOpf,
+    fetchFudosan,
+    fetchShoken,
+  ]);
+
+  // 30秒ごとにアクティブタブのみ自動更新
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetchActiveTab();
+    }, 30_000);
+    return () => clearInterval(interval);
+  }, [fetchActiveTab]);
+
+  // ---------------------------------------------------------------------------
+  // 認証エラー表示
+  // ---------------------------------------------------------------------------
+
+  if (authError) {
     return (
       <main className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
         <div className="bg-white rounded-2xl shadow-sm border p-8 max-w-md text-center">
-          <h1 className="text-xl font-bold text-gray-900 mb-4">Admin Dashboard</h1>
-          <p className="text-sm text-red-600 whitespace-pre-line">{error}</p>
+          <h1 className="text-xl font-bold text-gray-900 mb-4">
+            Admin Dashboard
+          </h1>
+          <p className="text-sm text-red-600 whitespace-pre-line">{authError}</p>
         </div>
       </main>
     );
   }
 
-  if (loading && !data) {
-    return (
-      <main className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <p className="text-gray-500">読み込み中...</p>
-      </main>
-    );
-  }
+  // ---------------------------------------------------------------------------
+  // レンダリング
+  // ---------------------------------------------------------------------------
 
-  if (!data) return null;
-
-  const { overview, subsByStatus, funnel, utmSources, recentEvents, recentSites } = data;
-
-  // ファネルの順序
-  const funnelSteps = ["page_view", "form_start", "checkout_start", "subscribed"];
-  const funnelLabels: Record<string, string> = {
-    page_view: "LP訪問",
-    form_start: "フォーム開始",
-    checkout_start: "決済開始",
-    subscribed: "登録完了",
-  };
+  const isLoadingActive =
+    (activeTab === "overview" && loadingOverview) ||
+    (activeTab === "opf" && loadingOpf) ||
+    (activeTab === "fudosan" && loadingFudosan) ||
+    (activeTab === "shoken" && loadingShoken);
 
   return (
     <main className="min-h-screen bg-gray-50 px-4 py-8">
       <div className="max-w-6xl mx-auto">
-        <div className="flex items-center justify-between mb-8">
-          <h1 className="text-2xl font-bold text-gray-900">OnePage-Flash Admin</h1>
+        {/* ヘッダー */}
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-2xl font-bold text-gray-900">
+            統合管理ダッシュボード
+          </h1>
           <button
-            onClick={fetchStats}
-            className="text-xs text-indigo-600 hover:text-indigo-800 font-medium px-3 py-1.5 border border-indigo-200 rounded-lg hover:bg-indigo-50 transition-colors"
+            onClick={fetchActiveTab}
+            disabled={isLoadingActive}
+            className="text-xs text-indigo-600 hover:text-indigo-800 font-medium px-3 py-1.5 border border-indigo-200 rounded-lg hover:bg-indigo-50 transition-colors disabled:opacity-50"
           >
-            更新
+            {isLoadingActive ? "更新中..." : "更新"}
           </button>
         </div>
 
-        {/* KPI カード */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
-          <KpiCard label="MRR" value={`¥${overview.mrr.toLocaleString()}`} sub="月次経常収益" color="indigo" />
-          <KpiCard label="アクティブサブスク" value={overview.activeSubs.toString()} sub={`全${overview.totalUsers}ユーザー`} color="green" />
-          <KpiCard label="今月新規" value={`+${overview.newThisMonth}`} sub={`解約 -${overview.canceledThisMonth}`} color="blue" />
-          <KpiCard label="公開サイト" value={overview.activeSites.toString()} sub={`全${overview.totalSites}サイト`} color="amber" />
+        {/* タブバー */}
+        <div className="flex gap-2 mb-6 flex-wrap">
+          {TABS.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => {
+                setActiveTab(tab.id);
+                setTabError(null);
+              }}
+              className={`px-4 py-2 rounded-xl text-sm transition-colors ${
+                activeTab === tab.id
+                  ? TAB_ACTIVE_STYLES[tab.id]
+                  : TAB_INACTIVE_STYLE
+              } border`}
+            >
+              {tab.label}
+            </button>
+          ))}
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          {/* コンバージョンファネル */}
-          <div className="bg-white rounded-2xl border p-6">
-            <h2 className="text-sm font-bold text-gray-900 mb-4">コンバージョンファネル（過去30日）</h2>
-            <div className="space-y-3">
-              {funnelSteps.map((step, i) => {
-                const count = funnel[step] ?? 0;
-                const prevCount = i > 0 ? (funnel[funnelSteps[i - 1]] ?? 0) : count;
-                const rate = prevCount > 0 && i > 0 ? Math.round((count / prevCount) * 100) : 100;
-                const maxCount = funnel[funnelSteps[0]] ?? 1;
-                const barWidth = maxCount > 0 ? Math.max((count / maxCount) * 100, 2) : 2;
-
-                return (
-                  <div key={step}>
-                    <div className="flex items-center justify-between text-xs mb-1">
-                      <span className="text-gray-600 font-medium">{funnelLabels[step] ?? step}</span>
-                      <span className="text-gray-900 font-bold">
-                        {count}
-                        {i > 0 && (
-                          <span className={`ml-2 ${rate < 30 ? "text-red-500" : "text-gray-400"}`}>
-                            ({rate}%)
-                          </span>
-                        )}
-                      </span>
-                    </div>
-                    <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-indigo-500 rounded-full transition-all duration-500"
-                        style={{ width: `${barWidth}%` }}
-                      />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+        {/* タブエラー */}
+        {tabError && (
+          <div className="mb-4 bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-sm text-red-600">
+            {tabError}
           </div>
+        )}
 
-          {/* サブスクステータス */}
-          <div className="bg-white rounded-2xl border p-6">
-            <h2 className="text-sm font-bold text-gray-900 mb-4">サブスクステータス</h2>
-            <div className="space-y-2">
-              {Object.entries(subsByStatus).map(([status, count]) => (
-                <div key={status} className="flex items-center justify-between py-2 border-b border-gray-50 last:border-0">
-                  <span className="text-sm text-gray-600">
-                    <StatusBadge status={status} /> {status}
-                  </span>
-                  <span className="text-sm font-bold text-gray-900">{count}</span>
-                </div>
-              ))}
-              {Object.keys(subsByStatus).length === 0 && (
-                <p className="text-xs text-gray-400">データなし</p>
-              )}
-            </div>
+        {/* タブコンテンツ */}
+        {activeTab === "overview" && (
+          <OverviewTabContent data={overviewData} loading={loadingOverview} />
+        )}
 
-            <h2 className="text-sm font-bold text-gray-900 mt-6 mb-4">流入元（過去30日）</h2>
-            <div className="space-y-2">
-              {utmSources.map((s) => (
-                <div key={s.source} className="flex items-center justify-between py-1">
-                  <span className="text-xs text-gray-600">{s.source}</span>
-                  <span className="text-xs font-bold text-gray-900">{s.count}</span>
-                </div>
-              ))}
-              {utmSources.length === 0 && (
-                <p className="text-xs text-gray-400">データなし</p>
-              )}
-            </div>
-          </div>
-        </div>
+        {activeTab === "opf" && (
+          <>
+            {loadingOpf && !opfData ? (
+              <LoadingPlaceholder />
+            ) : opfData ? (
+              <OpfTab data={opfData} />
+            ) : (
+              <EmptyPlaceholder message="データなし。「更新」ボタンを押してください。" />
+            )}
+          </>
+        )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* 最近のイベント */}
-          <div className="bg-white rounded-2xl border p-6">
-            <h2 className="text-sm font-bold text-gray-900 mb-4">最近のイベント</h2>
-            <div className="space-y-2 max-h-80 overflow-y-auto">
-              {recentEvents.map((ev, i) => (
-                <div key={i} className="flex items-center gap-3 py-1.5 border-b border-gray-50 last:border-0">
-                  <EventBadge type={ev.event_type} />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs text-gray-600 truncate">
-                      {ev.utm_source && <span className="text-indigo-500">[{ev.utm_source}] </span>}
-                      {ev.page_url ?? "-"}
-                    </p>
-                  </div>
-                  <span className="text-[10px] text-gray-400 flex-shrink-0">
-                    {formatTime(ev.created_at)}
-                  </span>
-                </div>
-              ))}
-              {recentEvents.length === 0 && (
-                <p className="text-xs text-gray-400">イベントなし</p>
-              )}
-            </div>
-          </div>
+        {activeTab === "fudosan" && (
+          <PurchaseTab
+            data={fudosanData}
+            loading={loadingFudosan}
+            serviceName="ai-fudosan"
+            serviceLabel="ai-fudosan"
+          />
+        )}
 
-          {/* 最近のサイト */}
-          <div className="bg-white rounded-2xl border p-6">
-            <h2 className="text-sm font-bold text-gray-900 mb-4">最近のサイト</h2>
-            <div className="space-y-2 max-h-80 overflow-y-auto">
-              {recentSites.map((site, i) => (
-                <div key={i} className="flex items-center justify-between py-2 border-b border-gray-50 last:border-0">
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">{site.site_name ?? site.subdomain}</p>
-                    <p className="text-xs text-gray-400">{site.subdomain}</p>
-                  </div>
-                  <div className="text-right">
-                    <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${site.is_active ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"}`}>
-                      {site.is_active ? "公開中" : "非公開"}
-                    </span>
-                    <p className="text-[10px] text-gray-400 mt-0.5">{formatTime(site.created_at)}</p>
-                  </div>
-                </div>
-              ))}
-              {recentSites.length === 0 && (
-                <p className="text-xs text-gray-400">サイトなし</p>
-              )}
-            </div>
-          </div>
-        </div>
+        {activeTab === "shoken" && (
+          <PurchaseTab
+            data={shokenData}
+            loading={loadingShoken}
+            serviceName="ai-shoken"
+            serviceLabel="ai-shoken"
+          />
+        )}
 
         {/* コスト監視リマインダー */}
         <div className="mt-8 bg-amber-50 border border-amber-200 rounded-2xl p-6">
-          <h2 className="text-sm font-bold text-amber-800 mb-3">日次コスト監視チェックリスト</h2>
+          <h2 className="text-sm font-bold text-amber-800 mb-3">
+            日次コスト監視チェックリスト
+          </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-amber-700">
-            <a href="https://dashboard.stripe.com" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-amber-900 underline">Stripe Dashboard → 売上・チャーン確認</a>
-            <a href="https://console.cloud.google.com/apis/dashboard" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-amber-900 underline">Google Cloud → Gemini API使用量</a>
-            <a href="https://dash.cloudflare.com" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-amber-900 underline">Cloudflare → Workers/R2使用量</a>
-            <a href="https://dashboard.render.com" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-amber-900 underline">Render → CPU/Memory使用率</a>
-            <a href="https://resend.com/overview" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-amber-900 underline">Resend → メール送信数</a>
-            <a href="https://analytics.google.com" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-amber-900 underline">GA4 → アクセス解析</a>
+            <a
+              href="https://dashboard.stripe.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 hover:text-amber-900 underline"
+            >
+              Stripe Dashboard → 売上・チャーン確認
+            </a>
+            <a
+              href="https://console.cloud.google.com/apis/dashboard"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 hover:text-amber-900 underline"
+            >
+              Google Cloud → Gemini API使用量
+            </a>
+            <a
+              href="https://dash.cloudflare.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 hover:text-amber-900 underline"
+            >
+              Cloudflare → Workers/R2使用量
+            </a>
+            <a
+              href="https://dashboard.render.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 hover:text-amber-900 underline"
+            >
+              Render → CPU/Memory使用率
+            </a>
+            <a
+              href="https://resend.com/overview"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 hover:text-amber-900 underline"
+            >
+              Resend → メール送信数
+            </a>
+            <a
+              href="https://analytics.google.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 hover:text-amber-900 underline"
+            >
+              GA4 → アクセス解析
+            </a>
           </div>
         </div>
       </div>
@@ -274,58 +385,173 @@ function AdminContent() {
 }
 
 // ---------------------------------------------------------------------------
-// UIパーツ
+// Overview タブコンテンツ
 // ---------------------------------------------------------------------------
 
-function KpiCard({ label, value, sub, color }: { label: string; value: string; sub: string; color: string }) {
-  const colors: Record<string, string> = {
-    indigo: "bg-indigo-50 border-indigo-100",
-    green: "bg-green-50 border-green-100",
-    blue: "bg-blue-50 border-blue-100",
-    amber: "bg-amber-50 border-amber-100",
-  };
+function OverviewTabContent({
+  data,
+  loading,
+}: {
+  data: OverviewData | null;
+  loading: boolean;
+}) {
+  if (loading && !data) {
+    return <LoadingPlaceholder />;
+  }
+
+  if (!data) {
+    return (
+      <EmptyPlaceholder message="データなし。「更新」ボタンを押してください。" />
+    );
+  }
+
+  const { grandTotal, opf, fudosan, shoken } = data;
+
   return (
-    <div className={`rounded-2xl border p-5 ${colors[color] ?? "bg-gray-50 border-gray-100"}`}>
-      <p className="text-xs font-medium text-gray-500 mb-1">{label}</p>
-      <p className="text-2xl font-black text-gray-900">{value}</p>
-      <p className="text-xs text-gray-400 mt-1">{sub}</p>
+    <div className="space-y-6">
+      {/* Row 1: 全サービス合計KPI */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <KpiCard
+          label="全サービス今月売上"
+          value={formatYen(grandTotal.thisMonthRevenue)}
+          sub="全サービス合計"
+          color="indigo"
+        />
+        <KpiCard
+          label="全サービス累計売上"
+          value={formatYen(grandTotal.totalRevenue)}
+          sub="全サービス合計"
+          color="purple"
+        />
+        <KpiCard
+          label="全サービスユーザー数"
+          value={grandTotal.totalUsers.toLocaleString()}
+          sub="累計（重複含む）"
+          color="blue"
+        />
+      </div>
+
+      {/* Row 2: サービス別サマリーカード */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* OnePage-Flash */}
+        <ServiceSummaryCard
+          label="OnePage-Flash"
+          colorBar="bg-blue-400"
+          items={
+            opf
+              ? [
+                  { key: "MRR", value: formatYen(opf.mrr) },
+                  { key: "アクティブサブスク", value: `${opf.activeSubs}件` },
+                  { key: "累計ユーザー", value: `${opf.totalUsers}人` },
+                  { key: "今月売上（推定）", value: formatYen(opf.thisMonthRevenue) },
+                ]
+              : null
+          }
+        />
+
+        {/* ai-fudosan */}
+        <ServiceSummaryCard
+          label="ai-fudosan"
+          colorBar="bg-green-400"
+          items={
+            fudosan
+              ? [
+                  { key: "今月売上", value: formatYen(fudosan.thisMonthRevenue) },
+                  { key: "累計売上", value: formatYen(fudosan.totalRevenue) },
+                  { key: "ユニーク購入者", value: `${fudosan.uniqueUsers}人` },
+                  { key: "累計購入数", value: `${fudosan.totalPurchases}件` },
+                ]
+              : null
+          }
+        />
+
+        {/* ai-shoken */}
+        <ServiceSummaryCard
+          label="ai-shoken"
+          colorBar="bg-amber-400"
+          items={
+            shoken
+              ? [
+                  { key: "今月売上", value: formatYen(shoken.thisMonthRevenue) },
+                  { key: "累計売上", value: formatYen(shoken.totalRevenue) },
+                  { key: "ユニーク購入者", value: `${shoken.uniqueUsers}人` },
+                  { key: "累計購入数", value: `${shoken.totalPurchases}件` },
+                ]
+              : null
+          }
+        />
+      </div>
     </div>
   );
 }
 
-function StatusBadge({ status }: { status: string }) {
-  const colors: Record<string, string> = {
-    active: "bg-green-500",
-    past_due: "bg-yellow-500",
-    canceled: "bg-red-500",
-    trialing: "bg-blue-500",
-  };
-  return <span className={`inline-block w-2 h-2 rounded-full ${colors[status] ?? "bg-gray-400"} mr-1.5`} />;
+// ---------------------------------------------------------------------------
+// ServiceSummaryCard
+// ---------------------------------------------------------------------------
+
+function ServiceSummaryCard({
+  label,
+  colorBar,
+  items,
+}: {
+  label: string;
+  colorBar: string;
+  items: Array<{ key: string; value: string }> | null;
+}) {
+  return (
+    <div className="bg-white rounded-2xl border overflow-hidden">
+      <div className={`h-1.5 w-full ${colorBar}`} />
+      <div className="p-5">
+        <h3 className="text-sm font-bold text-gray-900 mb-3">{label}</h3>
+        {items ? (
+          <dl className="space-y-2">
+            {items.map(({ key, value }) => (
+              <div
+                key={key}
+                className="flex items-center justify-between text-xs"
+              >
+                <dt className="text-gray-500">{key}</dt>
+                <dd className="font-bold text-gray-900">{value}</dd>
+              </div>
+            ))}
+          </dl>
+        ) : (
+          <p className="text-xs text-gray-400">
+            データ取得不可
+            <br />
+            環境変数を確認してください
+          </p>
+        )}
+      </div>
+    </div>
+  );
 }
 
-function EventBadge({ type }: { type: string }) {
-  const labels: Record<string, { text: string; bg: string }> = {
-    page_view: { text: "PV", bg: "bg-gray-100 text-gray-600" },
-    form_start: { text: "FS", bg: "bg-blue-100 text-blue-600" },
-    checkout_start: { text: "CS", bg: "bg-amber-100 text-amber-600" },
-    subscribed: { text: "CV", bg: "bg-green-100 text-green-700" },
-  };
-  const l = labels[type] ?? { text: type.substring(0, 2).toUpperCase(), bg: "bg-gray-100 text-gray-600" };
-  return <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${l.bg} flex-shrink-0`}>{l.text}</span>;
+// ---------------------------------------------------------------------------
+// ユーティリティコンポーネント
+// ---------------------------------------------------------------------------
+
+function LoadingPlaceholder() {
+  return (
+    <div className="flex items-center justify-center py-20">
+      <p className="text-gray-400 text-sm">読み込み中...</p>
+    </div>
+  );
 }
 
-function formatTime(dateStr: string): string {
-  const d = new Date(dateStr);
-  const now = new Date();
-  const diffMs = now.getTime() - d.getTime();
-  const diffMin = Math.floor(diffMs / 60000);
-  if (diffMin < 1) return "たった今";
-  if (diffMin < 60) return `${diffMin}分前`;
-  const diffHour = Math.floor(diffMin / 60);
-  if (diffHour < 24) return `${diffHour}時間前`;
-  const diffDay = Math.floor(diffHour / 24);
-  return `${diffDay}日前`;
+function EmptyPlaceholder({ message }: { message: string }) {
+  return (
+    <div className="flex items-center justify-center py-20">
+      <p className="text-gray-400 text-sm text-center whitespace-pre-line">
+        {message}
+      </p>
+    </div>
+  );
 }
+
+// ---------------------------------------------------------------------------
+// エクスポート
+// ---------------------------------------------------------------------------
 
 export default function AdminPage() {
   return (
