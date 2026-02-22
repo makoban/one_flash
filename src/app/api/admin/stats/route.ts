@@ -11,7 +11,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { query } from "@/lib/db";
-import { supabaseQuery } from "@/lib/supabase-db";
+import { fetchPurchases, fetchUserEmails, PurchaseRow } from "@/lib/supabase-db";
 
 // ---------------------------------------------------------------------------
 // 型定義
@@ -224,101 +224,94 @@ async function getOpfStats(): Promise<OpfStatsData> {
 async function getSupabasePurchaseStats(
   serviceName: string
 ): Promise<PurchaseStats> {
-  const monthStart = new Date();
-  monthStart.setDate(1);
-  monthStart.setHours(0, 0, 0, 0);
+  // Supabase JS SDK 経由で purchases を取得し、JS側で集計する
+  const rows: PurchaseRow[] = await fetchPurchases(serviceName);
 
-  const todayStart = new Date();
-  todayStart.setHours(0, 0, 0, 0);
-
+  const now = new Date();
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const thirtyDaysAgo = new Date();
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
   // 累計
-  const totalResult = await supabaseQuery<{
-    total_purchases: string;
-    total_revenue: string;
-    unique_users: string;
-  }>(
-    `SELECT COUNT(*) as total_purchases, COALESCE(SUM(amount),0) as total_revenue, COUNT(DISTINCT user_id) as unique_users FROM purchases WHERE service_name = $1`,
-    [serviceName]
-  );
-  const totalRow = totalResult.rows[0];
+  const totalRevenue = rows.reduce((s, r) => s + (r.amount ?? 0), 0);
+  const uniqueUserIds = [...new Set(rows.map((r) => r.user_id))];
 
   // 今月
-  const monthResult = await supabaseQuery<{ count: string; revenue: string }>(
-    `SELECT COUNT(*) as count, COALESCE(SUM(amount),0) as revenue FROM purchases WHERE service_name = $1 AND purchased_at >= $2`,
-    [serviceName, monthStart]
+  const monthRows = rows.filter(
+    (r) => new Date(r.purchased_at) >= monthStart
   );
-  const monthRow = monthResult.rows[0];
+  const thisMonthRevenue = monthRows.reduce((s, r) => s + (r.amount ?? 0), 0);
 
-  // 今日の売上
-  const todayResult = await supabaseQuery<{ revenue: string }>(
-    `SELECT COALESCE(SUM(amount),0) as revenue FROM purchases WHERE service_name = $1 AND purchased_at >= $2`,
-    [serviceName, todayStart]
+  // 今日
+  const todayRows = rows.filter(
+    (r) => new Date(r.purchased_at) >= todayStart
   );
-  const todayRow = todayResult.rows[0];
+  const todayRevenue = todayRows.reduce((s, r) => s + (r.amount ?? 0), 0);
 
-  // 最近20件（email JOIN）
-  const recentResult = await supabaseQuery<{
-    id: string;
-    email: string | null;
-    area_name: string | null;
-    area_code: string | null;
-    amount: number;
-    purchased_at: Date;
-  }>(
-    `SELECT p.id, u.email, p.area_name, p.area_code, p.amount, p.purchased_at FROM purchases p LEFT JOIN auth.users u ON p.user_id = u.id WHERE p.service_name = $1 ORDER BY p.purchased_at DESC LIMIT 20`,
-    [serviceName]
-  );
+  // メールアドレス取得（最近20件のユーザー分）
+  const recent20 = rows.slice(0, 20);
+  const recent20UserIds = [...new Set(recent20.map((r) => r.user_id))];
+  let emailMap = new Map<string, string>();
+  try {
+    emailMap = await fetchUserEmails(recent20UserIds);
+  } catch {
+    // auth.admin アクセスに失敗しても続行
+  }
 
   // 日別売上（過去30日）
-  const dailyResult = await supabaseQuery<{
-    date: string;
-    revenue: string;
-    count: string;
-  }>(
-    `SELECT DATE(purchased_at) as date, COALESCE(SUM(amount),0) as revenue, COUNT(*) as count FROM purchases WHERE service_name = $1 AND purchased_at >= $2 GROUP BY DATE(purchased_at) ORDER BY date DESC`,
-    [serviceName, thirtyDaysAgo]
-  );
+  const dailyMap = new Map<string, { revenue: number; count: number }>();
+  for (const r of rows) {
+    const d = new Date(r.purchased_at);
+    if (d < thirtyDaysAgo) continue;
+    const dateKey = d.toISOString().slice(0, 10);
+    const existing = dailyMap.get(dateKey) || { revenue: 0, count: 0 };
+    existing.revenue += r.amount ?? 0;
+    existing.count += 1;
+    dailyMap.set(dateKey, existing);
+  }
+  const dailyRevenue = [...dailyMap.entries()]
+    .sort((a, b) => b[0].localeCompare(a[0]))
+    .map(([date, v]) => ({ date, revenue: v.revenue, count: v.count }));
 
   // 人気エリアTOP10
-  const areasResult = await supabaseQuery<{
-    area_name: string | null;
-    area_code: string | null;
-    count: string;
-    revenue: string;
-  }>(
-    `SELECT area_name, area_code, COUNT(*) as count, COALESCE(SUM(amount),0) as revenue FROM purchases WHERE service_name = $1 GROUP BY area_name, area_code ORDER BY count DESC LIMIT 10`,
-    [serviceName]
-  );
-
-  return {
-    totalPurchases: parseInt(totalRow?.total_purchases ?? "0", 10),
-    totalRevenue: parseFloat(totalRow?.total_revenue ?? "0"),
-    uniqueUsers: parseInt(totalRow?.unique_users ?? "0", 10),
-    thisMonthCount: parseInt(monthRow?.count ?? "0", 10),
-    thisMonthRevenue: parseFloat(monthRow?.revenue ?? "0"),
-    todayRevenue: parseFloat(todayRow?.revenue ?? "0"),
-    recentPurchases: recentResult.rows.map((r) => ({
-      ...r,
-      amount: typeof r.amount === "number" ? r.amount : parseFloat(String(r.amount)),
-      purchased_at:
-        r.purchased_at instanceof Date
-          ? r.purchased_at.toISOString()
-          : r.purchased_at,
-    })),
-    dailyRevenue: dailyResult.rows.map((r) => ({
-      date: String(r.date),
-      revenue: parseFloat(r.revenue),
-      count: parseInt(r.count, 10),
-    })),
-    topAreas: areasResult.rows.map((r) => ({
+  const areaMap = new Map<
+    string,
+    { area_name: string | null; area_code: string | null; count: number; revenue: number }
+  >();
+  for (const r of rows) {
+    const key = r.area_name ?? "(unknown)";
+    const existing = areaMap.get(key) || {
       area_name: r.area_name,
       area_code: r.area_code,
-      count: parseInt(r.count, 10),
-      revenue: parseFloat(r.revenue),
+      count: 0,
+      revenue: 0,
+    };
+    existing.count += 1;
+    existing.revenue += r.amount ?? 0;
+    areaMap.set(key, existing);
+  }
+  const topAreas = [...areaMap.values()]
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 10);
+
+  return {
+    totalPurchases: rows.length,
+    totalRevenue,
+    uniqueUsers: uniqueUserIds.length,
+    thisMonthCount: monthRows.length,
+    thisMonthRevenue,
+    todayRevenue,
+    recentPurchases: recent20.map((r) => ({
+      id: r.id,
+      email: emailMap.get(r.user_id) ?? null,
+      area_name: r.area_name,
+      area_code: r.area_code,
+      amount: r.amount ?? 0,
+      purchased_at: r.purchased_at,
     })),
+    dailyRevenue,
+    topAreas,
   };
 }
 

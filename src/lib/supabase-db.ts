@@ -1,69 +1,97 @@
 /**
- * Supabase PostgreSQL 接続モジュール
+ * Supabase クライアント モジュール
  *
- * ai-fudosan / ai-shoken が使用する Supabase PostgreSQL への接続。
- * db.ts と同じ Proxy 遅延初期化パターンを採用。
- * 環境変数 SUPABASE_DATABASE_URL が未設定でもビルドを通す。
+ * ai-fudosan / ai-shoken が使用する Supabase への接続。
+ * @supabase/supabase-js を使用（HTTPS経由・IPv4/IPv6問題なし）。
  *
- * 接続形式: 個別パラメータ方式（connection string ではなく host/port/user/password を個別指定）
- * 理由: Supabase直接接続のパスワードに $, & 等の特殊文字が含まれ、
- *       connection string のURLエンコード/デコードで問題が起きるため。
+ * 環境変数:
+ *   SUPABASE_URL       - Supabase Project URL
+ *   SUPABASE_SECRET_KEY - Service Role Key（RLSバイパス）
  */
 
-import { Pool, QueryResult, QueryResultRow } from "pg";
-import dns from "dns";
-
-// Supabase は IPv6 のみの場合があり、Render (Oregon) からの接続で
-// ENETUNREACH が発生する。IPv4 を優先して解決する。
-dns.setDefaultResultOrder("ipv4first");
+import { createClient, SupabaseClient } from "@supabase/supabase-js";
 
 // ---------------------------------------------------------------------------
-// コネクションプール（遅延初期化）
+// Supabase クライアント（遅延初期化）
 // ---------------------------------------------------------------------------
 
-const globalForSupaPg = globalThis as unknown as { supabasePgPool?: Pool };
+const globalForSupa = globalThis as unknown as { supabaseClient?: SupabaseClient };
 
-function getSupabasePool(): Pool {
-  if (globalForSupaPg.supabasePgPool) return globalForSupaPg.supabasePgPool;
+function getSupabaseClient(): SupabaseClient {
+  if (globalForSupa.supabaseClient) return globalForSupa.supabaseClient;
 
-  const host = process.env.SUPABASE_DB_HOST;
-  const password = process.env.SUPABASE_DB_PASSWORD;
-  if (!host || !password) {
-    throw new Error(
-      "Missing environment variable: SUPABASE_DB_HOST and/or SUPABASE_DB_PASSWORD"
-    );
+  const url = process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_SECRET_KEY;
+  if (!url || !key) {
+    throw new Error("Missing SUPABASE_URL and/or SUPABASE_SECRET_KEY");
   }
 
-  const pool = new Pool({
-    host,
-    port: parseInt(process.env.SUPABASE_DB_PORT || "5432", 10),
-    database: process.env.SUPABASE_DB_NAME || "postgres",
-    user: process.env.SUPABASE_DB_USER || "postgres",
-    password,
-    ssl: { rejectUnauthorized: false },
-    max: 5,
-    idleTimeoutMillis: 30_000,
-    connectionTimeoutMillis: 10_000,
+  const client = createClient(url, key, {
+    auth: { persistSession: false, autoRefreshToken: false },
   });
 
-  globalForSupaPg.supabasePgPool = pool;
-  return pool;
+  globalForSupa.supabaseClient = client;
+  return client;
 }
 
 // ---------------------------------------------------------------------------
-// クエリヘルパー
+// purchasesテーブル取得ヘルパー
 // ---------------------------------------------------------------------------
 
+export interface PurchaseRow {
+  id: string;
+  user_id: string;
+  area_code: string | null;
+  area_name: string;
+  stripe_session_id: string;
+  stripe_payment_intent_id: string | null;
+  amount: number;
+  service_name: string;
+  purchased_at: string;
+}
+
 /**
- * Supabase PostgreSQL にクエリを発行するヘルパー関数
- *
- * @param text - SQLクエリ文字列
- * @param params - プレースホルダーに対応するパラメータ配列
- * @returns QueryResult
+ * 指定サービスの全購入データを取得（最大1000件）
  */
-export async function supabaseQuery<T extends QueryResultRow = QueryResultRow>(
-  text: string,
-  params?: unknown[]
-): Promise<QueryResult<T>> {
-  return getSupabasePool().query<T>(text, params);
+export async function fetchPurchases(
+  serviceName: string
+): Promise<PurchaseRow[]> {
+  const client = getSupabaseClient();
+  const { data, error } = await client
+    .from("purchases")
+    .select(
+      "id, user_id, area_code, area_name, stripe_session_id, stripe_payment_intent_id, amount, service_name, purchased_at"
+    )
+    .eq("service_name", serviceName)
+    .order("purchased_at", { ascending: false })
+    .limit(1000);
+
+  if (error) throw new Error(`Supabase query error: ${error.message}`);
+  return (data ?? []) as PurchaseRow[];
+}
+
+/**
+ * auth.users テーブルからメールアドレスをまとめて取得
+ */
+export async function fetchUserEmails(
+  userIds: string[]
+): Promise<Map<string, string>> {
+  if (userIds.length === 0) return new Map();
+  const client = getSupabaseClient();
+  const emailMap = new Map<string, string>();
+
+  // Supabase Admin API を使ってユーザー一覧を取得
+  const {
+    data: { users },
+    error,
+  } = await client.auth.admin.listUsers({ perPage: 1000 });
+
+  if (error || !users) return emailMap;
+
+  for (const u of users) {
+    if (userIds.includes(u.id) && u.email) {
+      emailMap.set(u.id, u.email);
+    }
+  }
+  return emailMap;
 }
