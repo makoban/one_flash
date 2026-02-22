@@ -1,14 +1,13 @@
 /**
- * R2 操作モジュール（Worker API + DB 経由）
+ * R2 操作モジュール（Worker API 経由）
  *
  * R2 への直接アクセス（S3 API）は使用せず、
  * Cloudflare Worker の API エンドポイント経由で R2 を操作する。
- * ドラフト HTML と HTML バックアップは PostgreSQL に保存する。
  *
- * これにより R2_ACCOUNT_ID 等の環境変数が不要になる。
+ * ドラフト HTML / バックアップ:
+ *   - DB（PostgreSQL）が利用可能な場合は DB に保存
+ *   - DB が利用不可の場合は Worker R2 に _drafts/ プレフィックスで保存（フォールバック）
  */
-
-import { query } from "./db";
 
 // ---------------------------------------------------------------------------
 // Worker API ヘルパー
@@ -78,37 +77,82 @@ export function getSitePublicUrl(slug: string): string {
 }
 
 // ---------------------------------------------------------------------------
-// ドラフト HTML 管理（PostgreSQL に保存）
+// DB ヘルパー（遅延インポート: DB未設定でも動作可能にする）
+// ---------------------------------------------------------------------------
+
+async function tryDbQuery<T>(sql: string, params?: unknown[]): Promise<{ rows: T[] } | null> {
+  if (!process.env.DATABASE_URL) return null;
+  try {
+    const { query } = await import("./db");
+    return await query<T & Record<string, unknown>>(sql, params);
+  } catch (err) {
+    console.warn("[r2] DB query failed, using R2 fallback:", (err as Error).message);
+    return null;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// ドラフト HTML 管理（DB優先 → R2フォールバック）
 // ---------------------------------------------------------------------------
 
 /**
- * 決済完了前の HTML をドラフトとして DB に一時保存する
+ * 決済完了前の HTML をドラフトとして一時保存する
+ * DB が利用可能なら DB、不可なら R2 の _drafts/ に保存
  */
 export async function uploadDraftHTML(draftId: string, htmlContent: string): Promise<void> {
-  await query(
+  // DB に保存を試行
+  const dbResult = await tryDbQuery(
     `INSERT INTO opf_drafts (draft_id, html)
      VALUES ($1, $2)
      ON CONFLICT (draft_id) DO UPDATE SET html = EXCLUDED.html, created_at = NOW()`,
     [draftId, htmlContent]
   );
+  if (dbResult) return;
+
+  // フォールバック: R2 の _drafts/ に保存
+  console.log(`[r2] Saving draft to R2: _drafts/${draftId}`);
+  const res = await workerFetch("/_api/update-html", {
+    subdomain: `_drafts/${draftId}`,
+    html: htmlContent,
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(`uploadDraftHTML (R2 fallback) failed: ${JSON.stringify(err)}`);
+  }
 }
 
 /**
- * ドラフト HTML を取得する
+ * ドラフト HTML を取得する（DB優先 → R2フォールバック）
  */
 export async function getDraftHTML(draftId: string): Promise<string | null> {
-  const result = await query<{ html: string }>(
+  // DB から取得を試行
+  const dbResult = await tryDbQuery<{ html: string }>(
     `SELECT html FROM opf_drafts WHERE draft_id = $1`,
     [draftId]
   );
-  return result.rows[0]?.html ?? null;
+  if (dbResult && dbResult.rows[0]?.html) return dbResult.rows[0].html;
+
+  // フォールバック: R2 の _drafts/ から取得
+  console.log(`[r2] Getting draft from R2: _drafts/${draftId}`);
+  const res = await workerFetch("/_api/get-html", { subdomain: `_drafts/${draftId}` });
+  if (res.status === 404) return null;
+  if (!res.ok) return null;
+  const data = await res.json() as { html: string };
+  return data.html;
 }
 
 /**
- * ドラフト HTML を削除する
+ * ドラフト HTML を削除する（DB優先 → R2フォールバック）
  */
 export async function deleteDraftHTML(draftId: string): Promise<void> {
-  await query(`DELETE FROM opf_drafts WHERE draft_id = $1`, [draftId]);
+  const dbResult = await tryDbQuery(`DELETE FROM opf_drafts WHERE draft_id = $1`, [draftId]);
+  if (dbResult) return;
+
+  // R2 の場合は空で上書き（削除相当）
+  await workerFetch("/_api/update-html", {
+    subdomain: `_drafts/${draftId}`,
+    html: "<!-- expired -->",
+  }).catch(() => {});
 }
 
 // ---------------------------------------------------------------------------
@@ -116,18 +160,27 @@ export async function deleteDraftHTML(draftId: string): Promise<void> {
 // ---------------------------------------------------------------------------
 
 /**
- * サイトを非公開にする（HTML を DB にバックアップし「非公開」ページに差し替え）
+ * サイトを非公開にする（HTML をバックアップし「非公開」ページに差し替え）
+ * DB優先 → R2フォールバック
  */
 export async function deactivateSite(slug: string, siteName: string): Promise<void> {
   // 現在の HTML を取得してバックアップ
   const currentHtml = await getSiteHTML(slug);
   if (currentHtml) {
-    await query(
+    // DB にバックアップを試行
+    const dbResult = await tryDbQuery(
       `INSERT INTO opf_html_backups (subdomain, html)
        VALUES ($1, $2)
        ON CONFLICT (subdomain) DO UPDATE SET html = EXCLUDED.html, created_at = NOW()`,
       [slug, currentHtml]
     );
+    if (!dbResult) {
+      // R2 フォールバック: _backups/ に保存
+      await workerFetch("/_api/update-html", {
+        subdomain: `_backups/${slug}`,
+        html: currentHtml,
+      }).catch((err: unknown) => console.warn("[r2] Backup to R2 failed:", err));
+    }
   }
 
   // 非公開ページに差し替え
@@ -136,18 +189,29 @@ export async function deactivateSite(slug: string, siteName: string): Promise<vo
 }
 
 /**
- * サイトを再公開する（DB のバックアップから HTML を復元）
+ * サイトを再公開する（バックアップから HTML を復元）
+ * DB優先 → R2フォールバック
  */
 export async function reactivateSite(slug: string): Promise<boolean> {
-  const result = await query<{ html: string }>(
+  // DB からバックアップ取得を試行
+  const dbResult = await tryDbQuery<{ html: string }>(
     `SELECT html FROM opf_html_backups WHERE subdomain = $1`,
     [slug]
   );
-  const backupHtml = result.rows[0]?.html;
+  let backupHtml = dbResult?.rows[0]?.html ?? null;
+
+  if (!backupHtml) {
+    // R2 フォールバック: _backups/ から取得
+    const res = await workerFetch("/_api/get-html", { subdomain: `_backups/${slug}` });
+    if (res.ok) {
+      const data = await res.json() as { html: string };
+      backupHtml = data.html;
+    }
+  }
+
   if (!backupHtml) return false;
 
   await uploadSiteHTML(slug, backupHtml);
-  // バックアップは残しておく（再度非公開→再公開に備えて）
   return true;
 }
 

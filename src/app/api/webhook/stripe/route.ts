@@ -178,25 +178,47 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session): Promis
 
   console.log(`[webhook/stripe] Site published: ${subdomain}`);
 
-  // --- Step 3: DB登録 ---
-  const user = await findOrCreateUser(customerEmail, stripeCustomerId ?? undefined);
+  // --- Step 3: DB登録（DB未設定でもサイト公開は成功させる） ---
+  try {
+    if (process.env.DATABASE_URL) {
+      const user = await findOrCreateUser(customerEmail, stripeCustomerId ?? undefined);
 
-  let subscriptionRecord = null;
-  if (stripeSubscriptionId) {
-    subscriptionRecord = await createSubscription({
-      userId: user.id,
-      stripeSubscriptionId,
-      status: "active",
-    });
+      let subscriptionRecord = null;
+      if (stripeSubscriptionId) {
+        subscriptionRecord = await createSubscription({
+          userId: user.id,
+          stripeSubscriptionId,
+          status: "active",
+        });
+      }
+
+      await createSite({
+        userId: user.id,
+        subscriptionId: subscriptionRecord?.id ?? "",
+        subdomain,
+        siteName,
+        inputSnapshot: { siteName, catchphrase, description, contactInfo, colorTheme, email: customerEmail },
+      });
+
+      // subscribed イベント記録
+      await insertAdEvent({
+        eventType: "subscribed",
+        userId: user.id,
+        utmSource: metadata.utm_source,
+        utmMedium: metadata.utm_medium,
+        utmCampaign: metadata.utm_campaign,
+        utmContent: metadata.utm_content,
+        utmTerm: metadata.utm_term,
+        sessionId: metadata.session_id,
+      }).catch((err: unknown) => console.warn("[webhook/stripe] Failed to record ad event:", err));
+
+      console.log(`[webhook/stripe] DB records created for ${subdomain}`);
+    } else {
+      console.warn("[webhook/stripe] DATABASE_URL not set, skipping DB registration");
+    }
+  } catch (dbErr) {
+    console.error("[webhook/stripe] DB registration failed (site still published):", dbErr);
   }
-
-  await createSite({
-    userId: user.id,
-    subscriptionId: subscriptionRecord?.id ?? "",
-    subdomain,
-    siteName,
-    inputSnapshot: { siteName, catchphrase, description, contactInfo, colorTheme, email: customerEmail },
-  });
 
   // --- Step 4: ドラフト削除 ---
   await deleteDraftHTML(draftId).catch((err: unknown) =>
@@ -221,18 +243,6 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session): Promis
       console.error("[webhook/stripe] Failed to send email:", err);
     }
   }
-
-  // --- Step 6: subscribed イベント記録 ---
-  await insertAdEvent({
-    eventType: "subscribed",
-    userId: user.id,
-    utmSource: metadata.utm_source,
-    utmMedium: metadata.utm_medium,
-    utmCampaign: metadata.utm_campaign,
-    utmContent: metadata.utm_content,
-    utmTerm: metadata.utm_term,
-    sessionId: metadata.session_id,
-  }).catch((err: unknown) => console.warn("[webhook/stripe] Failed to record ad event:", err));
 
   console.log(`[webhook/stripe] Checkout completed: ${subdomain} → ${publicUrl}`);
 }
