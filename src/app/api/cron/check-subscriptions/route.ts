@@ -202,10 +202,14 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         }
 
         // --- サイトの公開/非公開を判定 ---
-        const shouldBeActive = stripeStatus === "active" || stripeStatus === "trialing";
+        // past_due（Stripeリトライ中）は猶予期間としてサイトを維持する
+        const shouldBeActive =
+          stripeStatus === "active" ||
+          stripeStatus === "trialing" ||
+          stripeStatus === "past_due";
 
         if (site.is_active && !shouldBeActive) {
-          // アクティブだが支払い停止 → 非公開化
+          // canceled / unpaid / incomplete_expired → 非公開化
           await deactivateAndUpdate(site, stripeStatus, result);
         } else if (!site.is_active && shouldBeActive) {
           // 非公開だが支払い再開 → 再公開

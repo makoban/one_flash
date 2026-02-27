@@ -26,7 +26,7 @@ import {
   insertAdEvent,
 } from "@/lib/db";
 import { getDraftHTML, deleteDraftHTML, deactivateSite, reactivateSite } from "@/lib/r2";
-import { sendSiteCompletionEmail } from "@/lib/email";
+import { sendSiteCompletionEmail, sendPaymentFailureEmail } from "@/lib/email";
 import type Stripe from "stripe";
 
 export const runtime = "nodejs";
@@ -368,5 +368,45 @@ async function handlePaymentFailed(invoice: Stripe.Invoice): Promise<void> {
 
   await updateSubscriptionStatus(subId, "past_due");
   console.warn(`[webhook/stripe] Payment failed for subscription: ${subId}`);
-  // TODO: ユーザーへ決済失敗通知メールを送信
+
+  // ユーザーへ決済失敗通知メールを送信
+  try {
+    const sub = await getSubscriptionByStripeId(subId);
+    if (sub) {
+      const site = await getSiteBySubscriptionId(sub.id);
+      if (site) {
+        const userResult = await query<{ email: string }>(
+          `SELECT email FROM opf_users WHERE id = $1`,
+          [site.user_id]
+        );
+        const email = userResult.rows[0]?.email;
+        if (email) {
+          // Stripe Billing Portal URL を生成（顧客IDがあれば）
+          let billingPortalUrl: string | undefined;
+          try {
+            const stripeSub = await stripe.subscriptions.retrieve(subId);
+            const customerId = typeof stripeSub.customer === "string"
+              ? stripeSub.customer
+              : stripeSub.customer.id;
+            const portalSession = await stripe.billingPortal.sessions.create({
+              customer: customerId,
+              return_url: process.env.NEXT_PUBLIC_APP_URL ?? "https://oneflash.bantex.jp",
+            });
+            billingPortalUrl = portalSession.url;
+          } catch (portalErr) {
+            console.warn("[webhook/stripe] Failed to create billing portal session:", portalErr);
+          }
+
+          await sendPaymentFailureEmail({
+            to: email,
+            siteName: site.site_name ?? site.subdomain,
+            billingPortalUrl,
+          });
+          console.log(`[webhook/stripe] Payment failure email sent to ${email}`);
+        }
+      }
+    }
+  } catch (emailErr) {
+    console.error("[webhook/stripe] Failed to send payment failure email:", emailErr);
+  }
 }

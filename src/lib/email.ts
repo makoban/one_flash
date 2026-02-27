@@ -219,7 +219,74 @@ function buildRevisionCompletionEmailHtml(params: {
 }
 
 // ---------------------------------------------------------------------------
-// TODO: 本格実装時に追加する機能
+// 決済失敗通知メール
 // ---------------------------------------------------------------------------
-// export async function sendPaymentFailureEmail(...) { ... }
-// export async function sendAdminAlertEmail(...) { ... }
+
+/**
+ * 決済失敗通知メールを送信する
+ *
+ * Stripeのリトライ期間中（past_due）にユーザーへ支払い方法の更新を促す。
+ */
+export async function sendPaymentFailureEmail(params: {
+  to: string;
+  siteName: string;
+  billingPortalUrl?: string;
+}): Promise<void> {
+  const { to, siteName, billingPortalUrl } = params;
+
+  await resend.emails.send({
+    from: FROM_EMAIL,
+    to,
+    subject: `【${SERVICE_NAME}】お支払いに失敗しました - 「${siteName}」`,
+    html: buildPaymentFailureEmailHtml({ siteName, billingPortalUrl }),
+  });
+}
+
+function buildPaymentFailureEmailHtml(params: {
+  siteName: string;
+  billingPortalUrl?: string;
+}): string {
+  const { siteName, billingPortalUrl } = params;
+
+  const actionSection = billingPortalUrl
+    ? `<a href="${billingPortalUrl}" style="display: inline-block; background: #e74c3c; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 16px;">
+        お支払い方法を更新する
+      </a>`
+    : `<p style="font-size: 14px; color: #666;">お支払い方法の更新については、メールにてお問い合わせください。</p>`;
+
+  return `
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>お支払い失敗のお知らせ</title>
+</head>
+<body style="font-family: 'Helvetica Neue', Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+  <div style="background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); padding: 30px; border-radius: 12px 12px 0 0; text-align: center;">
+    <h1 style="color: white; margin: 0; font-size: 24px;">${SERVICE_NAME}</h1>
+    <p style="color: rgba(255,255,255,0.9); margin: 8px 0 0;">お支払いに関するお知らせ</p>
+  </div>
+
+  <div style="background: #fff; padding: 30px; border: 1px solid #e8e8e8; border-top: none;">
+    <p>「<strong>${siteName}</strong>」のお支払いが正常に処理されませんでした。</p>
+
+    <div style="background: #fef5f5; border-left: 4px solid #e74c3c; padding: 16px; margin: 20px 0; border-radius: 0 8px 8px 0;">
+      <p style="margin: 0; font-size: 14px;"><strong>現在のサイトは引き続き公開されています。</strong></p>
+      <p style="margin: 8px 0 0; font-size: 13px; color: #666;">自動でお支払いを再試行いたしますが、お支払い方法に問題がある場合は更新をお願いいたします。</p>
+    </div>
+
+    <p style="font-size: 14px; color: #666;">お支払いが確認できない状態が続くと、サイトが非公開になる場合がございます。</p>
+
+    <div style="text-align: center; margin: 24px 0;">
+      ${actionSection}
+    </div>
+  </div>
+
+  <div style="background: #f8f9fa; padding: 16px; border-radius: 0 0 12px 12px; text-align: center;">
+    <p style="margin: 0; font-size: 12px; color: #999;">© ${SERVICE_NAME} | ご不明な点はメールにてお問い合わせください。</p>
+  </div>
+</body>
+</html>
+  `.trim();
+}
