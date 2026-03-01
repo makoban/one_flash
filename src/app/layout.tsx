@@ -16,6 +16,27 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "OnePage-Flash - 10分でホームページが完成",
   description: "テキストを打ち込むだけ。AIが美しいホームページを自動生成します。初期3,980円 + 月額480円（税込・初月無料）。",
+  metadataBase: new URL("https://oneflash.bantex.jp"),
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    type: "website",
+    url: "https://oneflash.bantex.jp",
+    title: "OnePage-Flash - 10分でホームページが完成",
+    description: "テキストを打ち込むだけ。AIが美しいホームページを自動生成。初期3,980円 + 月額480円（税込・初月無料）。",
+    siteName: "OnePage-Flash",
+    locale: "ja_JP",
+  },
+  twitter: {
+    card: "summary",
+    title: "OnePage-Flash - 10分でホームページが完成",
+    description: "テキストを打ち込むだけ。AIが美しいホームページを自動生成。初期3,980円 + 月額480円（税込・初月無料）。",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 const GA_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;

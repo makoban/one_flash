@@ -494,6 +494,43 @@ ${theme.heroStyle}
 - タッチターゲットは最小44px
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+【SEO・構造化データ（head内に必ず含めること）】
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+以下のメタタグと構造化データを <head> 内に必ず含めること（既存のtitle・descriptionに加えて）:
+
+### 必須メタタグ
+- <meta name="robots" content="index, follow">
+- <meta property="og:type" content="website">
+- <meta property="og:title" content="[サイト名 - キャッチコピー]">
+- <meta property="og:description" content="[サイトの説明（80文字以内）]">
+- <meta property="og:locale" content="ja_JP">
+- <meta name="twitter:card" content="summary">
+- <meta name="twitter:title" content="[サイト名]">
+- <meta name="twitter:description" content="[サイトの説明（80文字以内）]">
+
+### JSON-LD構造化データ（<script type="application/ld+json">で記述）
+業種推定結果に基づいて、以下のいずれかのスキーマを生成すること:
+
+- MEDICAL → LocalBusiness + MedicalBusiness
+- BEAUTY → LocalBusiness + HealthAndBeautyBusiness
+- FOOD → LocalBusiness + FoodEstablishment
+- LEGAL → LocalBusiness + ProfessionalService
+- SCHOOL → LocalBusiness + EducationalOrganization
+- CONSTRUCTION → LocalBusiness + HomeAndConstructionBusiness
+- GENERAL → LocalBusiness
+
+JSON-LDに含めるフィールド（連絡先情報から抽出）:
+- name: サイト名
+- description: キャッチコピーまたは説明文の要約（100文字以内）
+- telephone: 電話番号（あれば）
+- email: メールアドレス（あれば）
+- address: 住所（あれば、PostalAddress型で）
+- openingHours: 営業時間（あれば）
+
+※ 連絡先情報に含まれていない項目は省略すること（捏造禁止）
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 【出力形式】
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

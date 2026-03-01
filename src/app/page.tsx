@@ -20,9 +20,41 @@ const SAMPLES = [
   { slug: "sample-shanti", label: "ヨガスタジオ", time: "6分", img: "/samples/pc-5.png" },
 ];
 
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "OnePage-Flash",
+  "applicationCategory": "WebApplication",
+  "description": "テキストを打ち込むだけでAIが美しいホームページを自動生成するサービス。個人事業主・フリーランス・店舗オーナー向け。",
+  "url": "https://oneflash.bantex.jp",
+  "operatingSystem": "Web",
+  "offers": {
+    "@type": "Offer",
+    "price": "3980",
+    "priceCurrency": "JPY",
+    "description": "初期制作3,980円（税込）+ 月額480円/月（税込・初月無料）",
+  },
+  "provider": {
+    "@type": "Organization",
+    "name": "株式会社バンテックス",
+    "url": "https://bantex.jp/",
+  },
+  "featureList": [
+    "AIによるホームページ自動生成",
+    "テキスト入力のみで完成",
+    "レスポンシブデザイン対応",
+    "独自サブドメイン付与",
+    "3つのデザインテーマ",
+  ],
+};
+
 export default function HomePage() {
   return (
     <main className="min-h-screen bg-[#0F0F1A] text-slate-100 overflow-x-hidden">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <UtmCapture trackPageView />
 
       {/* LINE フローティングボタン */}
