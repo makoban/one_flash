@@ -1,6 +1,6 @@
 {
   "name": "onepage-flash",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -29,6 +29,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
+    "puppeteer": "^24.37.5",
     "tailwindcss": "^4",
     "typescript": "^5"
   }
