@@ -30,7 +30,7 @@ export default function HomePage() {
         href="https://lin.ee/5b8JT4C"
         target="_blank"
         rel="noopener noreferrer"
-        className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 flex items-center gap-1.5 bg-[#06C755] hover:bg-[#05b04c] text-white font-bold px-3 py-2 sm:px-4 sm:py-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 text-[10px] sm:text-sm"
+        className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 flex items-center gap-1.5 bg-[#06C755] hover:bg-[#05b04c] text-white font-bold px-3 py-2 sm:px-4 sm:py-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 text-[2.8vw] sm:text-sm"
       >
         <svg className="w-4 h-4 sm:w-5 sm:h-5" viewBox="0 0 24 24" fill="currentColor">
           <path d="M19.365 9.863c.349 0 .63.285.63.631 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63h2.386c.346 0 .627.285.627.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595.06-.023.136-.033.194-.033.195 0 .375.104.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63.346 0 .628.285.628.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.282.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314" />
@@ -41,19 +41,19 @@ export default function HomePage() {
       {/* ナビゲーション */}
       <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md bg-[#0F0F1A]/80 border-b border-[#2D2D44]">
         <div className="max-w-6xl mx-auto px-2 sm:px-6 lg:px-8 h-12 sm:h-16 flex items-center justify-between whitespace-nowrap">
-          <span className="font-black text-[10px] sm:text-lg tracking-tight">
+          <span className="font-black text-[3vw] sm:text-lg tracking-tight">
             OnePage<span className="text-amber-400">-Flash</span>
           </span>
-          <div className="flex items-center gap-1 sm:gap-3">
+          <div className="flex items-center gap-1.5 sm:gap-3">
             <Link
               href="/edit"
-              className="px-1.5 py-1 sm:px-4 sm:py-2 text-slate-400 text-[9px] sm:text-sm font-medium hover:text-slate-200 transition-colors"
+              className="px-2 py-1 sm:px-4 sm:py-2 text-slate-400 text-[2.6vw] sm:text-sm font-medium hover:text-slate-200 transition-colors"
             >
               サイト修正
             </Link>
             <Link
               href="/create"
-              className="px-2 py-1 sm:px-5 sm:py-2.5 bg-amber-500 text-gray-900 text-[9px] sm:text-sm font-bold rounded-md sm:rounded-lg hover:bg-amber-400 transition-all duration-300 shadow-[0_0_20px_rgba(245,158,11,0.25)] hover:shadow-[0_0_30px_rgba(245,158,11,0.4)]"
+              className="px-2.5 py-1.5 sm:px-5 sm:py-2.5 bg-amber-500 text-gray-900 text-[2.6vw] sm:text-sm font-bold rounded-md sm:rounded-lg hover:bg-amber-400 transition-all duration-300 shadow-[0_0_20px_rgba(245,158,11,0.25)] hover:shadow-[0_0_30px_rgba(245,158,11,0.4)]"
             >
               今すぐ作成
             </Link>
@@ -75,11 +75,11 @@ export default function HomePage() {
         />
 
         <div className="relative z-10 text-center max-w-3xl mx-auto px-2 sm:px-4">
-          <p className="inline-block px-2 py-0.5 sm:px-4 sm:py-1.5 bg-amber-500/10 text-amber-400 border border-amber-500/20 text-[7px] sm:text-xs font-semibold rounded-full mb-5 sm:mb-8 tracking-wider whitespace-nowrap">
+          <p className="inline-block px-2 py-0.5 sm:px-4 sm:py-1.5 bg-amber-500/10 text-amber-400 border border-amber-500/20 text-[2.2vw] sm:text-xs font-semibold rounded-full mb-5 sm:mb-8 tracking-wider whitespace-nowrap">
             AI POWERED HP BUILDER
           </p>
 
-          <h1 className="text-[0.85rem] sm:text-3xl md:text-4xl lg:text-5xl font-black leading-[1.5] sm:leading-[1.3] mb-3 sm:mb-6 whitespace-nowrap">
+          <h1 className="text-[5vw] sm:text-3xl md:text-4xl lg:text-5xl font-black leading-[1.5] sm:leading-[1.3] mb-3 sm:mb-6 whitespace-nowrap">
             いまどきホームページなんて
             <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-amber-500">
@@ -88,27 +88,27 @@ export default function HomePage() {
             で作る時代。
           </h1>
 
-          <p className="text-[10px] sm:text-lg md:text-xl text-slate-300 leading-relaxed mb-2 sm:mb-3 whitespace-nowrap">
+          <p className="text-[3.2vw] sm:text-lg md:text-xl text-slate-300 leading-relaxed mb-2 sm:mb-3 whitespace-nowrap">
             シンプル・最小機能で十分。
             <br />
             AIがあなたのホームページを10分で作ります。
           </p>
 
-          <p className="text-[8px] sm:text-sm text-slate-500 mb-6 sm:mb-10 whitespace-nowrap">
+          <p className="text-[2.8vw] sm:text-sm text-slate-500 mb-6 sm:mb-10 whitespace-nowrap">
             初期費用 3,980円 + 月額 480円/月（初月無料）/ いつでも解約可
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 justify-center px-0 sm:px-2">
+          <div className="flex flex-col sm:flex-row gap-2.5 sm:gap-4 justify-center px-0 sm:px-2">
             <Link
               href="/create"
-              className="inline-flex items-center justify-center gap-1.5 bg-amber-500 hover:bg-amber-400 text-gray-900 font-bold px-4 py-2 sm:px-8 sm:py-4 rounded-lg sm:rounded-xl text-[10px] sm:text-lg transition-all duration-300 hover:scale-105 shadow-[0_0_30px_rgba(245,158,11,0.35)] hover:shadow-[0_0_50px_rgba(245,158,11,0.55)] whitespace-nowrap"
+              className="inline-flex items-center justify-center gap-1.5 bg-amber-500 hover:bg-amber-400 text-gray-900 font-bold px-5 py-2.5 sm:px-8 sm:py-4 rounded-lg sm:rounded-xl text-[3vw] sm:text-lg transition-all duration-300 hover:scale-105 shadow-[0_0_30px_rgba(245,158,11,0.35)] hover:shadow-[0_0_50px_rgba(245,158,11,0.55)] whitespace-nowrap"
             >
               無料でプレビューを見る
-              <svg className="w-3 h-3 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+              <svg className="w-3.5 h-3.5 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
             </Link>
             <Link
               href="/edit"
-              className="inline-flex items-center justify-center gap-1.5 border border-slate-600 hover:border-amber-500/50 text-slate-300 hover:text-amber-400 font-medium px-4 py-2 sm:px-8 sm:py-4 rounded-lg sm:rounded-xl text-[10px] sm:text-lg transition-all duration-300 whitespace-nowrap"
+              className="inline-flex items-center justify-center gap-1.5 border border-slate-600 hover:border-amber-500/50 text-slate-300 hover:text-amber-400 font-medium px-5 py-2.5 sm:px-8 sm:py-4 rounded-lg sm:rounded-xl text-[3vw] sm:text-lg transition-all duration-300 whitespace-nowrap"
             >
               既存サイトを修正する
             </Link>
@@ -119,10 +119,10 @@ export default function HomePage() {
       {/* 作品例セクション — iframe で実サイト縮小表示 */}
       <section className="bg-[#1A1A2E] py-14 sm:py-20 md:py-28 px-2 sm:px-4">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-sm sm:text-3xl md:text-4xl font-bold text-center mb-2 sm:mb-3 whitespace-nowrap">
+          <h2 className="text-[4.2vw] sm:text-3xl md:text-4xl font-bold text-center mb-2 sm:mb-3 whitespace-nowrap">
             AIが作った<span className="text-amber-400">作品例</span>
           </h2>
-          <p className="text-center text-slate-400 text-[8px] sm:text-base mb-8 sm:mb-14 whitespace-nowrap">
+          <p className="text-center text-slate-400 text-[2.7vw] sm:text-base mb-8 sm:mb-14 whitespace-nowrap">
             すべて実際にAIが生成したホームページです。クリックで実物が見れます。
           </p>
 
@@ -178,10 +178,10 @@ export default function HomePage() {
       {/* お悩みセクション */}
       <section className="bg-[#0F0F1A] py-14 sm:py-20 md:py-28 px-2 sm:px-4">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-sm sm:text-3xl md:text-4xl font-bold text-center mb-3 sm:mb-4 whitespace-nowrap">
+          <h2 className="text-[4.2vw] sm:text-3xl md:text-4xl font-bold text-center mb-3 sm:mb-4 whitespace-nowrap">
             こんな<span className="text-amber-400">お悩み</span>、ありませんか？
           </h2>
-          <p className="text-center text-slate-400 text-[8px] sm:text-base mb-8 sm:mb-14 whitespace-nowrap">
+          <p className="text-center text-slate-400 text-[2.8vw] sm:text-base mb-8 sm:mb-14 whitespace-nowrap">
             ホームページを持ちたいけど、踏み出せない理由
           </p>
 
@@ -201,12 +201,12 @@ export default function HomePage() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={item.icon} />
                   </svg>
                 </div>
-                <p className="text-slate-300 leading-relaxed whitespace-pre-line text-[10px] sm:text-base">{item.text}</p>
+                <p className="text-slate-300 leading-relaxed whitespace-pre-line text-[2.8vw] sm:text-base">{item.text}</p>
               </div>
             ))}
           </div>
 
-          <p className="text-center mt-8 sm:mt-10 text-[10px] sm:text-lg text-slate-300 whitespace-nowrap">
+          <p className="text-center mt-8 sm:mt-10 text-[3vw] sm:text-lg text-slate-300 whitespace-nowrap">
             <span className="text-amber-400 font-bold">OnePage-Flash</span> なら、すべて解決。
           </p>
         </div>
@@ -215,10 +215,10 @@ export default function HomePage() {
       {/* 聞かれる6つの質問セクション */}
       <section className="bg-[#0F0F1A] py-14 sm:py-20 md:py-28 px-2 sm:px-4">
         <div className="max-w-3xl mx-auto">
-          <h2 className="text-sm sm:text-3xl md:text-4xl font-bold text-center mb-3 sm:mb-4 whitespace-nowrap">
+          <h2 className="text-[4.2vw] sm:text-3xl md:text-4xl font-bold text-center mb-3 sm:mb-4 whitespace-nowrap">
             聞かれるのは<span className="text-amber-400">6つ</span>だけ
           </h2>
-          <p className="text-center text-slate-400 text-[8px] sm:text-base mb-8 sm:mb-14 whitespace-nowrap">
+          <p className="text-center text-slate-400 text-[2.7vw] sm:text-base mb-8 sm:mb-14 whitespace-nowrap">
             この6つの質問に答えるだけで、AIがプロ品質のHPを自動生成します
           </p>
 
@@ -272,18 +272,18 @@ export default function HomePage() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="text-[8px] sm:text-xs font-bold text-indigo-400 bg-indigo-500/10 px-1 sm:px-2 py-0.5 rounded-full whitespace-nowrap">
+                    <span className="text-[2.2vw] sm:text-xs font-bold text-indigo-400 bg-indigo-500/10 px-1.5 sm:px-2 py-0.5 rounded-full whitespace-nowrap">
                       {item.num}
                     </span>
-                    <span className="text-[10px] sm:text-sm font-semibold text-slate-200">{item.question}</span>
+                    <span className="text-[2.8vw] sm:text-sm font-semibold text-slate-200">{item.question}</span>
                   </div>
-                  <p className="text-[8px] sm:text-xs text-slate-500">{item.example}</p>
+                  <p className="text-[2.2vw] sm:text-xs text-slate-500">{item.example}</p>
                 </div>
               </div>
             ))}
           </div>
 
-          <p className="text-center mt-8 sm:mt-10 text-slate-400 text-[8px] sm:text-sm whitespace-nowrap">
+          <p className="text-center mt-8 sm:mt-10 text-slate-400 text-[2.8vw] sm:text-sm whitespace-nowrap">
             所要時間は<span className="text-amber-400 font-bold">約5〜10分</span>。スマホからでもOK。
           </p>
         </div>
@@ -292,7 +292,7 @@ export default function HomePage() {
       {/* ステップセクション */}
       <section className="bg-[#1A1A2E] py-14 sm:py-20 md:py-28 px-2 sm:px-4">
         <div className="max-w-5xl mx-auto">
-          <h2 className="text-sm sm:text-3xl md:text-4xl font-bold text-center mb-10 sm:mb-16 whitespace-nowrap">
+          <h2 className="text-[4.2vw] sm:text-3xl md:text-4xl font-bold text-center mb-10 sm:mb-16 whitespace-nowrap">
             たった<span className="text-amber-400">3ステップ</span>で完成
           </h2>
 
@@ -329,8 +329,8 @@ export default function HomePage() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={item.icon} />
                   </svg>
                 </div>
-                <h3 className="text-[10px] sm:text-lg font-bold mb-1 sm:mb-2">{item.title}</h3>
-                <p className="text-[8px] sm:text-sm text-slate-400 leading-relaxed whitespace-pre-line">{item.desc}</p>
+                <h3 className="text-[3vw] sm:text-lg font-bold mb-1 sm:mb-2">{item.title}</h3>
+                <p className="text-[2.5vw] sm:text-sm text-slate-400 leading-relaxed whitespace-pre-line">{item.desc}</p>
               </div>
             ))}
           </div>
@@ -340,28 +340,28 @@ export default function HomePage() {
       {/* 料金セクション */}
       <section className="bg-[#0F0F1A] py-14 sm:py-20 md:py-28 px-2 sm:px-4">
         <div className="max-w-lg mx-auto text-center">
-          <h2 className="text-sm sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4 whitespace-nowrap">
+          <h2 className="text-[4.2vw] sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4 whitespace-nowrap">
             シンプルな<span className="text-amber-400">料金</span>
           </h2>
-          <p className="text-slate-400 text-[8px] sm:text-base mb-8 sm:mb-12 whitespace-nowrap">わかりやすい1プランのみ。追加費用なし。</p>
+          <p className="text-slate-400 text-[2.8vw] sm:text-base mb-8 sm:mb-12 whitespace-nowrap">わかりやすい1プランのみ。追加費用なし。</p>
 
-          <div className="bg-gradient-to-b from-[#1E2035] to-[#1A1A2E] rounded-2xl sm:rounded-3xl border border-indigo-500/30 p-3 sm:p-8 md:p-10 shadow-[0_0_60px_rgba(99,102,241,0.1)]">
-            <span className="inline-flex items-center gap-1 bg-amber-500/10 text-amber-400 border border-amber-500/30 px-2 py-0.5 sm:px-3 sm:py-1 rounded-full text-[8px] sm:text-xs font-medium mb-3 sm:mb-6">
+          <div className="bg-gradient-to-b from-[#1E2035] to-[#1A1A2E] rounded-2xl sm:rounded-3xl border border-indigo-500/30 p-4 sm:p-8 md:p-10 shadow-[0_0_60px_rgba(99,102,241,0.1)]">
+            <span className="inline-flex items-center gap-1 bg-amber-500/10 text-amber-400 border border-amber-500/30 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full text-[2.5vw] sm:text-xs font-medium mb-4 sm:mb-6">
               業界最安クラス
             </span>
 
             <div className="mb-1 sm:mb-2 whitespace-nowrap">
-              <span className="text-xl sm:text-5xl md:text-6xl font-black">¥3,980</span>
-              <span className="text-[8px] sm:text-lg text-slate-400 ml-1 sm:ml-2">初期費用</span>
+              <span className="text-[7vw] sm:text-5xl md:text-6xl font-black">¥3,980</span>
+              <span className="text-[2.8vw] sm:text-lg text-slate-400 ml-1 sm:ml-2">初期費用</span>
             </div>
             <div className="mb-1 sm:mb-3 whitespace-nowrap">
-              <span className="text-sm sm:text-2xl font-bold text-slate-300">+ ¥480</span>
-              <span className="text-slate-400 text-[10px] sm:text-base">/月</span>
+              <span className="text-[4.5vw] sm:text-2xl font-bold text-slate-300">+ ¥480</span>
+              <span className="text-slate-400 text-[2.8vw] sm:text-base">/月</span>
             </div>
-            <p className="text-[10px] sm:text-sm text-amber-400 font-medium mb-1">初月無料</p>
-            <p className="text-[8px] sm:text-sm text-slate-500 mb-4 sm:mb-8 whitespace-nowrap">税込 / いつでも解約可 / 解約後も再開OK</p>
+            <p className="text-[3vw] sm:text-sm text-amber-400 font-medium mb-1">初月無料</p>
+            <p className="text-[2.5vw] sm:text-sm text-slate-500 mb-5 sm:mb-8 whitespace-nowrap">税込 / いつでも解約可 / 解約後も再開OK</p>
 
-            <ul className="space-y-1.5 sm:space-y-3 text-[10px] sm:text-sm text-slate-300 mb-4 sm:mb-8 text-left">
+            <ul className="space-y-2 sm:space-y-3 text-[2.8vw] sm:text-sm text-slate-300 mb-5 sm:mb-8 text-left">
               {[
                 "AIによるプロ品質HP自動生成",
                 "プレビューで確認してから決済",
@@ -370,8 +370,8 @@ export default function HomePage() {
                 "SSL証明書・サーバー費用込み",
                 "解約後も再開すれば即復旧",
               ].map((item) => (
-                <li key={item} className="flex items-center gap-1.5 sm:gap-3 whitespace-nowrap">
-                  <svg className="w-3 h-3 sm:w-5 sm:h-5 text-emerald-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <li key={item} className="flex items-center gap-2 sm:gap-3 whitespace-nowrap">
+                  <svg className="w-3.5 h-3.5 sm:w-5 sm:h-5 text-emerald-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
                   {item}
@@ -381,7 +381,7 @@ export default function HomePage() {
 
             <Link
               href="/create"
-              className="block w-full py-2.5 sm:py-4 bg-amber-500 hover:bg-amber-400 text-gray-900 font-bold rounded-lg sm:rounded-xl text-[10px] sm:text-lg transition-all duration-300 shadow-[0_0_30px_rgba(245,158,11,0.3)] hover:shadow-[0_0_50px_rgba(245,158,11,0.5)] text-center whitespace-nowrap"
+              className="block w-full py-2.5 sm:py-4 bg-amber-500 hover:bg-amber-400 text-gray-900 font-bold rounded-lg sm:rounded-xl text-[3vw] sm:text-lg transition-all duration-300 shadow-[0_0_30px_rgba(245,158,11,0.3)] hover:shadow-[0_0_50px_rgba(245,158,11,0.5)] text-center whitespace-nowrap"
             >
               無料でプレビューを見る
             </Link>
@@ -397,10 +397,10 @@ export default function HomePage() {
         </div>
 
         <div className="relative z-10 text-center max-w-3xl mx-auto">
-          <h2 className="text-sm sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4 whitespace-nowrap">
+          <h2 className="text-[4.2vw] sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4 whitespace-nowrap">
             今日、ホームページを手に入れよう
           </h2>
-          <p className="text-slate-400 mb-6 sm:mb-10 text-[8px] sm:text-lg leading-relaxed whitespace-nowrap">
+          <p className="text-slate-400 mb-6 sm:mb-10 text-[3vw] sm:text-lg leading-relaxed whitespace-nowrap">
             あなたのお店・サービスを、
             <br className="sm:hidden" />
             もっと多くの人に届けませんか？
@@ -408,13 +408,13 @@ export default function HomePage() {
 
           <Link
             href="/create"
-            className="inline-flex items-center justify-center gap-1.5 bg-amber-500 hover:bg-amber-400 text-gray-900 font-bold px-4 py-2 sm:px-10 sm:py-5 rounded-lg sm:rounded-xl text-[10px] sm:text-xl transition-all duration-300 hover:scale-105 shadow-[0_0_40px_rgba(245,158,11,0.4)] hover:shadow-[0_0_60px_rgba(245,158,11,0.6)] whitespace-nowrap"
+            className="inline-flex items-center justify-center gap-1.5 bg-amber-500 hover:bg-amber-400 text-gray-900 font-bold px-5 py-2.5 sm:px-10 sm:py-5 rounded-lg sm:rounded-xl text-[3vw] sm:text-xl transition-all duration-300 hover:scale-105 shadow-[0_0_40px_rgba(245,158,11,0.4)] hover:shadow-[0_0_60px_rgba(245,158,11,0.6)] whitespace-nowrap"
           >
             無料でサイトを作ってみる
-            <svg className="w-3 h-3 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+            <svg className="w-3.5 h-3.5 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
           </Link>
 
-          <p className="text-slate-600 text-[8px] sm:text-sm mt-3 sm:mt-4 whitespace-nowrap">
+          <p className="text-slate-600 text-[2.5vw] sm:text-sm mt-3 sm:mt-4 whitespace-nowrap">
             クレジットカード不要でプレビューが確認できます
           </p>
 
@@ -423,7 +423,7 @@ export default function HomePage() {
               href="https://lin.ee/5b8JT4C"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 sm:gap-2 text-[#06C755] hover:text-[#05b04c] text-[10px] sm:text-base font-medium transition-colors"
+              className="inline-flex items-center gap-1.5 sm:gap-2 text-[#06C755] hover:text-[#05b04c] text-[2.8vw] sm:text-base font-medium transition-colors"
             >
               <svg className="w-4 h-4 sm:w-5 sm:h-5" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M19.365 9.863c.349 0 .63.285.63.631 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63h2.386c.346 0 .627.285.627.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595.06-.023.136-.033.194-.033.195 0 .375.104.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63.346 0 .628.285.628.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.282.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314" />
@@ -439,15 +439,15 @@ export default function HomePage() {
         <div className="max-w-4xl mx-auto">
           <div className="flex flex-col sm:flex-row justify-between gap-6 sm:gap-8 mb-8 sm:mb-10 text-center sm:text-left">
             <div className="sm:max-w-xs">
-              <span className="font-black text-[10px] sm:text-lg tracking-tight">
+              <span className="font-black text-[3vw] sm:text-lg tracking-tight">
                 OnePage<span className="text-amber-400">-Flash</span>
               </span>
-              <p className="text-[8px] sm:text-sm text-slate-500 leading-relaxed mt-2 sm:mt-3">
+              <p className="text-[2.4vw] sm:text-sm text-slate-500 leading-relaxed mt-2 sm:mt-3">
                 テキストを入力するだけで、AIが10分でプロ品質のホームページを生成するサービスです。
               </p>
             </div>
 
-            <div className="grid grid-cols-2 gap-4 sm:gap-8 text-[9px] sm:text-sm">
+            <div className="grid grid-cols-2 gap-4 sm:gap-8 text-[2.4vw] sm:text-sm">
               <div>
                 <div className="text-slate-300 font-medium mb-1.5 sm:mb-3">サービス</div>
                 <div className="space-y-1 sm:space-y-2">
@@ -471,7 +471,7 @@ export default function HomePage() {
           </div>
 
           <div className="border-t border-[#2D2D44] pt-4 sm:pt-6">
-            <div className="flex flex-col items-center gap-2 sm:gap-3 text-[8px] sm:text-xs text-slate-600">
+            <div className="flex flex-col items-center gap-2 sm:gap-3 text-[2.2vw] sm:text-xs text-slate-600">
               <p className="text-center whitespace-nowrap">&copy; 2026 OnePage-Flash（株式会社バンテックス）<span className="ml-1 sm:ml-2 text-slate-700">v0.3.0-render</span></p>
               <div className="flex items-center gap-3 sm:gap-4">
                 <span className="flex items-center gap-1 sm:gap-1.5">
