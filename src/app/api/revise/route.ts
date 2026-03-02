@@ -127,7 +127,10 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     // --- 修正完了メール送信 ---
     const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
-    const publicUrl = getSitePublicUrl(site.subdomain);
+    const workerUrl = process.env.WORKER_URL ?? "";
+    const publicUrl = workerUrl
+      ? `${workerUrl}/s/${site.subdomain}`
+      : getSitePublicUrl(site.subdomain);
     const revisionUrl = `${appUrl}/revise?token=${site.revision_token}`;
     const newRemainingFreeRevisions = Math.max(
       0,
