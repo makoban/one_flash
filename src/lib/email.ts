@@ -35,7 +35,7 @@ export const resend = new Proxy({} as Resend, {
 // ---------------------------------------------------------------------------
 
 /** 送信元メールアドレス（Resendで認証済みドメインのアドレスを設定） */
-const FROM_EMAIL = "OnePage-Flash <noreply@info-page.jp>";
+const FROM_EMAIL = "OnePage-Flash <noreply@bantex.jp>";
 
 /** サービス名 */
 const SERVICE_NAME = "OnePage-Flash";
