@@ -16,10 +16,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { geminiModel } from "@/lib/gemini";
 import { uploadSiteHTML, getSiteHTML, getSitePublicUrl } from "@/lib/r2";
-import { query } from "@/lib/db";
+import { query, getSiteByRevisionToken, findOrCreateUser } from "@/lib/db";
 import { sendRevisionCompletionEmail } from "@/lib/email";
 import { buildRefinerPrompt, parseRefinerResponse, validateRevisionInstruction } from "@/prompts/refiner";
-import type { SiteRow } from "@/lib/db";
+import type { OpfSiteRow } from "@/lib/db";
 
 // ---------------------------------------------------------------------------
 // 定数
@@ -55,19 +55,14 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     }
 
     // --- DBでサイト情報を取得 ---
-    const result = await query<SiteRow>(
-      "SELECT * FROM sites WHERE revision_token = $1",
-      [token]
-    );
+    const site = await getSiteByRevisionToken(token);
 
-    if (result.rows.length === 0) {
+    if (!site) {
       return NextResponse.json(
         { error: "無効な修正用トークンです" },
         { status: 404 }
       );
     }
-
-    const site = result.rows[0];
 
     // --- 無料修正回数チェック ---
     const remainingFreeRevisions = Math.max(
@@ -89,7 +84,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     }
 
     // --- R2 から現在の HTML を取得 ---
-    const currentHtml = await getSiteHTML(site.slug);
+    const currentHtml = await getSiteHTML(site.subdomain);
 
     if (!currentHtml) {
       return NextResponse.json(
@@ -121,28 +116,35 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     }
 
     // --- R2 に上書き保存 ---
-    await uploadSiteHTML(site.slug, refinedHtml);
+    await uploadSiteHTML(site.subdomain, refinedHtml);
 
     // --- DB の revision_count をインクリメント ---
     const newRevisionCount = site.revision_count + 1;
     await query(
-      "UPDATE sites SET revision_count = $1, updated_at = NOW() WHERE slug = $2",
-      [newRevisionCount, site.slug]
+      "UPDATE opf_sites SET revision_count = $1, updated_at = NOW() WHERE id = $2",
+      [newRevisionCount, site.id]
     );
 
     // --- 修正完了メール送信 ---
     const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
-    const publicUrl = getSitePublicUrl(site.slug);
+    const publicUrl = getSitePublicUrl(site.subdomain);
     const revisionUrl = `${appUrl}/revise?token=${site.revision_token}`;
     const newRemainingFreeRevisions = Math.max(
       0,
       FREE_REVISION_LIMIT - newRevisionCount
     );
 
-    if (site.email) {
+    // opf_users からメールアドレスを取得
+    const userResult = await query<{ email: string }>(
+      "SELECT email FROM opf_users WHERE id = $1",
+      [site.user_id]
+    );
+    const userEmail = userResult.rows[0]?.email;
+
+    if (userEmail) {
       await sendRevisionCompletionEmail({
-        to: site.email,
-        siteName: site.site_name,
+        to: userEmail,
+        siteName: site.site_name ?? "",
         publicUrl,
         revisionUrl,
       });

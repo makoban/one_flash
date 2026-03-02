@@ -179,6 +179,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session): Promis
   console.log(`[webhook/stripe] Site published: ${subdomain}`);
 
   // --- Step 3: DB登録（DB未設定でもサイト公開は成功させる） ---
+  let revisionToken: string | null = null;
   try {
     if (process.env.DATABASE_URL) {
       const user = await findOrCreateUser(customerEmail, stripeCustomerId ?? undefined);
@@ -192,13 +193,16 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session): Promis
         });
       }
 
-      await createSite({
+      const siteRecord = await createSite({
         userId: user.id,
         subscriptionId: subscriptionRecord?.id ?? "",
         subdomain,
         siteName,
         inputSnapshot: { siteName, catchphrase, description, contactInfo, colorTheme, email: customerEmail },
       });
+
+      // revision_token を保持（メールURL用）
+      revisionToken = siteRecord.revision_token;
 
       // subscribed イベント記録
       await insertAdEvent({
@@ -228,7 +232,9 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session): Promis
   // --- Step 5: 完了メール送信 ---
   const publicUrl = `${workerUrl}/s/${subdomain}`;
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
-  const revisionUrl = `${appUrl}/revise?subdomain=${subdomain}`;
+  const revisionUrl = revisionToken
+    ? `${appUrl}/revise?token=${revisionToken}`
+    : `${appUrl}/revise?subdomain=${subdomain}`;
 
   if (customerEmail) {
     try {

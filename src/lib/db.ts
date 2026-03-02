@@ -9,6 +9,7 @@
  */
 
 import { Pool, PoolClient, QueryResult, QueryResultRow } from "pg";
+import crypto from "crypto";
 
 // ---------------------------------------------------------------------------
 // コネクションプール（遅延初期化: 環境変数未設定でもビルドを通す）
@@ -158,6 +159,8 @@ export interface OpfSiteRow {
   is_active: boolean;
   is_published: boolean;
   input_snapshot: Record<string, unknown> | null;
+  revision_token: string | null;
+  revision_count: number;
   created_at: Date;
   updated_at: Date;
   [key: string]: unknown;
@@ -199,6 +202,8 @@ CREATE TABLE IF NOT EXISTS opf_sites (
   is_active BOOLEAN DEFAULT true,
   is_published BOOLEAN DEFAULT false,
   input_snapshot JSONB,
+  revision_token VARCHAR(255),
+  revision_count INT DEFAULT 0,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -317,11 +322,12 @@ export async function createSite(params: {
   siteName: string;
   inputSnapshot: Record<string, unknown>;
 }): Promise<OpfSiteRow> {
+  const revisionToken = crypto.randomUUID();
   const result = await query<OpfSiteRow>(
-    `INSERT INTO opf_sites (user_id, subscription_id, subdomain, r2_key, site_name, is_active, is_published, input_snapshot)
-     VALUES ($1, $2, $3, $4, $5, true, true, $6)
+    `INSERT INTO opf_sites (user_id, subscription_id, subdomain, r2_key, site_name, is_active, is_published, input_snapshot, revision_token, revision_count)
+     VALUES ($1, $2, $3, $4, $5, true, true, $6, $7, 0)
      RETURNING *`,
-    [params.userId, params.subscriptionId, params.subdomain, `${params.subdomain}/index.html`, params.siteName, JSON.stringify(params.inputSnapshot)]
+    [params.userId, params.subscriptionId, params.subdomain, `${params.subdomain}/index.html`, params.siteName, JSON.stringify(params.inputSnapshot), revisionToken]
   );
   return result.rows[0];
 }
@@ -338,6 +344,14 @@ export async function getSiteBySubdomain(subdomain: string): Promise<OpfSiteRow 
   const result = await query<OpfSiteRow>(
     `SELECT * FROM opf_sites WHERE subdomain = $1`,
     [subdomain]
+  );
+  return result.rows[0] ?? null;
+}
+
+export async function getSiteByRevisionToken(token: string): Promise<OpfSiteRow | null> {
+  const result = await query<OpfSiteRow>(
+    `SELECT * FROM opf_sites WHERE revision_token = $1`,
+    [token]
   );
   return result.rows[0] ?? null;
 }
