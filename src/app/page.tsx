@@ -318,6 +318,16 @@ export default function HomePage() {
           <p className="text-center mt-8 sm:mt-10 text-slate-400 text-[2.8vw] sm:text-sm whitespace-nowrap">
             所要時間は<span className="text-amber-400 font-bold">約5〜10分</span>。スマホからでもOK。
           </p>
+
+          {/* 迷惑メール注意書き */}
+          <div className="mt-6 sm:mt-8 p-3 sm:p-4 bg-[#1E2035] rounded-xl border border-amber-500/20">
+            <p className="text-[2.4vw] sm:text-xs text-slate-400 leading-relaxed text-center">
+              <span className="text-amber-400 font-medium">メールが届かない場合：</span>
+              完成通知は <span className="text-slate-300 font-medium">noreply@bantex.jp</span> から送信されます。
+              迷惑メールフォルダをご確認いただくか、
+              <span className="text-slate-300">@bantex.jp</span> からのメールを受信許可に設定してください。
+            </p>
+          </div>
         </div>
       </section>
 
@@ -504,7 +514,7 @@ export default function HomePage() {
 
           <div className="border-t border-[#2D2D44] pt-4 sm:pt-6">
             <div className="flex flex-col items-center gap-2 sm:gap-3 text-[2.2vw] sm:text-xs text-slate-600">
-              <p className="text-center whitespace-nowrap">&copy; 2026 OnePage-Flash（株式会社バンテックス）<span className="ml-1 sm:ml-2 text-slate-700">v0.4.0</span></p>
+              <p className="text-center whitespace-nowrap">&copy; 2026 OnePage-Flash（株式会社バンテックス）<span className="ml-1 sm:ml-2 text-slate-700">v0.5.0</span></p>
               <div className="flex items-center gap-3 sm:gap-4">
                 <span className="flex items-center gap-1 sm:gap-1.5">
                   <svg className="w-3 h-3 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>

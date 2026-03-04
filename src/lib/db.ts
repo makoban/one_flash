@@ -160,6 +160,7 @@ export interface OpfSiteRow {
   is_published: boolean;
   input_snapshot: Record<string, unknown> | null;
   revision_token: string | null;
+  revision_token_expires_at: Date | null;
   revision_count: number;
   created_at: Date;
   updated_at: Date;
@@ -203,6 +204,7 @@ CREATE TABLE IF NOT EXISTS opf_sites (
   is_published BOOLEAN DEFAULT false,
   input_snapshot JSONB,
   revision_token VARCHAR(255),
+  revision_token_expires_at TIMESTAMPTZ,
   revision_count INT DEFAULT 0,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
@@ -324,8 +326,8 @@ export async function createSite(params: {
 }): Promise<OpfSiteRow> {
   const revisionToken = crypto.randomUUID();
   const result = await query<OpfSiteRow>(
-    `INSERT INTO opf_sites (user_id, subscription_id, subdomain, r2_key, site_name, is_active, is_published, input_snapshot, revision_token, revision_count)
-     VALUES ($1, $2, $3, $4, $5, true, true, $6, $7, 0)
+    `INSERT INTO opf_sites (user_id, subscription_id, subdomain, r2_key, site_name, is_active, is_published, input_snapshot, revision_token, revision_token_expires_at, revision_count)
+     VALUES ($1, $2, $3, $4, $5, true, true, $6, $7, NOW() + INTERVAL '30 days', 0)
      RETURNING *`,
     [params.userId, params.subscriptionId, params.subdomain, `${params.subdomain}/index.html`, params.siteName, JSON.stringify(params.inputSnapshot), revisionToken]
   );
@@ -348,12 +350,17 @@ export async function getSiteBySubdomain(subdomain: string): Promise<OpfSiteRow 
   return result.rows[0] ?? null;
 }
 
-export async function getSiteByRevisionToken(token: string): Promise<OpfSiteRow | null> {
+export async function getSiteByRevisionToken(token: string): Promise<{ site: OpfSiteRow | null; expired: boolean }> {
   const result = await query<OpfSiteRow>(
     `SELECT * FROM opf_sites WHERE revision_token = $1`,
     [token]
   );
-  return result.rows[0] ?? null;
+  const site = result.rows[0] ?? null;
+  if (!site) return { site: null, expired: false };
+  const expired = site.revision_token_expires_at
+    ? new Date(site.revision_token_expires_at) < new Date()
+    : false;
+  return { site, expired };
 }
 
 export async function updateSiteIsActive(subdomain: string, isActive: boolean): Promise<void> {

@@ -56,12 +56,19 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     }
 
     // --- DBでサイト情報を取得 ---
-    const site = await getSiteByRevisionToken(token);
+    const { site, expired } = await getSiteByRevisionToken(token);
 
     if (!site) {
       return NextResponse.json(
         { error: "無効な修正用トークンです" },
         { status: 404 }
+      );
+    }
+
+    if (expired) {
+      return NextResponse.json(
+        { error: "修正用トークンの有効期限が切れています。新しいトークンが必要な場合はお問い合わせください。" },
+        { status: 410 }
       );
     }
 

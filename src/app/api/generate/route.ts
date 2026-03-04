@@ -80,7 +80,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       );
     }
 
-    // --- Step 2: HTML生成 ---
+    // --- Step 2: HTML生成（リトライ最大3回 + フォールバック） ---
     console.log("[generate] Generating HTML...");
     let generatorPrompt = buildGeneratorPrompt(formData);
 
@@ -89,13 +89,31 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       generatorPrompt += `\n\n## ユーザーからの追加指示（最優先で反映すること）\n${instruction.trim()}`;
     }
 
-    const generationResult = await geminiModel.generateContent(generatorPrompt);
-    const rawHtml = generationResult.response.text();
-    let html = parseGeneratorResponse(rawHtml);
+    let html = "";
+    let usedFallback = false;
+
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      try {
+        const generationResult = await geminiModel.generateContent(generatorPrompt);
+        const rawHtml = generationResult.response.text();
+        html = parseGeneratorResponse(rawHtml);
+        break;
+      } catch (error) {
+        console.warn(`[generate] Attempt ${attempt} failed:`, error);
+        if (attempt === 3) {
+          console.error("[generate] All 3 attempts failed, using fallback template");
+          html = buildFallbackHtml(formData);
+          usedFallback = true;
+          warnings.push("AI生成に一時的な問題が発生したため、シンプルなテンプレートで生成しました。修正機能で調整できます。");
+        }
+      }
+    }
 
     // --- Step 3: 日本語テキスト品質チェック＆修正 ---
-    html = postProcessHtml(html);
-    console.log("[generate] HTML generated and post-processed, length:", html.length);
+    if (!usedFallback) {
+      html = postProcessHtml(html);
+    }
+    console.log(`[generate] HTML ${usedFallback ? "fallback" : "generated"}, length:`, html.length);
 
     // html をレスポンスに含める（screenshot API に渡すため）
     return NextResponse.json({ html, moderation, warnings }, { status: 200 });
@@ -149,4 +167,56 @@ function postProcessHtml(html: string): string {
   result = result.replace(/&amp;(?=#|[a-zA-Z])/g, "&");
 
   return result;
+}
+
+// ---------------------------------------------------------------------------
+// フォールバックHTMLテンプレート（Gemini 全リトライ失敗時）
+// ---------------------------------------------------------------------------
+
+function buildFallbackHtml(formData: SiteFormData): string {
+  const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  const theme = formData.colorTheme ?? "simple";
+  const colors = theme === "colorful"
+    ? { bg: "#FFF8F0", accent: "#FF6B35", text: "#333" }
+    : theme === "business"
+    ? { bg: "#F8FAFC", accent: "#1E40AF", text: "#1E293B" }
+    : { bg: "#FFFFFF", accent: "#6366F1", text: "#374151" };
+
+  return `<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>${esc(formData.siteName)}</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif;color:${colors.text};background:${colors.bg};overflow-wrap:break-word;overflow-x:hidden}
+.hero{text-align:center;padding:80px 20px;background:linear-gradient(135deg,${colors.accent}11,${colors.accent}05)}
+.hero h1{font-size:2rem;margin-bottom:16px}
+.hero p{font-size:1.1rem;opacity:0.8;max-width:600px;margin:0 auto}
+.section{padding:60px 20px;max-width:800px;margin:0 auto}
+.section h2{font-size:1.5rem;margin-bottom:20px;color:${colors.accent};border-bottom:2px solid ${colors.accent};padding-bottom:8px}
+.section p{line-height:1.8;white-space:pre-line}
+.contact{background:${colors.accent}08;padding:60px 20px;text-align:center}
+.contact h2{font-size:1.5rem;margin-bottom:20px;color:${colors.accent}}
+.contact p{line-height:1.8;white-space:pre-line}
+footer{text-align:center;padding:30px 20px;font-size:0.85rem;opacity:0.6}
+</style>
+</head>
+<body>
+<div class="hero">
+<h1>${esc(formData.siteName)}</h1>
+<p>${esc(formData.catchphrase)}</p>
+</div>
+<div class="section">
+<h2>${esc(formData.siteName)}について</h2>
+<p>${esc(formData.description)}</p>
+</div>
+<div class="contact">
+<h2>お問い合わせ</h2>
+<p>${esc(formData.contactInfo)}</p>
+</div>
+<footer>&copy; ${new Date().getFullYear()} ${esc(formData.siteName)}</footer>
+</body>
+</html>`;
 }
