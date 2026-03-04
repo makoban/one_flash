@@ -44,8 +44,10 @@ function isAuthorized(request: NextRequest): boolean {
     const token = authHeader.slice(7);
     const cronSecret = process.env.CRON_SECRET;
     const adminPassword = process.env.ADMIN_PASSWORD;
+    const uploadSecret = process.env.UPLOAD_SECRET;
     if (cronSecret && token === cronSecret) return true;
     if (adminPassword && token === adminPassword) return true;
+    if (uploadSecret && token === uploadSecret) return true;
   }
 
   // クエリパラメータ認証（簡易）
