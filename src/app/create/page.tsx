@@ -27,6 +27,7 @@ interface PreviewData {
   pcImage: string;
   mobileImage: string;
   html: string;
+  warnings?: string[];
 }
 
 interface HistoryEntry {
@@ -225,6 +226,19 @@ export default function CreatePage() {
       )}
 
       {pageState === "preview" && previewData && formData && (
+        <>
+        {previewData.warnings && previewData.warnings.length > 0 && (
+          <div className="max-w-2xl mx-auto mb-6 p-4 bg-amber-50 border border-amber-200 rounded-xl">
+            <p className="text-sm font-semibold text-amber-800 mb-2">
+              以下の内容はこのサービスでは対応できないため、可能な範囲で作成しました：
+            </p>
+            <ul className="list-disc list-inside space-y-1">
+              {previewData.warnings.map((w, i) => (
+                <li key={i} className="text-sm text-amber-700">{w}</li>
+              ))}
+            </ul>
+          </div>
+        )}
         <PreviewSection
           pcImage={previewData.pcImage}
           mobileImage={previewData.mobileImage}
@@ -238,6 +252,7 @@ export default function CreatePage() {
           currentHistoryIndex={currentHistoryIndex}
           onRestoreFromHistory={handleRestoreFromHistory}
         />
+        </>
       )}
 
       {pageState === "complete" && formData && (
@@ -266,7 +281,7 @@ async function generateAndScreenshot(data: SiteFormData, instruction?: string): 
     throw new Error(errorData.error ?? "HTML生成に失敗しました");
   }
 
-  const { html } = (await generateResponse.json()) as { html: string };
+  const { html, warnings } = (await generateResponse.json()) as { html: string; warnings?: string[] };
 
   // Step 2: スクリーンショット取得
   const screenshotResponse = await fetch("/api/screenshot", {
@@ -285,7 +300,7 @@ async function generateAndScreenshot(data: SiteFormData, instruction?: string): 
     mobileImage: string;
   };
 
-  return { pcImage, mobileImage, html };
+  return { pcImage, mobileImage, html, warnings: warnings ?? [] };
 }
 
 // ---------------------------------------------------------------------------

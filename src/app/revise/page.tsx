@@ -87,6 +87,7 @@ function ReviseContent() {
   const [fieldsOpen, setFieldsOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [warnings, setWarnings] = useState<string[]>([]);
   const [success, setSuccess] = useState<{
     publicUrl: string;
     freeRevisionsRemaining: number;
@@ -153,6 +154,7 @@ function ReviseContent() {
         requiresPayment?: boolean;
         message?: string;
         error?: string;
+        warnings?: string[];
       };
 
       if (response.status === 402 && data.requiresPayment) {
@@ -164,6 +166,7 @@ function ReviseContent() {
         throw new Error(data.error ?? "修正に失敗しました");
       }
 
+      setWarnings(data.warnings ?? []);
       setSuccess({
         publicUrl: data.publicUrl ?? "",
         freeRevisionsRemaining: data.freeRevisionsRemaining ?? 0,
@@ -208,6 +211,20 @@ function ReviseContent() {
             >
               更新されたサイトを確認する
             </a>
+          </div>
+        )}
+
+        {/* 実現不可能な要求の警告 */}
+        {warnings.length > 0 && (
+          <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-xl">
+            <p className="text-sm font-semibold text-amber-800 mb-2">
+              以下の内容はこのサービスでは対応できないため、可能な範囲で修正しました：
+            </p>
+            <ul className="list-disc list-inside space-y-1">
+              {warnings.map((w, i) => (
+                <li key={i} className="text-sm text-amber-700">{w}</li>
+              ))}
+            </ul>
           </div>
         )}
 

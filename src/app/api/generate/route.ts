@@ -12,6 +12,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { geminiModel, moderationModel } from "@/lib/gemini";
 import { buildModerationPrompt, parseModerationResponse } from "@/prompts/moderation";
 import { buildGeneratorPrompt, parseGeneratorResponse } from "@/prompts/generator";
+import { buildFeasibilityPrompt, parseFeasibilityResponse } from "@/prompts/feasibility";
 import type { SiteFormData } from "@/lib/gemini";
 
 // Puppeteer を使用する screenshot API と同様に Node.js ランタイムを指定
@@ -45,13 +46,32 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       }
     }
 
-    // --- Step 1: コンテンツモデレーション ---
-    console.log("[generate] Running moderation for:", formData.siteName);
+    // --- Step 1: コンテンツモデレーション + 実行可能性チェック（並列実行） ---
+    console.log("[generate] Running moderation & feasibility check for:", formData.siteName);
     const moderationPrompt = buildModerationPrompt(formData);
-    const moderationResult = await moderationModel.generateContent(moderationPrompt);
+    const feasibilityPrompt = buildFeasibilityPrompt(
+      `サイト名: ${formData.siteName}\nキャッチコピー: ${formData.catchphrase}\n説明: ${formData.description}\n連絡先: ${formData.contactInfo}`
+    );
+
+    const [moderationResult, feasibilityResult] = await Promise.all([
+      moderationModel.generateContent(moderationPrompt),
+      moderationModel.generateContent(feasibilityPrompt),
+    ]);
+
     const moderationText = moderationResult.response.text();
     const moderation = parseModerationResponse(moderationText);
     console.log("[generate] Moderation result:", moderation);
+
+    let warnings: string[] = [];
+    try {
+      const feasibility = parseFeasibilityResponse(feasibilityResult.response.text());
+      warnings = feasibility.warnings;
+      if (warnings.length > 0) {
+        console.log("[generate] Feasibility warnings:", warnings);
+      }
+    } catch (e) {
+      console.warn("[generate] Feasibility check parse error, continuing:", e);
+    }
 
     if (!moderation.isSafe) {
       return NextResponse.json(
@@ -78,7 +98,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     console.log("[generate] HTML generated and post-processed, length:", html.length);
 
     // html をレスポンスに含める（screenshot API に渡すため）
-    return NextResponse.json({ html, moderation }, { status: 200 });
+    return NextResponse.json({ html, moderation, warnings }, { status: 200 });
   } catch (error: unknown) {
     console.error("[generate] Error:", error);
     const message = error instanceof Error ? error.message : "Internal server error";

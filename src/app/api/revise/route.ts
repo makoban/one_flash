@@ -14,11 +14,12 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { geminiModel } from "@/lib/gemini";
+import { geminiModel, moderationModel } from "@/lib/gemini";
 import { uploadSiteHTML, getSiteHTML, getSitePublicUrl } from "@/lib/r2";
 import { query, getSiteByRevisionToken, findOrCreateUser } from "@/lib/db";
 import { sendRevisionCompletionEmail } from "@/lib/email";
 import { buildRefinerPrompt, parseRefinerResponse, validateRevisionInstruction } from "@/prompts/refiner";
+import { buildFeasibilityPrompt, parseFeasibilityResponse } from "@/prompts/feasibility";
 import type { OpfSiteRow } from "@/lib/db";
 
 // ---------------------------------------------------------------------------
@@ -83,8 +84,23 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       );
     }
 
-    // --- R2 から現在の HTML を取得 ---
-    const currentHtml = await getSiteHTML(site.subdomain);
+    // --- 実行可能性チェック + R2 から現在の HTML を取得（並列実行） ---
+    const feasibilityPrompt = buildFeasibilityPrompt(instruction);
+    const [feasibilityResult, currentHtml] = await Promise.all([
+      moderationModel.generateContent(feasibilityPrompt),
+      getSiteHTML(site.subdomain),
+    ]);
+
+    let warnings: string[] = [];
+    try {
+      const feasibility = parseFeasibilityResponse(feasibilityResult.response.text());
+      warnings = feasibility.warnings;
+      if (warnings.length > 0) {
+        console.log("[revise] Feasibility warnings:", warnings);
+      }
+    } catch (e) {
+      console.warn("[revise] Feasibility check parse error, continuing:", e);
+    }
 
     if (!currentHtml) {
       return NextResponse.json(
@@ -158,6 +174,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         success: true,
         publicUrl,
         freeRevisionsRemaining: newRemainingFreeRevisions,
+        warnings,
       },
       { status: 200 }
     );
