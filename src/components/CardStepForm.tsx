@@ -96,6 +96,8 @@ export default function CardStepForm({ onSubmit, isSubmitting, onFirstInteractio
   const [errors, setErrors] = useState<FormErrors>({});
   // アニメーション用: ステップ変更のたびにキーを更新してフェードインを再発火
   const [animationKey, setAnimationKey] = useState(0);
+  const [moderating, setModerating] = useState(false);
+  const [moderationError, setModerationError] = useState<string | null>(null);
 
   const firstInputRef = useRef<HTMLInputElement | HTMLTextAreaElement | null>(null);
 
@@ -172,8 +174,36 @@ export default function CardStepForm({ onSubmit, isSubmitting, onFirstInteractio
     return Object.keys(newErrors).length === 0;
   }
 
-  function handleNext(): void {
+  async function handleNext(): Promise<void> {
     if (!validateCurrentStep()) return;
+
+    // Q4（連絡先）完了時 = テキスト入力がすべて揃ったタイミングでモデレーション
+    if (currentStep === 4) {
+      setModerating(true);
+      setModerationError(null);
+      try {
+        const res = await fetch("/api/moderate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            siteName: formData.siteName,
+            catchphrase: formData.catchphrase,
+            description: formData.description,
+            contactInfo: formData.contactInfo,
+          }),
+        });
+        const data = (await res.json()) as { isSafe: boolean; reason: string };
+        if (!data.isSafe) {
+          setModerationError(data.reason);
+          setModerating(false);
+          return;
+        }
+      } catch {
+        // API失敗時は通過させる
+      }
+      setModerating(false);
+    }
+
     setCurrentStep((prev) => Math.min(prev + 1, TOTAL_STEPS));
   }
 
@@ -194,7 +224,7 @@ export default function CardStepForm({ onSubmit, isSubmitting, onFirstInteractio
     if (e.key === "Enter" && !isTextarea) {
       e.preventDefault();
       if (currentStep < TOTAL_STEPS) {
-        handleNext();
+        void handleNext();
       }
     }
   }
@@ -286,13 +316,21 @@ export default function CardStepForm({ onSubmit, isSubmitting, onFirstInteractio
           />
         )}
 
+        {/* モデレーションエラー */}
+        {moderationError && (
+          <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+            <p className="text-sm text-red-700">{moderationError}</p>
+            <p className="text-xs text-red-500 mt-1">内容を修正して「戻る」から該当箇所を直してください。</p>
+          </div>
+        )}
+
         {/* ナビゲーションボタン */}
         <div className="mt-8 flex gap-3">
           {currentStep > 1 && (
             <button
               type="button"
               onClick={handleBack}
-              disabled={isSubmitting}
+              disabled={isSubmitting || moderating}
               className="px-5 py-3 border border-gray-200 rounded-xl text-sm text-gray-600 font-medium hover:bg-gray-50 transition-colors disabled:opacity-50"
             >
               戻る
@@ -303,9 +341,17 @@ export default function CardStepForm({ onSubmit, isSubmitting, onFirstInteractio
             <button
               type="button"
               onClick={handleNext}
-              className="flex-1 py-3 px-6 bg-indigo-600 text-white rounded-xl font-semibold text-sm hover:bg-indigo-700 active:bg-indigo-800 transition-colors shadow-sm"
+              disabled={moderating}
+              className="flex-1 py-3 px-6 bg-indigo-600 text-white rounded-xl font-semibold text-sm hover:bg-indigo-700 active:bg-indigo-800 transition-colors shadow-sm disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              次へ
+              {moderating ? (
+                <span className="flex items-center justify-center gap-2">
+                  <SpinnerIcon />
+                  内容を確認中...
+                </span>
+              ) : (
+                "次へ"
+              )}
             </button>
           ) : (
             <button

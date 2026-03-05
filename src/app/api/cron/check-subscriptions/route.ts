@@ -28,6 +28,7 @@ import {
   updateSiteIsActive,
 } from "@/lib/db";
 import { deactivateSite, reactivateSite } from "@/lib/r2";
+import { notifySlack } from "@/lib/slack";
 import type Stripe from "stripe";
 
 export const runtime = "nodejs";
@@ -235,6 +236,29 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         `errors=${result.errors.length}, skipped=${result.skipped}`
     );
 
+    // --- Slack通知 ---
+    const hasAnomalies =
+      result.errors.length > 0 ||
+      result.deactivated.length > 0 ||
+      result.reactivated.length > 0 ||
+      result.statusUpdated.length > 0;
+
+    if (hasAnomalies) {
+      const lines: string[] = [`実行時間: ${elapsed}s`, `確認: ${result.checked}件`];
+      if (result.deactivated.length > 0)
+        lines.push(`非公開化: ${result.deactivated.join(", ")}`);
+      if (result.reactivated.length > 0)
+        lines.push(`再公開: ${result.reactivated.join(", ")}`);
+      if (result.statusUpdated.length > 0)
+        lines.push(`ステータス同期: ${result.statusUpdated.join(", ")}`);
+      if (result.errors.length > 0)
+        lines.push(`エラー: ${result.errors.join(", ")}`);
+      await notifySlack(
+        result.errors.length > 0 ? "サブスクバッチ異常あり" : "サブスクバッチ変更検知",
+        lines.join("\n")
+      );
+    }
+
     return NextResponse.json({
       success: true,
       elapsed: `${elapsed}s`,
@@ -243,6 +267,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : "Internal error";
     console.error("[cron/check-subscriptions] Fatal error:", error);
+    await notifySlack("サブスクバッチ致命的エラー", message);
     return NextResponse.json({ error: message, ...result }, { status: 500 });
   }
 }

@@ -71,6 +71,8 @@ export default function StepForm({ onSubmit, isSubmitting = false }: StepFormPro
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState<SiteFormData>(INITIAL_FORM_DATA);
   const [errors, setErrors] = useState<Partial<Record<keyof SiteFormData, string>>>({});
+  const [moderating, setModerating] = useState(false);
+  const [moderationError, setModerationError] = useState<string | null>(null);
 
   // --- フォームフィールド更新 ---
   function handleChange(
@@ -113,8 +115,35 @@ export default function StepForm({ onSubmit, isSubmitting = false }: StepFormPro
   }
 
   // --- ステップ進む ---
-  function handleNext(): void {
-    if (currentStep === 1 && !validateStep1()) return;
+  async function handleNext(): Promise<void> {
+    if (currentStep === 1) {
+      if (!validateStep1()) return;
+
+      // モデレーションチェック
+      setModerating(true);
+      setModerationError(null);
+      try {
+        const res = await fetch("/api/moderate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            siteName: formData.siteName,
+            catchphrase: formData.catchphrase,
+            description: formData.description,
+            contactInfo: formData.contactInfo,
+          }),
+        });
+        const data = await res.json() as { isSafe: boolean; reason: string };
+        if (!data.isSafe) {
+          setModerationError(data.reason);
+          setModerating(false);
+          return;
+        }
+      } catch {
+        // API失敗時は通過させる
+      }
+      setModerating(false);
+    }
     setCurrentStep((prev) => Math.min(prev + 1, TOTAL_STEPS));
   }
 
@@ -152,6 +181,14 @@ export default function StepForm({ onSubmit, isSubmitting = false }: StepFormPro
           <Step3 formData={formData} />
         )}
 
+        {/* モデレーションエラー */}
+        {moderationError && (
+          <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+            <p className="text-sm text-red-700">{moderationError}</p>
+            <p className="text-xs text-red-500 mt-1">内容を修正して再度お試しください。</p>
+          </div>
+        )}
+
         {/* ナビゲーションボタン */}
         <div className="mt-8 flex gap-3">
           {currentStep > 1 && (
@@ -169,9 +206,20 @@ export default function StepForm({ onSubmit, isSubmitting = false }: StepFormPro
             <button
               type="button"
               onClick={handleNext}
-              className="flex-1 py-3 px-6 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700 transition-colors"
+              disabled={moderating}
+              className="flex-1 py-3 px-6 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700 transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
             >
-              次へ進む
+              {moderating ? (
+                <span className="flex items-center justify-center gap-2">
+                  <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                  内容を確認中...
+                </span>
+              ) : (
+                "次へ進む"
+              )}
             </button>
           ) : (
             <button
