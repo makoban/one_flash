@@ -44,6 +44,7 @@ export const metadata: Metadata = {
 
 const GA_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
 const AW_ID = process.env.NEXT_PUBLIC_AW_CONVERSION_ID;
+const GTAG_ID = GA_ID || AW_ID;
 
 export default function RootLayout({
   children,
@@ -54,10 +55,10 @@ export default function RootLayout({
     <html lang="ja">
       <head>
         {/* Google Analytics 4 + Google Ads */}
-        {GA_ID && (
+        {GTAG_ID && (
           <>
             <Script
-              src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
+              src={`https://www.googletagmanager.com/gtag/js?id=${GTAG_ID}`}
               strategy="afterInteractive"
             />
             <Script id="ga4-init" strategy="afterInteractive">
@@ -65,7 +66,7 @@ export default function RootLayout({
                 window.dataLayer = window.dataLayer || [];
                 function gtag(){dataLayer.push(arguments);}
                 gtag('js', new Date());
-                gtag('config', '${GA_ID}');
+                ${GA_ID ? `gtag('config', '${GA_ID}');` : ""}
                 ${AW_ID ? `gtag('config', '${AW_ID}');` : ""}
               `}
             </Script>
