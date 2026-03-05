@@ -415,6 +415,32 @@ async function getOverviewData(): Promise<OverviewData> {
 }
 
 // ---------------------------------------------------------------------------
+// エラーログ取得
+// ---------------------------------------------------------------------------
+
+async function getErrorLogs() {
+  const result = await query<{
+    id: string;
+    api_name: string;
+    level: string;
+    message: string;
+    context: Record<string, unknown> | null;
+    created_at: Date;
+  }>(
+    `SELECT id, api_name, level, message, context, created_at
+     FROM opf_error_logs
+     ORDER BY created_at DESC
+     LIMIT 50`
+  );
+  return {
+    errors: result.rows.map((r) => ({
+      ...r,
+      created_at: r.created_at instanceof Date ? r.created_at.toISOString() : r.created_at,
+    })),
+  };
+}
+
+// ---------------------------------------------------------------------------
 // Route Handler
 // ---------------------------------------------------------------------------
 
@@ -432,6 +458,11 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     switch (service) {
       case "opf": {
         const data = await getOpfStats();
+        return NextResponse.json(data);
+      }
+
+      case "errors": {
+        const data = await getErrorLogs();
         return NextResponse.json(data);
       }
 
