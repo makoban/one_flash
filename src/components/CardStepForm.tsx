@@ -177,20 +177,21 @@ export default function CardStepForm({ onSubmit, isSubmitting, onFirstInteractio
   async function handleNext(): Promise<void> {
     if (!validateCurrentStep()) return;
 
-    // Q4（連絡先）完了時 = テキスト入力がすべて揃ったタイミングでモデレーション
-    if (currentStep === 4) {
+    // Q2（キャッチコピー）・Q3（説明文）で都度モデレーションチェック
+    const moderationTargets: Record<number, { field: string; text: string }> = {
+      2: { field: "キャッチコピー", text: formData.catchphrase },
+      3: { field: "サービス内容・説明", text: formData.description },
+    };
+
+    const target = moderationTargets[currentStep];
+    if (target) {
       setModerating(true);
       setModerationError(null);
       try {
         const res = await fetch("/api/moderate", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            siteName: formData.siteName,
-            catchphrase: formData.catchphrase,
-            description: formData.description,
-            contactInfo: formData.contactInfo,
-          }),
+          body: JSON.stringify({ text: target.text, field: target.field }),
         });
         const data = (await res.json()) as { isSafe: boolean; reason: string };
         if (!data.isSafe) {
@@ -340,7 +341,7 @@ export default function CardStepForm({ onSubmit, isSubmitting, onFirstInteractio
           {currentStep < TOTAL_STEPS ? (
             <button
               type="button"
-              onClick={handleNext}
+              onClick={() => { void handleNext(); }}
               disabled={moderating}
               className="flex-1 py-3 px-6 bg-indigo-600 text-white rounded-xl font-semibold text-sm hover:bg-indigo-700 active:bg-indigo-800 transition-colors shadow-sm disabled:opacity-60 disabled:cursor-not-allowed"
             >
