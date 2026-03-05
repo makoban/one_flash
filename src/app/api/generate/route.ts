@@ -13,6 +13,7 @@ import { geminiModel, moderationModel } from "@/lib/gemini";
 import { buildModerationPrompt, parseModerationResponse } from "@/prompts/moderation";
 import { buildGeneratorPrompt, parseGeneratorResponse } from "@/prompts/generator";
 import { buildFeasibilityPrompt, parseFeasibilityResponse } from "@/prompts/feasibility";
+import { notifyCustomerError } from "@/lib/slack";
 import type { SiteFormData } from "@/lib/gemini";
 
 // Puppeteer を使用する screenshot API と同様に Node.js ランタイムを指定
@@ -102,6 +103,10 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         console.warn(`[generate] Attempt ${attempt} failed:`, error);
         if (attempt === 3) {
           console.error("[generate] All 3 attempts failed, using fallback template");
+          await notifyCustomerError("generate", "Gemini全リトライ失敗→フォールバック使用", {
+            siteName: formData.siteName, subdomain: formData.subdomain,
+            error: error instanceof Error ? error.message : String(error),
+          });
           html = buildFallbackHtml(formData);
           usedFallback = true;
           warnings.push("AI生成に一時的な問題が発生したため、シンプルなテンプレートで生成しました。修正機能で調整できます。");
@@ -119,6 +124,9 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ html, moderation, warnings }, { status: 200 });
   } catch (error: unknown) {
     console.error("[generate] Error:", error);
+    await notifyCustomerError("generate", "生成API致命的エラー", {
+      error: error instanceof Error ? error.message : String(error),
+    });
     const message = error instanceof Error ? error.message : "Internal server error";
     return NextResponse.json({ error: message }, { status: 500 });
   }

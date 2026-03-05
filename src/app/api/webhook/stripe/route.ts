@@ -27,6 +27,7 @@ import {
 } from "@/lib/db";
 import { getDraftHTML, deleteDraftHTML, deactivateSite, reactivateSite } from "@/lib/r2";
 import { sendSiteCompletionEmail, sendPaymentFailureEmail } from "@/lib/email";
+import { notifyCustomerError } from "@/lib/slack";
 import type Stripe from "stripe";
 
 export const runtime = "nodejs";
@@ -103,6 +104,10 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     }
   } catch (error: unknown) {
     console.error(`[webhook/stripe] Error handling ${event.type}:`, error);
+    await notifyCustomerError("webhook/stripe", `イベント処理失敗: ${event.type}`, {
+      event_id: event.id,
+      error: error instanceof Error ? error.message : String(error),
+    });
     // Stripe には200を返す（リトライ防止。エラーはログで追跡）
   }
 
@@ -118,6 +123,9 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session): Promis
   const metadata = session.metadata;
   if (!metadata?.draftId || !metadata?.subdomain) {
     console.error("[webhook/stripe] Missing metadata in session:", session.id);
+    await notifyCustomerError("webhook/stripe", "メタデータ不足で公開処理スキップ", {
+      session_id: session.id,
+    });
     return;
   }
 
@@ -146,6 +154,9 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session): Promis
   const html = await getDraftHTML(draftId);
   if (!html) {
     console.error(`[webhook/stripe] Draft not found: ${draftId}`);
+    await notifyCustomerError("webhook/stripe", "課金済みだがドラフトHTML未発見", {
+      subdomain, draftId, email: customerEmail,
+    });
     return;
   }
 
@@ -172,7 +183,11 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session): Promis
 
   if (!publishResponse.ok) {
     const errorData = (await publishResponse.json().catch(() => ({}))) as { error?: string };
-    console.error(`[webhook/stripe] Publish failed: ${errorData.error ?? publishResponse.statusText}`);
+    const publishError = errorData.error ?? publishResponse.statusText;
+    console.error(`[webhook/stripe] Publish failed: ${publishError}`);
+    await notifyCustomerError("webhook/stripe", "課金済みだがサイト公開失敗（R2アップロード）", {
+      subdomain, email: customerEmail, error: publishError,
+    });
     return;
   }
 
@@ -222,6 +237,10 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session): Promis
     }
   } catch (dbErr) {
     console.error("[webhook/stripe] DB registration failed (site still published):", dbErr);
+    await notifyCustomerError("webhook/stripe", "DB登録失敗（サイトは公開済み）", {
+      subdomain, email: customerEmail,
+      error: dbErr instanceof Error ? dbErr.message : String(dbErr),
+    });
   }
 
   // --- Step 4: ドラフト削除 ---
@@ -247,6 +266,10 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session): Promis
       console.log(`[webhook/stripe] Email sent to ${customerEmail}`);
     } catch (err) {
       console.error("[webhook/stripe] Failed to send email:", err);
+      await notifyCustomerError("webhook/stripe", "完了メール送信失敗（サイトは公開済み）", {
+        subdomain, email: customerEmail,
+        error: err instanceof Error ? err.message : String(err),
+      });
     }
   }
 
@@ -414,5 +437,9 @@ async function handlePaymentFailed(invoice: Stripe.Invoice): Promise<void> {
     }
   } catch (emailErr) {
     console.error("[webhook/stripe] Failed to send payment failure email:", emailErr);
+    await notifyCustomerError("webhook/stripe", "決済失敗通知メール送信失敗", {
+      subscription_id: subId,
+      error: emailErr instanceof Error ? emailErr.message : String(emailErr),
+    });
   }
 }

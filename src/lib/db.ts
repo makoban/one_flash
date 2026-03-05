@@ -25,12 +25,12 @@ function getPool(): Pool {
     throw new Error("Missing environment variable: DATABASE_URL");
   }
 
+  // Render PostgreSQL は SSL 必須。DATABASE_URL に localhost が含まれる場合のみ SSL を無効化
+  const isLocal = databaseUrl.includes("localhost") || databaseUrl.includes("127.0.0.1");
+
   const pool = new Pool({
     connectionString: databaseUrl,
-    ssl:
-      process.env.NODE_ENV === "production"
-        ? { rejectUnauthorized: false }
-        : false,
+    ssl: isLocal ? false : { rejectUnauthorized: false },
     max: 10,
     idleTimeoutMillis: 30_000,
     connectionTimeoutMillis: 10_000,
@@ -253,6 +253,19 @@ CREATE TABLE IF NOT EXISTS opf_html_backups (
   html TEXT NOT NULL,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+CREATE TABLE IF NOT EXISTS opf_error_logs (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  api_name VARCHAR(100) NOT NULL,
+  level VARCHAR(20) NOT NULL DEFAULT 'error',
+  message TEXT NOT NULL,
+  context JSONB,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_opf_error_logs_api_name ON opf_error_logs(api_name);
+CREATE INDEX IF NOT EXISTS idx_opf_error_logs_created_at ON opf_error_logs(created_at);
+CREATE INDEX IF NOT EXISTS idx_opf_error_logs_level ON opf_error_logs(level);
 `;
 
 /** opf_* テーブルが存在しなければ作成する */
@@ -370,10 +383,6 @@ export async function updateSiteIsActive(subdomain: string, isActive: boolean): 
   );
 }
 
-// ---------------------------------------------------------------------------
-// opf_ad_events CRUD
-// ---------------------------------------------------------------------------
-
 export interface OpfAdEventRow {
   id: string;
   user_id: string | null;
@@ -390,6 +399,45 @@ export interface OpfAdEventRow {
   created_at: Date;
   [key: string]: unknown;
 }
+
+// ---------------------------------------------------------------------------
+// opf_error_logs CRUD
+// ---------------------------------------------------------------------------
+
+export interface OpfErrorLogRow {
+  id: string;
+  api_name: string;
+  level: string;
+  message: string;
+  context: Record<string, unknown> | null;
+  created_at: Date;
+}
+
+export async function insertErrorLog(params: {
+  apiName: string;
+  level?: "error" | "warn" | "info";
+  message: string;
+  context?: Record<string, string | number | undefined>;
+}): Promise<void> {
+  try {
+    await query(
+      `INSERT INTO opf_error_logs (api_name, level, message, context)
+       VALUES ($1, $2, $3, $4)`,
+      [
+        params.apiName,
+        params.level ?? "error",
+        params.message,
+        params.context ? JSON.stringify(params.context) : null,
+      ]
+    );
+  } catch {
+    // DB書き込み失敗でもアプリは止めない
+  }
+}
+
+// ---------------------------------------------------------------------------
+// opf_ad_events CRUD
+// ---------------------------------------------------------------------------
 
 export async function insertAdEvent(params: {
   eventType: string;

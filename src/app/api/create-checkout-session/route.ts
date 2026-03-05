@@ -19,6 +19,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { stripe, INITIAL_FEE, MONTHLY_FEE, CURRENCY } from "@/lib/stripe";
 import { uploadDraftHTML } from "@/lib/r2";
 import type { SiteFormData } from "@/lib/gemini";
+import { notifyCustomerError } from "@/lib/slack";
 import crypto from "crypto";
 
 // ---------------------------------------------------------------------------
@@ -43,9 +44,11 @@ interface CreateCheckoutRequestBody {
 // ---------------------------------------------------------------------------
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
+  let formData: SiteFormData | undefined;
   try {
     const body = (await request.json()) as CreateCheckoutRequestBody;
-    const { formData, html, utm, sessionId } = body;
+    formData = body.formData;
+    const { html, utm, sessionId } = body;
 
     // --- バリデーション ---
     if (!html || typeof html !== "string") {
@@ -124,6 +127,11 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ url: session.url }, { status: 200 });
   } catch (error: unknown) {
     console.error("[create-checkout-session] Error:", error);
+    await notifyCustomerError("create-checkout-session", "Checkout作成失敗", {
+      siteName: formData?.siteName,
+      subdomain: formData?.subdomain,
+      error: error instanceof Error ? error.message : String(error),
+    });
     const message =
       error instanceof Error ? error.message : "Internal server error";
     return NextResponse.json({ error: message }, { status: 500 });

@@ -9,12 +9,14 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
+import { notifyCustomerError } from "@/lib/slack";
 
 export const runtime = "nodejs";
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
+  let body: { html?: string; subdomain?: string; formData?: Record<string, unknown>; email?: string; password?: string } | undefined;
   try {
-    const body = (await request.json()) as {
+    body = (await request.json()) as {
       html?: string;
       subdomain?: string;
       formData?: Record<string, unknown>;
@@ -79,6 +81,10 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     );
   } catch (error: unknown) {
     console.error("[publish] Error:", error);
+    await notifyCustomerError("publish", "サイト公開失敗", {
+      subdomain: body?.subdomain,
+      error: error instanceof Error ? error.message : String(error),
+    });
     const message = error instanceof Error ? error.message : "Publish failed";
     return NextResponse.json({ error: message }, { status: 500 });
   }

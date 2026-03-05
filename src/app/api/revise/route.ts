@@ -20,6 +20,7 @@ import { query, getSiteByRevisionToken, findOrCreateUser } from "@/lib/db";
 import { sendRevisionCompletionEmail } from "@/lib/email";
 import { buildRefinerPrompt, parseRefinerResponse, validateRevisionInstruction } from "@/prompts/refiner";
 import { buildFeasibilityPrompt, parseFeasibilityResponse } from "@/prompts/feasibility";
+import { notifyCustomerError } from "@/lib/slack";
 import type { OpfSiteRow } from "@/lib/db";
 
 // ---------------------------------------------------------------------------
@@ -130,6 +131,10 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       } catch (error) {
         console.warn(`[revise] Refinement attempt ${attempt} failed:`, error);
         if (attempt === 3) {
+          await notifyCustomerError("revise", "修正Gemini全リトライ失敗", {
+            subdomain: site.subdomain, siteName: site.site_name ?? "",
+            error: error instanceof Error ? error.message : String(error),
+          });
           return NextResponse.json(
             { error: "修正処理に失敗しました。もう一度お試しください。" },
             { status: 500 }
@@ -187,6 +192,9 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     );
   } catch (error: unknown) {
     console.error("[revise] Error:", error);
+    await notifyCustomerError("revise", "修正API致命的エラー", {
+      error: error instanceof Error ? error.message : String(error),
+    });
     const message =
       error instanceof Error ? error.message : "Internal server error";
     return NextResponse.json({ error: message }, { status: 500 });
