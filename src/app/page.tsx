@@ -6,9 +6,44 @@
  * 作品例はスクリーンショット画像で表示し、リンクで実物を見せる。
  */
 
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
 import UtmCapture from "@/components/UtmCapture";
+
+/**
+ * Google Ads コンバージョンイベントを発火する。
+ * グローバルタグ（AW-17822680636）は layout.tsx で設置済み。
+ * window.gtag は layout.tsx のインラインスクリプトで定義されるため
+ * unknown キャストでアクセスする。
+ */
+function fireConversionEvent(): void {
+  if (typeof window === "undefined") return;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const gtagFn = (window as unknown as Record<string, unknown>)["gtag"] as ((...args: unknown[]) => void) | undefined;
+  if (typeof gtagFn === "function") {
+    gtagFn("event", "conversion", {
+      send_to: "AW-17822680636/ObktCNO1nvwbELyMwrJC",
+      value: 3980.0,
+      currency: "JPY",
+    });
+  }
+}
+
+/**
+ * CTA クリック時にコンバージョンを発火し、300ms 後に遷移する。
+ * Next.js の Link では href="/create" の内部遷移を使いつつ、
+ * gtag のタグ送信を確保するために setTimeout でわずかに遅延させる。
+ */
+function handleCtaClick(e: React.MouseEvent<HTMLAnchorElement>): void {
+  e.preventDefault();
+  const href = (e.currentTarget as HTMLAnchorElement).href;
+  fireConversionEvent();
+  setTimeout(() => {
+    window.location.href = href;
+  }, 300);
+}
 
 const WORKER_BASE = "https://onepage-flash-router.ai-fudosan.workers.dev/s";
 
@@ -85,6 +120,7 @@ export default function HomePage() {
             </Link>
             <Link
               href="/create"
+              onClick={handleCtaClick}
               className="px-2.5 py-1.5 sm:px-5 sm:py-2.5 bg-amber-500 text-gray-900 text-[2.6vw] sm:text-sm font-bold rounded-md sm:rounded-lg hover:bg-amber-400 transition-all duration-300 shadow-[0_0_20px_rgba(245,158,11,0.25)] hover:shadow-[0_0_30px_rgba(245,158,11,0.4)]"
             >
               今すぐ作成
@@ -133,6 +169,7 @@ export default function HomePage() {
           <div className="flex flex-col sm:flex-row gap-2.5 sm:gap-4 justify-center px-0 sm:px-2">
             <Link
               href="/create"
+              onClick={handleCtaClick}
               className="inline-flex items-center justify-center gap-1.5 bg-amber-500 hover:bg-amber-400 text-gray-900 font-bold px-5 py-2.5 sm:px-8 sm:py-4 rounded-lg sm:rounded-xl text-[3vw] sm:text-lg transition-all duration-300 hover:scale-105 shadow-[0_0_30px_rgba(245,158,11,0.35)] hover:shadow-[0_0_50px_rgba(245,158,11,0.55)] whitespace-nowrap"
             >
               無料でプレビューを見る
@@ -195,6 +232,7 @@ export default function HomePage() {
             {/* 最後のカード: CTA */}
             <Link
               href="/create"
+              onClick={handleCtaClick}
               className="flex flex-col items-center justify-center rounded-xl sm:rounded-2xl border-2 border-dashed border-[#2D2D44] hover:border-amber-500/50 transition-all duration-300 p-6 sm:p-8 min-h-[200px] sm:min-h-[320px]"
             >
               <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-amber-500/10 flex items-center justify-center mb-3 sm:mb-4">
@@ -423,6 +461,7 @@ export default function HomePage() {
 
             <Link
               href="/create"
+              onClick={handleCtaClick}
               className="block w-full py-2.5 sm:py-4 bg-amber-500 hover:bg-amber-400 text-gray-900 font-bold rounded-lg sm:rounded-xl text-[3vw] sm:text-lg transition-all duration-300 shadow-[0_0_30px_rgba(245,158,11,0.3)] hover:shadow-[0_0_50px_rgba(245,158,11,0.5)] text-center whitespace-nowrap"
             >
               無料でプレビューを見る
@@ -450,6 +489,7 @@ export default function HomePage() {
 
           <Link
             href="/create"
+            onClick={handleCtaClick}
             className="inline-flex items-center justify-center gap-1.5 bg-amber-500 hover:bg-amber-400 text-gray-900 font-bold px-5 py-2.5 sm:px-10 sm:py-5 rounded-lg sm:rounded-xl text-[3vw] sm:text-xl transition-all duration-300 hover:scale-105 shadow-[0_0_40px_rgba(245,158,11,0.4)] hover:shadow-[0_0_60px_rgba(245,158,11,0.6)] whitespace-nowrap"
           >
             無料でサイトを作ってみる
