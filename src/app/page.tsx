@@ -108,26 +108,26 @@ export default function HomePage() {
 
         <div className="relative z-10 text-center max-w-3xl mx-auto px-2 sm:px-4">
           <p className="inline-block px-2 py-0.5 sm:px-4 sm:py-1.5 bg-amber-500/10 text-amber-400 border border-amber-500/20 text-[2.2vw] sm:text-xs font-semibold rounded-full mb-5 sm:mb-8 tracking-wider whitespace-nowrap">
-            AI POWERED HP BUILDER
+            質問6個でHP完成 · 最短10分 · AI自動生成
           </p>
 
           <h1 className="text-[5vw] sm:text-3xl md:text-4xl lg:text-5xl font-black leading-[1.5] sm:leading-[1.3] mb-3 sm:mb-6 whitespace-nowrap">
-            いまどきホームページなんて
+            HPがない？ 6つの質問に答えて。
             <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-amber-500">
-              「3,980円」
+              3,980円
             </span>
-            で作る時代。
+            でURL発行まで完了。
           </h1>
 
           <p className="text-[3.2vw] sm:text-lg md:text-xl text-slate-300 leading-relaxed mb-2 sm:mb-3 whitespace-nowrap">
-            シンプル・最小機能で十分。
+            業界No.1のコスト。秘密はAI自動生成。
             <br />
-            AIがあなたのホームページを10分で作ります。
+            サーバー・SSL込み月480円。HPをお急ぎの方へ。
           </p>
 
           <p className="text-[2.8vw] sm:text-sm text-slate-500 mb-6 sm:mb-10 whitespace-nowrap">
-            初期費用 3,980円 + 月額 480円/月（初月無料）/ いつでも解約可
+            初期3,980円 + 月額480円（税込・初月無料・サーバーSSL込）/ いつでも解約可
           </p>
 
           <div className="flex flex-col sm:flex-row gap-2.5 sm:gap-4 justify-center px-0 sm:px-2">
@@ -152,10 +152,10 @@ export default function HomePage() {
       <section className="bg-[#1A1A2E] py-14 sm:py-20 md:py-28 px-2 sm:px-4">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-[4.2vw] sm:text-3xl md:text-4xl font-bold text-center mb-2 sm:mb-3 whitespace-nowrap">
-            AIが作った<span className="text-amber-400">作品例</span>
+            AIが<span className="text-amber-400">実際に作った</span>サイト
           </h2>
           <p className="text-center text-slate-400 text-[2.7vw] sm:text-base mb-8 sm:mb-14 whitespace-nowrap">
-            すべて実際にAIが生成したホームページです。クリックで実物が見れます。
+            全部3,980円。クリックで実物をご覧ください。
           </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
@@ -211,18 +211,18 @@ export default function HomePage() {
       <section className="bg-[#0F0F1A] py-14 sm:py-20 md:py-28 px-2 sm:px-4">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-[4.2vw] sm:text-3xl md:text-4xl font-bold text-center mb-3 sm:mb-4 whitespace-nowrap">
-            こんな<span className="text-amber-400">お悩み</span>、ありませんか？
+            HPが<span className="text-amber-400">ない</span>だけで、損してませんか？
           </h2>
           <p className="text-center text-slate-400 text-[2.8vw] sm:text-base mb-8 sm:mb-14 whitespace-nowrap">
-            ホームページを持ちたいけど、踏み出せない理由
+            「作りたいけど高い・難しい・時間ない」——もう言い訳は不要です
           </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             {[
-              { icon: "M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z", text: "制作会社に頼んだら\n10万円以上と言われた" },
-              { icon: "M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z", text: "忙しすぎて\nHPのことまで手が回らない" },
-              { icon: "M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z", text: "自分で作ろうとしたけど\nデザインが上手くいかない" },
-              { icon: "M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z", text: "ネットで検索しても\n自分のお店が出てこない" },
+              { icon: "M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z", text: "制作会社の見積もり10万円以上…\n個人事業主には高すぎる" },
+              { icon: "M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z", text: "本業が忙しすぎて\nHP制作なんて後回し" },
+              { icon: "M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z", text: "自作しようとしたけど\n結局挫折して未完成のまま" },
+              { icon: "M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z", text: "「お店の名前 + 地域名」で\n検索しても何も出てこない" },
             ].map((item) => (
               <div
                 key={item.text}
@@ -248,10 +248,10 @@ export default function HomePage() {
       <section className="bg-[#0F0F1A] py-14 sm:py-20 md:py-28 px-2 sm:px-4">
         <div className="max-w-3xl mx-auto">
           <h2 className="text-[4.2vw] sm:text-3xl md:text-4xl font-bold text-center mb-3 sm:mb-4 whitespace-nowrap">
-            聞かれるのは<span className="text-amber-400">6つ</span>だけ
+            聞かれるのは<span className="text-amber-400">たった6つ</span>
           </h2>
           <p className="text-center text-slate-400 text-[2.7vw] sm:text-base mb-8 sm:mb-14 whitespace-nowrap">
-            この6つの質問に答えるだけで、AIがプロ品質のHPを自動生成します
+            この6つに答えるだけ。あとはAIが全部やります
           </p>
 
           <div className="space-y-3 sm:space-y-4">
@@ -335,7 +335,7 @@ export default function HomePage() {
       <section className="bg-[#1A1A2E] py-14 sm:py-20 md:py-28 px-2 sm:px-4">
         <div className="max-w-5xl mx-auto">
           <h2 className="text-[4.2vw] sm:text-3xl md:text-4xl font-bold text-center mb-10 sm:mb-16 whitespace-nowrap">
-            たった<span className="text-amber-400">3ステップ</span>で完成
+            最短<span className="text-amber-400">10分</span>。3ステップで公開
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-8">
@@ -383,9 +383,9 @@ export default function HomePage() {
       <section className="bg-[#0F0F1A] py-14 sm:py-20 md:py-28 px-2 sm:px-4">
         <div className="max-w-lg mx-auto text-center">
           <h2 className="text-[4.2vw] sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4 whitespace-nowrap">
-            シンプルな<span className="text-amber-400">料金</span>
+            この価格、<span className="text-amber-400">本気</span>です
           </h2>
-          <p className="text-slate-400 text-[2.8vw] sm:text-base mb-8 sm:mb-12 whitespace-nowrap">わかりやすい1プランのみ。追加費用なし。</p>
+          <p className="text-slate-400 text-[2.8vw] sm:text-base mb-8 sm:mb-12 whitespace-nowrap">サーバー・SSL・ドメイン全部込み。追加費用なし。</p>
 
           <div className="bg-gradient-to-b from-[#1E2035] to-[#1A1A2E] rounded-2xl sm:rounded-3xl border border-indigo-500/30 p-4 sm:p-8 md:p-10 shadow-[0_0_60px_rgba(99,102,241,0.1)]">
             <span className="inline-flex items-center gap-1 bg-amber-500/10 text-amber-400 border border-amber-500/30 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full text-[2.5vw] sm:text-xs font-medium mb-4 sm:mb-6">
@@ -440,12 +440,12 @@ export default function HomePage() {
 
         <div className="relative z-10 text-center max-w-3xl mx-auto">
           <h2 className="text-[4.2vw] sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4 whitespace-nowrap">
-            今日、ホームページを手に入れよう
+            HPがないのは、もったいない。
           </h2>
           <p className="text-slate-400 mb-6 sm:mb-10 text-[3vw] sm:text-lg leading-relaxed whitespace-nowrap">
-            あなたのお店・サービスを、
+            6つの質問に答えるだけ。
             <br className="sm:hidden" />
-            もっと多くの人に届けませんか？
+            10分後にはあなた専用のURLが届きます。
           </p>
 
           <Link
