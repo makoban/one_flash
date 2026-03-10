@@ -8,6 +8,7 @@
 
 "use client";
 
+import { useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import UtmCapture from "@/components/UtmCapture";
@@ -84,6 +85,32 @@ const jsonLd = {
 };
 
 export default function HomePage() {
+  // スクロール計測: 各セクションが30%以上表示されたタイミングでBeacon送信
+  useEffect(() => {
+    const sid = localStorage.getItem('_bx_sid') || crypto.randomUUID();
+    localStorage.setItem('_bx_sid', sid);
+    const dt = window.innerWidth < 768 ? 'mobile' : 'desktop';
+    const ref = document.referrer || '';
+    const sent: Record<string, boolean> = {};
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        const secId = entry.target.getAttribute('data-section') || entry.target.id;
+        if (!secId || sent[secId]) return;
+        sent[secId] = true;
+        const blob = new Blob([JSON.stringify({
+          session_id: sid, service_key: 'onepage-flash',
+          section_id: secId, device_type: dt, referrer: ref
+        })], { type: 'application/json' });
+        navigator.sendBeacon('https://bantex-ads-dashboard.onrender.com/api/track/scroll', blob);
+      });
+    }, { threshold: 0.3 });
+
+    document.querySelectorAll('section[id]').forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <main className="min-h-screen bg-[#0F0F1A] text-slate-100 overflow-x-hidden">
       <script
@@ -130,7 +157,7 @@ export default function HomePage() {
       </nav>
 
       {/* ヒーローセクション */}
-      <section className="relative min-h-[80vh] sm:min-h-[90vh] flex items-center justify-center overflow-hidden pt-12 sm:pt-16">
+      <section id="hero" className="relative min-h-[80vh] sm:min-h-[90vh] flex items-center justify-center overflow-hidden pt-12 sm:pt-16">
         {/* 背景 */}
         <div className="absolute inset-0 bg-gradient-to-br from-indigo-900/20 via-transparent to-violet-900/20" />
         <div
@@ -186,7 +213,7 @@ export default function HomePage() {
       </section>
 
       {/* 作品例セクション — iframe で実サイト縮小表示 */}
-      <section className="bg-[#1A1A2E] py-14 sm:py-20 md:py-28 px-2 sm:px-4">
+      <section id="samples" className="bg-[#1A1A2E] py-14 sm:py-20 md:py-28 px-2 sm:px-4">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-[4.2vw] sm:text-3xl md:text-4xl font-bold text-center mb-2 sm:mb-3 whitespace-nowrap">
             AIが<span className="text-amber-400">実際に作った</span>サイト
@@ -246,7 +273,7 @@ export default function HomePage() {
       </section>
 
       {/* お悩みセクション */}
-      <section className="bg-[#0F0F1A] py-14 sm:py-20 md:py-28 px-2 sm:px-4">
+      <section id="pain" className="bg-[#0F0F1A] py-14 sm:py-20 md:py-28 px-2 sm:px-4">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-[4.2vw] sm:text-3xl md:text-4xl font-bold text-center mb-3 sm:mb-4 whitespace-nowrap">
             HPが<span className="text-amber-400">ない</span>だけで、損してませんか？
@@ -283,7 +310,7 @@ export default function HomePage() {
       </section>
 
       {/* 聞かれる6つの質問セクション */}
-      <section className="bg-[#0F0F1A] py-14 sm:py-20 md:py-28 px-2 sm:px-4">
+      <section id="questions" className="bg-[#0F0F1A] py-14 sm:py-20 md:py-28 px-2 sm:px-4">
         <div className="max-w-3xl mx-auto">
           <h2 className="text-[4.2vw] sm:text-3xl md:text-4xl font-bold text-center mb-3 sm:mb-4 whitespace-nowrap">
             聞かれるのは<span className="text-amber-400">たった6つ</span>
@@ -370,7 +397,7 @@ export default function HomePage() {
       </section>
 
       {/* ステップセクション */}
-      <section className="bg-[#1A1A2E] py-14 sm:py-20 md:py-28 px-2 sm:px-4">
+      <section id="steps" className="bg-[#1A1A2E] py-14 sm:py-20 md:py-28 px-2 sm:px-4">
         <div className="max-w-5xl mx-auto">
           <h2 className="text-[4.2vw] sm:text-3xl md:text-4xl font-bold text-center mb-10 sm:mb-16 whitespace-nowrap">
             最短<span className="text-amber-400">10分</span>。3ステップで公開
@@ -418,7 +445,7 @@ export default function HomePage() {
       </section>
 
       {/* 料金セクション */}
-      <section className="bg-[#0F0F1A] py-14 sm:py-20 md:py-28 px-2 sm:px-4">
+      <section id="pricing" className="bg-[#0F0F1A] py-14 sm:py-20 md:py-28 px-2 sm:px-4">
         <div className="max-w-lg mx-auto text-center">
           <h2 className="text-[4.2vw] sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4 whitespace-nowrap">
             この価格、<span className="text-amber-400">本気</span>です
@@ -471,7 +498,7 @@ export default function HomePage() {
       </section>
 
       {/* 最終CTA */}
-      <section className="relative py-16 sm:py-24 md:py-32 overflow-hidden px-2 sm:px-4">
+      <section id="cta-final" className="relative py-16 sm:py-24 md:py-32 overflow-hidden px-2 sm:px-4">
         <div className="absolute inset-0 bg-gradient-to-br from-indigo-900/20 via-[#0F0F1A] to-violet-900/20" />
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="w-64 sm:w-96 h-64 sm:h-96 bg-amber-500/5 rounded-full blur-3xl" />
