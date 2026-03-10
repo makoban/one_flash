@@ -134,7 +134,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session): Promis
     subdomain,
     siteName = "",
     email: metaEmail = "",
-    colorTheme = "simple",
+    colorTheme = "clean-light",
     catchphrase = "",
     contactInfo = "",
     description = "",

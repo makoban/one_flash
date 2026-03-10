@@ -29,25 +29,20 @@ const COLOR_THEMES: Array<{
   label: string;
   description: string;
   colors: string[];
+  recommend: string;
 }> = [
-  {
-    value: "simple",
-    label: "シンプル",
-    description: "白を基調とした清潔感のあるすっきりしたデザイン",
-    colors: ["#ffffff", "#374151", "#e5e7eb"],
-  },
-  {
-    value: "colorful",
-    label: "カラフル",
-    description: "鮮やかな色使いで楽しく親しみやすいデザイン",
-    colors: ["#7c3aed", "#ec4899", "#f59e0b"],
-  },
-  {
-    value: "business",
-    label: "ビジネス",
-    description: "紺を基調とした信頼感のあるプロフェッショナルなデザイン",
-    colors: ["#0c1524", "#c9a96e", "#1a3a5c"],
-  },
+  { value: "clean-light", label: "クリーンライト", description: "白基調の清潔感あるデザイン", colors: ["#ffffff", "#6366f1", "#f3f4f6"], recommend: "クリニック・薬局・歯科・整体院" },
+  { value: "royal-navy", label: "ロイヤルネイビー", description: "紺×ゴールドの格式高いデザイン", colors: ["#0c1524", "#c9a96e", "#1a3a5c"], recommend: "病院・弁護士・税理士・コンサル" },
+  { value: "bloom-pink", label: "ブルームピンク", description: "華やかで目を引くグラデーション", colors: ["#7c3aed", "#ec4899", "#f59e0b"], recommend: "ネイルサロン・エステ・フラワーショップ" },
+  { value: "soft-blossom", label: "ソフトブロッサム", description: "やさしいピンクのナチュラルデザイン", colors: ["#ffffff", "#ec4899", "#fce7f3"], recommend: "美容室・リラクゼーション・ヨガ教室" },
+  { value: "sunset-cafe", label: "サンセットカフェ", description: "温かみのあるオレンジ系グラデーション", colors: ["#ea580c", "#f59e0b", "#fbbf24"], recommend: "カフェ・ベーカリー・雑貨屋・パン教室" },
+  { value: "dark-dining", label: "ダークダイニング", description: "高級感のあるダーク×ゴールド", colors: ["#0c1524", "#c9a96e", "#16213e"], recommend: "レストラン・バー・寿司屋・焼肉店" },
+  { value: "trust-blue", label: "トラストブルー", description: "知性と信頼を伝えるストライプ装飾", colors: ["#0c1524", "#c9a96e", "#1a3a5c"], recommend: "弁護士・司法書士・会計事務所" },
+  { value: "modern-minimal", label: "モダンミニマル", description: "無駄のないシャープな白基調デザイン", colors: ["#ffffff", "#374151", "#f1f5f9"], recommend: "税理士・行政書士・社労士・FP" },
+  { value: "pop-school", label: "ポップスクール", description: "楽しさが伝わるカラフルデザイン", colors: ["#2563eb", "#7c3aed", "#ec4899"], recommend: "英会話教室・学習塾・ピアノ教室・ダンス教室" },
+  { value: "blueprint", label: "ブループリント", description: "設計図モチーフの堅実なデザイン", colors: ["#ffffff", "#374151", "#f3f4f6"], recommend: "工務店・リフォーム・建築設計・不動産" },
+  { value: "free-wave", label: "フリーウェーブ", description: "自由で個性的なウェーブデザイン", colors: ["#7c3aed", "#ec4899", "#f59e0b"], recommend: "デザイナー・フリーランス・写真家・ハンドメイド" },
+  { value: "executive", label: "エグゼクティブ", description: "洗練されたプレミアムデザイン", colors: ["#0c1524", "#c9a96e", "#1a3a5c"], recommend: "コンサルタント・経営者・士業全般・IT企業" },
 ];
 
 /** サブドメインを自動生成する（ランダム8文字） */
@@ -81,7 +76,7 @@ const INITIAL_FORM_DATA: SiteFormData = {
   catchphrase: "",
   description: "",
   contactInfo: "",
-  colorTheme: "simple",
+  colorTheme: "clean-light",
   email: "",
   subdomain: "",
 };
@@ -555,7 +550,7 @@ function StepColorTheme({ value, onChange }: StepColorThemeProps) {
       <h2 className="text-lg font-bold text-gray-900 mt-1 mb-5 leading-snug">
         サイトの雰囲気はどれが近いですか？
       </h2>
-      <div className="space-y-3">
+      <div className="grid grid-cols-2 gap-3">
         {COLOR_THEMES.map((theme) => {
           const isSelected = value === theme.value;
           return (
@@ -563,46 +558,28 @@ function StepColorTheme({ value, onChange }: StepColorThemeProps) {
               key={theme.value}
               type="button"
               onClick={() => onChange(theme.value)}
-              className={`w-full text-left p-4 rounded-xl border-2 transition-all ${
+              className={`text-left p-3 rounded-xl border-2 transition-all ${
                 isSelected
                   ? "border-indigo-500 bg-indigo-50"
                   : "border-gray-100 hover:border-gray-300 bg-white"
               }`}
             >
-              <div className="flex items-center gap-4">
-                {/* カラーパレット（小さな丸） */}
-                <div className="flex gap-1.5 flex-shrink-0">
-                  {theme.colors.map((color, i) => (
-                    <span
-                      key={i}
-                      className="w-5 h-5 rounded-full border border-gray-200 inline-block"
-                      style={{ backgroundColor: color }}
-                    />
-                  ))}
-                </div>
-
-                {/* テーマ情報 */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className="font-semibold text-sm text-gray-900">{theme.label}</span>
-                    {isSelected && (
-                      <span className="text-xs bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full font-medium">
-                        選択中
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-xs text-gray-500 mt-0.5">{theme.description}</p>
-                </div>
-
-                {/* ラジオインジケーター */}
-                <div
-                  className={`w-5 h-5 rounded-full border-2 flex-shrink-0 flex items-center justify-center transition-all ${
-                    isSelected ? "border-indigo-500 bg-indigo-500" : "border-gray-300"
-                  }`}
-                >
-                  {isSelected && <div className="w-2 h-2 rounded-full bg-white" />}
-                </div>
+              <div className="flex gap-1.5 mb-2">
+                {theme.colors.map((color, i) => (
+                  <span
+                    key={i}
+                    className="w-4 h-4 rounded-full border border-gray-200 inline-block"
+                    style={{ backgroundColor: color }}
+                  />
+                ))}
+                {isSelected && (
+                  <span className="ml-auto text-[10px] bg-indigo-100 text-indigo-700 px-1.5 py-0.5 rounded-full font-medium">
+                    選択中
+                  </span>
+                )}
               </div>
+              <div className="font-semibold text-xs text-gray-900">{theme.label}</div>
+              <p className="text-[10px] text-gray-500 mt-0.5 leading-relaxed">{theme.recommend}</p>
             </button>
           );
         })}

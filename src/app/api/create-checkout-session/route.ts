@@ -150,6 +150,7 @@ function validateFormData(formData: SiteFormData | undefined): string | null {
   if (!formData.catchphrase || formData.catchphrase.trim().length === 0) return "catchphrase is required";
   if (!formData.description || formData.description.trim().length === 0) return "description is required";
   if (!formData.contactInfo || formData.contactInfo.trim().length === 0) return "contactInfo is required";
-  if (!["simple", "colorful", "business"].includes(formData.colorTheme)) return "Invalid colorTheme";
+  const VALID_THEMES = ["clean-light", "royal-navy", "bloom-pink", "soft-blossom", "sunset-cafe", "dark-dining", "trust-blue", "modern-minimal", "pop-school", "blueprint", "free-wave", "executive"];
+  if (!VALID_THEMES.includes(formData.colorTheme)) return "Invalid colorTheme";
   return null;
 }

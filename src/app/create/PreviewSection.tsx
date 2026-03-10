@@ -42,9 +42,18 @@ interface PreviewSectionProps {
 type DeviceTab = "pc" | "mobile";
 
 const THEME_LABELS: Record<SiteFormData["colorTheme"], string> = {
-  simple: "シンプル",
-  colorful: "カラフル",
-  business: "ビジネス",
+  "clean-light": "クリーンライト",
+  "royal-navy": "ロイヤルネイビー",
+  "bloom-pink": "ブルームピンク",
+  "soft-blossom": "ソフトブロッサム",
+  "sunset-cafe": "サンセットカフェ",
+  "dark-dining": "ダークダイニング",
+  "trust-blue": "トラストブルー",
+  "modern-minimal": "モダンミニマル",
+  "pop-school": "ポップスクール",
+  "blueprint": "ブループリント",
+  "free-wave": "フリーウェーブ",
+  "executive": "エグゼクティブ",
 };
 
 // ---------------------------------------------------------------------------
@@ -208,22 +217,15 @@ export default function PreviewSection({
               {/* カラーテーマ切り替え */}
               <div className="mt-3">
                 <label className="block text-xs font-medium text-gray-500 mb-1.5">テーマ変更</label>
-                <div className="flex gap-2">
-                  {(["simple", "colorful", "business"] as const).map((t) => (
-                    <button
-                      key={t}
-                      type="button"
-                      onClick={() => setEditData((prev) => ({ ...prev, colorTheme: t }))}
-                      className={`flex-1 py-2 px-2 rounded-lg text-xs font-medium transition-all ${
-                        editData.colorTheme === t
-                          ? "bg-indigo-600 text-white shadow-sm"
-                          : "bg-white text-gray-600 hover:bg-gray-100 border border-gray-200"
-                      }`}
-                    >
-                      {THEME_LABELS[t]}
-                    </button>
+                <select
+                  value={editData.colorTheme}
+                  onChange={(e) => setEditData((prev) => ({ ...prev, colorTheme: e.target.value as SiteFormData["colorTheme"] }))}
+                  className="w-full py-2 px-3 rounded-lg text-xs font-medium bg-white text-gray-600 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                >
+                  {Object.entries(THEME_LABELS).map(([value, label]) => (
+                    <option key={value} value={value}>{label}</option>
                   ))}
-                </div>
+                </select>
               </div>
 
               {/* 再生成ボタン */}

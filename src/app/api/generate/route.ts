@@ -181,13 +181,20 @@ function postProcessHtml(html: string): string {
 // フォールバックHTMLテンプレート（Gemini 全リトライ失敗時）
 // ---------------------------------------------------------------------------
 
+function getBaseThemeCategory(theme: string): "light" | "colorful" | "dark" {
+  if (["royal-navy", "dark-dining", "trust-blue", "executive"].includes(theme)) return "dark";
+  if (["bloom-pink", "sunset-cafe", "pop-school", "free-wave"].includes(theme)) return "colorful";
+  return "light"; // clean-light, soft-blossom, modern-minimal, blueprint
+}
+
 function buildFallbackHtml(formData: SiteFormData): string {
   const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
-  const theme = formData.colorTheme ?? "simple";
-  const colors = theme === "colorful"
-    ? { bg: "#FFF8F0", accent: "#FF6B35", text: "#333" }
-    : theme === "business"
+  const theme = formData.colorTheme ?? "clean-light";
+  const category = getBaseThemeCategory(theme);
+  const colors = category === "dark"
     ? { bg: "#F8FAFC", accent: "#1E40AF", text: "#1E293B" }
+    : category === "colorful"
+    ? { bg: "#FFF8F0", accent: "#FF6B35", text: "#333" }
     : { bg: "#FFFFFF", accent: "#6366F1", text: "#374151" };
 
   return `<!DOCTYPE html>

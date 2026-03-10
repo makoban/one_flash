@@ -21,10 +21,10 @@ import type { SiteFormData } from "@/lib/gemini";
 // ---------------------------------------------------------------------------
 
 const COLOR_THEMES = {
-  simple: {
-    label: "シンプル・クリーン",
+  "clean-light": {
+    label: "クリーンライト",
     heroStyle:
-      "白を基調としたクリーンで清潔感のあるデザイン。Noto Sans JPのすっきりしたゴシック体で読みやすさと信頼感を両立。余白を贅沢に使い、必要最小限の色で洗練された印象。",
+      "白を基調としたクリーンで清潔感のあるデザイン。Noto Sans JPのすっきりしたゴシック体で読みやすさと信頼感を両立。余白を贅沢に使い、必要最小限の色で洗練された印象。十字モチーフの控えめな装飾。",
     palette: {
       primary: "#111827",
       accent: "#374151",
@@ -48,16 +48,42 @@ const COLOR_THEMES = {
         "https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+JP:wght@300;400;500;700&display=swap",
     },
   },
-  colorful: {
-    label: "カラフル・ポップ",
+  "royal-navy": {
+    label: "ロイヤルネイビー",
     heroStyle:
-      "鮮やかなグラデーションと明るい配色で楽しさ・親しみやすさを表現。Zen Maru Gothicの丸ゴシックとPoppinsの柔らかいサンセリフで、カジュアルで元気な雰囲気。",
+      "深みのあるネイビー〜ダークブルーのグラデーション。Playfair Displayのクラシカルなセリフ体で格式と信頼感を演出。ゴールドに近い暖色アクセントで上質さをプラス。同心円リング装飾。",
+    palette: {
+      primary: "#0c1524",
+      accent: "#c9a96e",
+      accentLight: "#e2cf9e",
+      heroBg: "linear-gradient(160deg, #0c1524 0%, #162544 50%, #1a3a5c 100%)",
+      heroText: "#ffffff",
+      sectionBg1: "#f8f9fb",
+      sectionBg2: "#ffffff",
+      sectionBgDark: "#0c1524",
+      cardBg: "#ffffff",
+      cardBorder: "#e8ecf1",
+      textPrimary: "#0c1524",
+      textSecondary: "#4a5568",
+      textMuted: "#a0aec0",
+    },
+    fonts: {
+      display: "Playfair Display",
+      label: "Montserrat",
+      body: "Noto Serif JP",
+      googleFontsUrl:
+        "https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Noto+Serif+JP:wght@300;400;500;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap",
+    },
+  },
+  "bloom-pink": {
+    label: "ブルームピンク",
+    heroStyle:
+      "紫→ピンク→オレンジの華やかなグラデーションで目を引くデザイン。Zen Maru Gothicの丸ゴシックとPoppinsで、カジュアルで華やかな雰囲気。有機的なブロブと光の粒子の装飾。",
     palette: {
       primary: "#1e1b4b",
       accent: "#7c3aed",
       accentLight: "#c4b5fd",
-      heroBg:
-        "linear-gradient(135deg, #7c3aed 0%, #ec4899 50%, #f59e0b 100%)",
+      heroBg: "linear-gradient(135deg, #7c3aed 0%, #ec4899 50%, #f59e0b 100%)",
       heroText: "#ffffff",
       sectionBg1: "#fefce8",
       sectionBg2: "#fdf4ff",
@@ -76,16 +102,231 @@ const COLOR_THEMES = {
         "https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Zen+Maru+Gothic:wght@300;400;500;700&display=swap",
     },
   },
-  business: {
-    label: "ビジネス・プロフェッショナル",
+  "soft-blossom": {
+    label: "ソフトブロッサム",
     heroStyle:
-      "深みのあるネイビー〜ダークブルーのグラデーション。Playfair Displayのクラシカルなセリフ体で格式と信頼感を演出。ゴールドに近い暖色アクセントで上質さをプラス。",
+      "やさしいピンクのグラデーションで、ナチュラルで落ち着いた印象。Noto Sans JPのすっきりしたゴシック体にピンクアクセント。楕円リングと流線の装飾。",
+    palette: {
+      primary: "#111827",
+      accent: "#ec4899",
+      accentLight: "#f9a8d4",
+      heroBg: "linear-gradient(135deg, #ffffff 0%, #fdf2f8 50%, #fce7f3 100%)",
+      heroText: "#111827",
+      sectionBg1: "#ffffff",
+      sectionBg2: "#fdf2f8",
+      sectionBgDark: "#831843",
+      cardBg: "#ffffff",
+      cardBorder: "#fce7f3",
+      textPrimary: "#111827",
+      textSecondary: "#9d174d",
+      textMuted: "#f472b6",
+    },
+    fonts: {
+      display: "Noto Sans JP",
+      label: "Inter",
+      body: "Noto Sans JP",
+      googleFontsUrl:
+        "https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+JP:wght@300;400;500;700&display=swap",
+    },
+  },
+  "sunset-cafe": {
+    label: "サンセットカフェ",
+    heroStyle:
+      "温かみのあるオレンジ〜イエローのグラデーションで食欲と親しみを演出。Zen Maru Gothicの丸ゴシックで手作り感。湯気の曲線とプレート円の装飾。",
+    palette: {
+      primary: "#431407",
+      accent: "#ea580c",
+      accentLight: "#fdba74",
+      heroBg: "linear-gradient(135deg, #ea580c 0%, #f59e0b 50%, #fbbf24 100%)",
+      heroText: "#ffffff",
+      sectionBg1: "#fffbeb",
+      sectionBg2: "#fff7ed",
+      sectionBgDark: "#431407",
+      cardBg: "#ffffff",
+      cardBorder: "#fed7aa",
+      textPrimary: "#431407",
+      textSecondary: "#9a3412",
+      textMuted: "#fb923c",
+    },
+    fonts: {
+      display: "Zen Maru Gothic",
+      label: "Poppins",
+      body: "Zen Maru Gothic",
+      googleFontsUrl:
+        "https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Zen+Maru+Gothic:wght@300;400;500;700&display=swap",
+    },
+  },
+  "dark-dining": {
+    label: "ダークダイニング",
+    heroStyle:
+      "深いダーク×ゴールドで高級感と特別感。Playfair Displayのセリフ体で上質なダイニング体験を演出。エレガントなプレート輪郭と湯気の装飾。",
     palette: {
       primary: "#0c1524",
       accent: "#c9a96e",
       accentLight: "#e2cf9e",
-      heroBg:
-        "linear-gradient(160deg, #0c1524 0%, #162544 50%, #1a3a5c 100%)",
+      heroBg: "linear-gradient(160deg, #0c1524 0%, #1a1a2e 50%, #16213e 100%)",
+      heroText: "#ffffff",
+      sectionBg1: "#f8f9fb",
+      sectionBg2: "#ffffff",
+      sectionBgDark: "#0c1524",
+      cardBg: "#ffffff",
+      cardBorder: "#e8ecf1",
+      textPrimary: "#0c1524",
+      textSecondary: "#4a5568",
+      textMuted: "#a0aec0",
+    },
+    fonts: {
+      display: "Playfair Display",
+      label: "Montserrat",
+      body: "Noto Serif JP",
+      googleFontsUrl:
+        "https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Noto+Serif+JP:wght@300;400;500;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap",
+    },
+  },
+  "trust-blue": {
+    label: "トラストブルー",
+    heroStyle:
+      "ネイビー×ゴールドで知性と信頼感。Playfair Displayで格式を演出。縦ストライプと天秤モチーフ、ナンバリング装飾。",
+    palette: {
+      primary: "#0c1524",
+      accent: "#c9a96e",
+      accentLight: "#e2cf9e",
+      heroBg: "linear-gradient(160deg, #0c1524 0%, #162544 50%, #1a3a5c 100%)",
+      heroText: "#ffffff",
+      sectionBg1: "#f8f9fb",
+      sectionBg2: "#ffffff",
+      sectionBgDark: "#0c1524",
+      cardBg: "#ffffff",
+      cardBorder: "#e8ecf1",
+      textPrimary: "#0c1524",
+      textSecondary: "#4a5568",
+      textMuted: "#a0aec0",
+    },
+    fonts: {
+      display: "Playfair Display",
+      label: "Montserrat",
+      body: "Noto Serif JP",
+      googleFontsUrl:
+        "https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Noto+Serif+JP:wght@300;400;500;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap",
+    },
+  },
+  "modern-minimal": {
+    label: "モダンミニマル",
+    heroStyle:
+      "無駄のないシャープな白基調デザイン。Noto Sans JPで清潔感。幾何学ラインとナンバリングの装飾。",
+    palette: {
+      primary: "#111827",
+      accent: "#374151",
+      accentLight: "#9ca3af",
+      heroBg: "linear-gradient(135deg, #ffffff 0%, #f8fafc 50%, #f1f5f9 100%)",
+      heroText: "#111827",
+      sectionBg1: "#ffffff",
+      sectionBg2: "#f8fafc",
+      sectionBgDark: "#111827",
+      cardBg: "#ffffff",
+      cardBorder: "#e2e8f0",
+      textPrimary: "#111827",
+      textSecondary: "#475569",
+      textMuted: "#94a3b8",
+    },
+    fonts: {
+      display: "Noto Sans JP",
+      label: "Inter",
+      body: "Noto Sans JP",
+      googleFontsUrl:
+        "https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+JP:wght@300;400;500;700&display=swap",
+    },
+  },
+  "pop-school": {
+    label: "ポップスクール",
+    heroStyle:
+      "青→紫→ピンクの楽しいグラデーションで、学ぶ楽しさを表現。Zen Maru Gothicの丸ゴシックで親しみやすさ。浮遊する幾何学シェイプの装飾。",
+    palette: {
+      primary: "#1e1b4b",
+      accent: "#2563eb",
+      accentLight: "#93c5fd",
+      heroBg: "linear-gradient(135deg, #2563eb 0%, #7c3aed 50%, #ec4899 100%)",
+      heroText: "#ffffff",
+      sectionBg1: "#eff6ff",
+      sectionBg2: "#fdf4ff",
+      sectionBgDark: "#1e1b4b",
+      cardBg: "#ffffff",
+      cardBorder: "#bfdbfe",
+      textPrimary: "#1e1b4b",
+      textSecondary: "#1d4ed8",
+      textMuted: "#60a5fa",
+    },
+    fonts: {
+      display: "Zen Maru Gothic",
+      label: "Poppins",
+      body: "Zen Maru Gothic",
+      googleFontsUrl:
+        "https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Zen+Maru+Gothic:wght@300;400;500;700&display=swap",
+    },
+  },
+  "blueprint": {
+    label: "ブループリント",
+    heroStyle:
+      "白基調に設計図モチーフのデザイン。Noto Sans JPのすっきりしたゴシック体で安心感。建物のアウトラインと寸法線の装飾。",
+    palette: {
+      primary: "#111827",
+      accent: "#374151",
+      accentLight: "#9ca3af",
+      heroBg: "linear-gradient(135deg, #ffffff 0%, #f9fafb 50%, #f3f4f6 100%)",
+      heroText: "#111827",
+      sectionBg1: "#ffffff",
+      sectionBg2: "#f9fafb",
+      sectionBgDark: "#111827",
+      cardBg: "#ffffff",
+      cardBorder: "#e5e7eb",
+      textPrimary: "#111827",
+      textSecondary: "#4b5563",
+      textMuted: "#9ca3af",
+    },
+    fonts: {
+      display: "Noto Sans JP",
+      label: "Inter",
+      body: "Noto Sans JP",
+      googleFontsUrl:
+        "https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+JP:wght@300;400;500;700&display=swap",
+    },
+  },
+  "free-wave": {
+    label: "フリーウェーブ",
+    heroStyle:
+      "紫→ピンク→オレンジの自由なグラデーション。Zen Maru Gothicの丸ゴシックとPoppinsでカジュアルな雰囲気。ウェーブレイヤーとボケドットの装飾。",
+    palette: {
+      primary: "#1e1b4b",
+      accent: "#7c3aed",
+      accentLight: "#c4b5fd",
+      heroBg: "linear-gradient(135deg, #7c3aed 0%, #ec4899 50%, #f59e0b 100%)",
+      heroText: "#ffffff",
+      sectionBg1: "#fefce8",
+      sectionBg2: "#fdf4ff",
+      sectionBgDark: "#1e1b4b",
+      cardBg: "#ffffff",
+      cardBorder: "#e9d5ff",
+      textPrimary: "#1e1b4b",
+      textSecondary: "#6b21a8",
+      textMuted: "#a78bfa",
+    },
+    fonts: {
+      display: "Zen Maru Gothic",
+      label: "Poppins",
+      body: "Zen Maru Gothic",
+      googleFontsUrl:
+        "https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Zen+Maru+Gothic:wght@300;400;500;700&display=swap",
+    },
+  },
+  "executive": {
+    label: "エグゼクティブ",
+    heroStyle:
+      "紺×ゴールドのプレミアムデザイン。Playfair Displayの格式高いセリフ体にMontserratのモダンラベル。ダイヤモンドグリッドの洗練された装飾。",
+    palette: {
+      primary: "#0c1524",
+      accent: "#c9a96e",
+      accentLight: "#e2cf9e",
+      heroBg: "linear-gradient(160deg, #0c1524 0%, #162544 50%, #1a3a5c 100%)",
       heroText: "#ffffff",
       sectionBg1: "#f8f9fb",
       sectionBg2: "#ffffff",

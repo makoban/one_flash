@@ -70,7 +70,7 @@ export interface SiteFormData {
   catchphrase: string;
   description: string;
   contactInfo: string;
-  colorTheme: "simple" | "colorful" | "business";
+  colorTheme: "clean-light" | "royal-navy" | "bloom-pink" | "soft-blossom" | "sunset-cafe" | "dark-dining" | "trust-blue" | "modern-minimal" | "pop-school" | "blueprint" | "free-wave" | "executive";
   email: string;
   subdomain: string;
 }
