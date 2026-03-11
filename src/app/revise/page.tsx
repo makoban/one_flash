@@ -316,9 +316,21 @@ function ReviseContent() {
                   </p>
                   {FIELD_CONFIG.map((config) => (
                     <div key={config.key}>
-                      <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                        {config.label}
-                      </label>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <label className="block text-sm font-medium text-gray-700">
+                          {config.label}
+                        </label>
+                        {config.key === "colorTheme" && (
+                          <a
+                            href="/theme-samples.html"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-xs text-indigo-600 hover:text-indigo-800 underline underline-offset-2"
+                          >
+                            サンプルを見る ↗
+                          </a>
+                        )}
+                      </div>
                       {config.type === "textarea" ? (
                         <textarea
                           value={fields[config.key]}
