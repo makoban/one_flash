@@ -44,29 +44,11 @@ body { background: #f8f9fb; color: #1a1a2e; font-family: 'Noto Sans JP', sans-se
   background: #fff;
   box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 12px rgba(0,0,0,0.04);
   transition: transform 0.2s, box-shadow 0.2s;
-  cursor: pointer;
   position: relative;
 }
 .card:hover {
   transform: translateY(-4px);
   box-shadow: 0 4px 16px rgba(0,0,0,0.1), 0 8px 24px rgba(0,0,0,0.06);
-}
-.card.selected {
-  outline: 3px solid #6366f1;
-  outline-offset: -3px;
-}
-.card.selected::after {
-  content: "\2713 \9078\629E\4E2D";
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  background: #6366f1;
-  color: #fff;
-  font-size: 0.7rem;
-  font-weight: 700;
-  padding: 4px 10px;
-  border-radius: 999px;
-  z-index: 10;
 }
 
 /* Hero (preview area) */
@@ -132,7 +114,7 @@ body { background: #f8f9fb; color: #1a1a2e; font-family: 'Noto Sans JP', sans-se
 <div class="grid">
 
 <!-- ========== 1. クリーンライト ========== -->
-<div class="card" onclick="this.classList.toggle('selected')">
+<div class="card">
   <div class="hero" style="background: linear-gradient(135deg, #ffffff 0%, #f9fafb 50%, #f3f4f6 100%);">
     <svg class="bg-art" viewBox="0 0 800 400" preserveAspectRatio="xMidYMid slice">
       <defs>
@@ -152,7 +134,7 @@ body { background: #f8f9fb; color: #1a1a2e; font-family: 'Noto Sans JP', sans-se
       <div class="site-name" style="color:#374151;">TANAKA CLINIC</div>
       <h2 style="color:#111827; font-family:'Noto Sans JP';">あなたの健康に<br>寄り添うクリニック</h2>
       <p style="color:#374151;">地域のかかりつけ医として、丁寧な診療を心がけています。</p>
-      <a class="cta" href="#" onclick="event.preventDefault()" style="background:#111827; color:#fff;">診療案内を見る</a>
+      <a class="cta" href="#" style="background:#111827; color:#fff;">診療案内を見る</a>
     </div>
   </div>
   <div class="card-info">
@@ -169,7 +151,7 @@ body { background: #f8f9fb; color: #1a1a2e; font-family: 'Noto Sans JP', sans-se
 </div>
 
 <!-- ========== 2. ロイヤルネイビー ========== -->
-<div class="card" onclick="this.classList.toggle('selected')">
+<div class="card">
   <div class="hero" style="background: linear-gradient(160deg, #0c1524 0%, #162544 50%, #1a3a5c 100%);">
     <svg class="bg-art" viewBox="0 0 800 400" preserveAspectRatio="xMidYMid slice">
       <defs>
@@ -189,7 +171,7 @@ body { background: #f8f9fb; color: #1a1a2e; font-family: 'Noto Sans JP', sans-se
       <div class="site-name" style="color:#e2cf9e; font-family:'Montserrat';">TANAKA CLINIC</div>
       <h2 style="color:#ffffff; font-family:'Playfair Display','Noto Serif JP';">あなたの健康に<br>寄り添うクリニック</h2>
       <p style="color:#cbd5e1;">地域のかかりつけ医として、丁寧な診療を心がけています。</p>
-      <a class="cta" href="#" onclick="event.preventDefault()" style="background:#c9a96e; color:#0c1524;">診療案内を見る</a>
+      <a class="cta" href="#" style="background:#c9a96e; color:#0c1524;">診療案内を見る</a>
     </div>
   </div>
   <div class="card-info">
@@ -206,7 +188,7 @@ body { background: #f8f9fb; color: #1a1a2e; font-family: 'Noto Sans JP', sans-se
 </div>
 
 <!-- ========== 3. ブルームピンク ========== -->
-<div class="card" onclick="this.classList.toggle('selected')">
+<div class="card">
   <div class="hero" style="background: linear-gradient(135deg, #7c3aed 0%, #ec4899 50%, #f59e0b 100%);">
     <svg class="bg-art" viewBox="0 0 800 400" preserveAspectRatio="xMidYMid slice">
       <ellipse cx="150" cy="80" rx="120" ry="90" fill="#fff" fill-opacity="0.05" transform="rotate(-15 150 80)"/>
@@ -225,7 +207,7 @@ body { background: #f8f9fb; color: #1a1a2e; font-family: 'Noto Sans JP', sans-se
       <div class="site-name" style="color:#fff; font-family:'Poppins';">NAIL SALON LIRA</div>
       <h2 style="color:#ffffff; font-family:'Zen Maru Gothic';">指先から始まる<br>あなたらしさ</h2>
       <p style="color:#fef3c7;">丁寧な施術で、特別なひとときをお届けします。</p>
-      <a class="cta" href="#" onclick="event.preventDefault()" style="background:#fff; color:#7c3aed;">ご予約はこちら</a>
+      <a class="cta" href="#" style="background:#fff; color:#7c3aed;">ご予約はこちら</a>
     </div>
   </div>
   <div class="card-info">
@@ -241,7 +223,7 @@ body { background: #f8f9fb; color: #1a1a2e; font-family: 'Noto Sans JP', sans-se
 </div>
 
 <!-- ========== 4. ソフトブロッサム ========== -->
-<div class="card" onclick="this.classList.toggle('selected')">
+<div class="card">
   <div class="hero" style="background: linear-gradient(135deg, #ffffff 0%, #fdf2f8 50%, #fce7f3 100%);">
     <svg class="bg-art" viewBox="0 0 800 400" preserveAspectRatio="xMidYMid slice">
       <defs>
@@ -262,7 +244,7 @@ body { background: #f8f9fb; color: #1a1a2e; font-family: 'Noto Sans JP', sans-se
       <div class="site-name" style="color:#9ca3af; font-family:'Inter';">RELAXATION HANA</div>
       <h2 style="color:#111827; font-family:'Noto Sans JP';">心と体を<br>ほぐすひととき</h2>
       <p style="color:#6b7280;">完全予約制のプライベート空間でリラックス。</p>
-      <a class="cta" href="#" onclick="event.preventDefault()" style="background:#111827; color:#fff;">ご予約はこちら</a>
+      <a class="cta" href="#" style="background:#111827; color:#fff;">ご予約はこちら</a>
     </div>
   </div>
   <div class="card-info">
@@ -278,7 +260,7 @@ body { background: #f8f9fb; color: #1a1a2e; font-family: 'Noto Sans JP', sans-se
 </div>
 
 <!-- ========== 5. サンセットカフェ ========== -->
-<div class="card" onclick="this.classList.toggle('selected')">
+<div class="card">
   <div class="hero" style="background: linear-gradient(135deg, #ea580c 0%, #f59e0b 50%, #fbbf24 100%);">
     <svg class="bg-art" viewBox="0 0 800 400" preserveAspectRatio="xMidYMid slice">
       <path d="M 650 380 Q 660 320 640 280 Q 620 240 640 200 Q 660 160 650 120" fill="none" stroke="#fff" stroke-opacity="0.08" stroke-width="1.5" stroke-linecap="round"/>
@@ -295,7 +277,7 @@ body { background: #f8f9fb; color: #1a1a2e; font-family: 'Noto Sans JP', sans-se
       <div class="site-name" style="color:#fff; font-family:'Poppins';">CAFE KOMOREBI</div>
       <h2 style="color:#ffffff; font-family:'Zen Maru Gothic';">木漏れ日のなかで<br>ゆっくりと</h2>
       <p style="color:#fef3c7;">自家焙煎のコーヒーと手作りスイーツをどうぞ。</p>
-      <a class="cta" href="#" onclick="event.preventDefault()" style="background:#fff; color:#ea580c;">メニューを見る</a>
+      <a class="cta" href="#" style="background:#fff; color:#ea580c;">メニューを見る</a>
     </div>
   </div>
   <div class="card-info">
@@ -312,7 +294,7 @@ body { background: #f8f9fb; color: #1a1a2e; font-family: 'Noto Sans JP', sans-se
 </div>
 
 <!-- ========== 6. ダークダイニング ========== -->
-<div class="card" onclick="this.classList.toggle('selected')">
+<div class="card">
   <div class="hero" style="background: linear-gradient(160deg, #0c1524 0%, #1a1a2e 50%, #16213e 100%);">
     <svg class="bg-art" viewBox="0 0 800 400" preserveAspectRatio="xMidYMid slice">
       <defs>
@@ -333,7 +315,7 @@ body { background: #f8f9fb; color: #1a1a2e; font-family: 'Noto Sans JP', sans-se
       <div class="site-name" style="color:#e2cf9e; font-family:'Montserrat';">RISTORANTE SORA</div>
       <h2 style="color:#ffffff; font-family:'Playfair Display','Noto Serif JP';">特別な夜を<br>あなたに</h2>
       <p style="color:#94a3b8;">厳選素材を使った本格イタリアンをどうぞ。</p>
-      <a class="cta" href="#" onclick="event.preventDefault()" style="background:#c9a96e; color:#0c1524;">コースを見る</a>
+      <a class="cta" href="#" style="background:#c9a96e; color:#0c1524;">コースを見る</a>
     </div>
   </div>
   <div class="card-info">
@@ -350,7 +332,7 @@ body { background: #f8f9fb; color: #1a1a2e; font-family: 'Noto Sans JP', sans-se
 </div>
 
 <!-- ========== 7. トラストブルー ========== -->
-<div class="card" onclick="this.classList.toggle('selected')">
+<div class="card">
   <div class="hero" style="background: linear-gradient(160deg, #0c1524 0%, #162544 50%, #1a3a5c 100%);">
     <svg class="bg-art" viewBox="0 0 800 400" preserveAspectRatio="xMidYMid slice">
       <line x1="650" y1="0" x2="650" y2="400" stroke="#c9a96e" stroke-opacity="0.04" stroke-width="0.5"/>
@@ -367,7 +349,7 @@ body { background: #f8f9fb; color: #1a1a2e; font-family: 'Noto Sans JP', sans-se
       <div class="site-name" style="color:#e2cf9e; font-family:'Montserrat';">YAMADA LAW OFFICE</div>
       <h2 style="color:#ffffff; font-family:'Playfair Display','Noto Serif JP';">あなたの権利を<br>守るために</h2>
       <p style="color:#94a3b8;">企業法務から個人の相談まで、誠実に対応いたします。</p>
-      <a class="cta" href="#" onclick="event.preventDefault()" style="background:#c9a96e; color:#0c1524;">無料相談はこちら</a>
+      <a class="cta" href="#" style="background:#c9a96e; color:#0c1524;">無料相談はこちら</a>
     </div>
   </div>
   <div class="card-info">
@@ -383,7 +365,7 @@ body { background: #f8f9fb; color: #1a1a2e; font-family: 'Noto Sans JP', sans-se
 </div>
 
 <!-- ========== 8. モダンミニマル ========== -->
-<div class="card" onclick="this.classList.toggle('selected')">
+<div class="card">
   <div class="hero" style="background: linear-gradient(135deg, #ffffff 0%, #f8fafc 50%, #f1f5f9 100%);">
     <svg class="bg-art" viewBox="0 0 800 400" preserveAspectRatio="xMidYMid slice">
       <line x1="620" y1="0" x2="620" y2="400" stroke="#374151" stroke-opacity="0.04" stroke-width="0.5"/>
@@ -399,7 +381,7 @@ body { background: #f8f9fb; color: #1a1a2e; font-family: 'Noto Sans JP', sans-se
       <div class="site-name" style="color:#9ca3af; font-family:'Inter';">SATO TAX OFFICE</div>
       <h2 style="color:#111827; font-family:'Noto Sans JP';">経営を支える<br>確かなパートナー</h2>
       <p style="color:#6b7280;">法人・個人の税務をトータルサポートいたします。</p>
-      <a class="cta" href="#" onclick="event.preventDefault()" style="background:#111827; color:#fff;">無料相談はこちら</a>
+      <a class="cta" href="#" style="background:#111827; color:#fff;">無料相談はこちら</a>
     </div>
   </div>
   <div class="card-info">
@@ -416,7 +398,7 @@ body { background: #f8f9fb; color: #1a1a2e; font-family: 'Noto Sans JP', sans-se
 </div>
 
 <!-- ========== 9. ポップスクール ========== -->
-<div class="card" onclick="this.classList.toggle('selected')">
+<div class="card">
   <div class="hero" style="background: linear-gradient(135deg, #2563eb 0%, #7c3aed 50%, #ec4899 100%);">
     <svg class="bg-art" viewBox="0 0 800 400" preserveAspectRatio="xMidYMid slice">
       <rect x="80" y="60" width="40" height="40" rx="8" fill="#fff" fill-opacity="0.06" transform="rotate(15 100 80)"/>
@@ -434,7 +416,7 @@ body { background: #f8f9fb; color: #1a1a2e; font-family: 'Noto Sans JP', sans-se
       <div class="site-name" style="color:#fff; font-family:'Poppins';">SAKURA ENGLISH</div>
       <h2 style="color:#ffffff; font-family:'Zen Maru Gothic';">楽しく学ぶ、<br>使える英語</h2>
       <p style="color:#e0e7ff;">少人数制で一人ひとりに合わせたレッスンを提供します。</p>
-      <a class="cta" href="#" onclick="event.preventDefault()" style="background:#fff; color:#7c3aed;">体験レッスン申込</a>
+      <a class="cta" href="#" style="background:#fff; color:#7c3aed;">体験レッスン申込</a>
     </div>
   </div>
   <div class="card-info">
@@ -451,7 +433,7 @@ body { background: #f8f9fb; color: #1a1a2e; font-family: 'Noto Sans JP', sans-se
 </div>
 
 <!-- ========== 10. ブループリント ========== -->
-<div class="card" onclick="this.classList.toggle('selected')">
+<div class="card">
   <div class="hero" style="background: linear-gradient(135deg, #ffffff 0%, #f9fafb 50%, #f3f4f6 100%);">
     <svg class="bg-art" viewBox="0 0 800 400" preserveAspectRatio="xMidYMid slice">
       <line x1="600" y1="50" x2="750" y2="50" stroke="#374151" stroke-opacity="0.05" stroke-width="0.5"/>
@@ -471,7 +453,7 @@ body { background: #f8f9fb; color: #1a1a2e; font-family: 'Noto Sans JP', sans-se
       <div class="site-name" style="color:#9ca3af; font-family:'Inter';">SUZUKI CONSTRUCTION</div>
       <h2 style="color:#111827; font-family:'Noto Sans JP';">確かな技術で<br>理想の住まいを</h2>
       <p style="color:#6b7280;">創業30年の実績。新築・リフォームお任せください。</p>
-      <a class="cta" href="#" onclick="event.preventDefault()" style="background:#111827; color:#fff;">施工実績を見る</a>
+      <a class="cta" href="#" style="background:#111827; color:#fff;">施工実績を見る</a>
     </div>
   </div>
   <div class="card-info">
@@ -488,7 +470,7 @@ body { background: #f8f9fb; color: #1a1a2e; font-family: 'Noto Sans JP', sans-se
 </div>
 
 <!-- ========== 11. フリーウェーブ ========== -->
-<div class="card" onclick="this.classList.toggle('selected')">
+<div class="card">
   <div class="hero" style="background: linear-gradient(135deg, #7c3aed 0%, #ec4899 50%, #f59e0b 100%);">
     <svg class="bg-art" viewBox="0 0 800 400" preserveAspectRatio="xMidYMid slice">
       <path d="M 0 280 Q 200 240 400 270 Q 600 300 800 250 L 800 400 L 0 400 Z" fill="#fff" fill-opacity="0.03"/>
@@ -506,7 +488,7 @@ body { background: #f8f9fb; color: #1a1a2e; font-family: 'Noto Sans JP', sans-se
       <div class="site-name" style="color:#fff; font-family:'Poppins';">FREELANCE DESIGN MIKI</div>
       <h2 style="color:#ffffff; font-family:'Zen Maru Gothic';">デザインで<br>想いをカタチに</h2>
       <p style="color:#fef3c7;">ロゴ・名刺・Webデザインをお手頃価格で。</p>
-      <a class="cta" href="#" onclick="event.preventDefault()" style="background:#fff; color:#7c3aed;">お問い合わせ</a>
+      <a class="cta" href="#" style="background:#fff; color:#7c3aed;">お問い合わせ</a>
     </div>
   </div>
   <div class="card-info">
@@ -523,7 +505,7 @@ body { background: #f8f9fb; color: #1a1a2e; font-family: 'Noto Sans JP', sans-se
 </div>
 
 <!-- ========== 12. エグゼクティブ ========== -->
-<div class="card" onclick="this.classList.toggle('selected')">
+<div class="card">
   <div class="hero" style="background: linear-gradient(160deg, #0c1524 0%, #162544 50%, #1a3a5c 100%);">
     <svg class="bg-art" viewBox="0 0 800 400" preserveAspectRatio="xMidYMid slice">
       <defs>
@@ -544,7 +526,7 @@ body { background: #f8f9fb; color: #1a1a2e; font-family: 'Noto Sans JP', sans-se
       <div class="site-name" style="color:#e2cf9e; font-family:'Montserrat';">NEXT STAGE CONSULTING</div>
       <h2 style="color:#ffffff; font-family:'Playfair Display','Noto Serif JP';">経営の未来を<br>共に描く</h2>
       <p style="color:#94a3b8;">戦略立案から実行支援まで、ワンストップで。</p>
-      <a class="cta" href="#" onclick="event.preventDefault()" style="background:#c9a96e; color:#0c1524;">お問い合わせ</a>
+      <a class="cta" href="#" style="background:#c9a96e; color:#0c1524;">お問い合わせ</a>
     </div>
   </div>
   <div class="card-info">
