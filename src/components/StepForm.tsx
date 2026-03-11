@@ -373,7 +373,17 @@ interface Step2Props {
 function Step2({ selectedTheme, onChange }: Step2Props) {
   return (
     <div>
-      <h2 className="text-xl font-bold text-gray-900 mb-1">デザインテーマを選択</h2>
+      <div className="flex items-center justify-between mb-1">
+        <h2 className="text-xl font-bold text-gray-900">デザインテーマを選択</h2>
+        <a
+          href="/theme-samples.html"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-xs text-indigo-600 hover:text-indigo-800 underline underline-offset-2 whitespace-nowrap ml-3"
+        >
+          サンプルを見る ↗
+        </a>
+      </div>
       <p className="text-sm text-gray-500 mb-6">
         ホームページのデザイン方向性を選んでください
       </p>

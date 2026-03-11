@@ -547,9 +547,19 @@ function StepColorTheme({ value, onChange }: StepColorThemeProps) {
   return (
     <div>
       <QuestionLabel step={5} />
-      <h2 className="text-lg font-bold text-gray-900 mt-1 mb-5 leading-snug">
-        サイトの雰囲気はどれが近いですか？
-      </h2>
+      <div className="flex items-center justify-between mt-1 mb-5">
+        <h2 className="text-lg font-bold text-gray-900 leading-snug">
+          サイトの雰囲気はどれが近いですか？
+        </h2>
+        <a
+          href="/theme-samples.html"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-xs text-indigo-600 hover:text-indigo-800 underline underline-offset-2 whitespace-nowrap ml-3"
+        >
+          サンプルを見る ↗
+        </a>
+      </div>
       <div className="grid grid-cols-2 gap-3">
         {COLOR_THEMES.map((theme) => {
           const isSelected = value === theme.value;
