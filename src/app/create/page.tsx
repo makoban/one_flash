@@ -90,8 +90,10 @@ export default function CreatePage() {
     setIsSubmitting(true);
     setPageState("generating");
 
+    trackEvent("generate_start");
     try {
       const preview = await generateAndScreenshot(data);
+      trackEvent("generate_complete");
       setPreviewData(preview);
       const entry: HistoryEntry = {
         id: 1,

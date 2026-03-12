@@ -15,10 +15,22 @@ import type { OpfStatsData } from "../api/admin/stats/route";
 // ファネル設定
 // ---------------------------------------------------------------------------
 
-const FUNNEL_STEPS = ["page_view", "form_start", "checkout_start", "subscribed"];
+const FUNNEL_STEPS = [
+  "page_view", "form_start",
+  "form_step_2", "form_step_3", "form_step_4", "form_step_5", "form_step_6",
+  "generate_start", "generate_complete",
+  "checkout_start", "subscribed",
+];
 const FUNNEL_LABELS: Record<string, string> = {
   page_view: "LP訪問",
-  form_start: "フォーム開始",
+  form_start: "Q1 開始",
+  form_step_2: "Q2 キャッチコピー",
+  form_step_3: "Q3 説明文",
+  form_step_4: "Q4 連絡先",
+  form_step_5: "Q5 テーマ選択",
+  form_step_6: "Q6 メール",
+  generate_start: "生成開始",
+  generate_complete: "生成完了",
   checkout_start: "決済開始",
   subscribed: "登録完了",
 };

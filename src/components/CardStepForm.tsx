@@ -17,6 +17,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import type { SiteFormData } from "@/lib/gemini";
+import { trackEvent } from "@/lib/utm";
 
 // ---------------------------------------------------------------------------
 // 定数
@@ -200,7 +201,10 @@ export default function CardStepForm({ onSubmit, isSubmitting, onFirstInteractio
       setModerating(false);
     }
 
-    setCurrentStep((prev) => Math.min(prev + 1, TOTAL_STEPS));
+    const nextStep = Math.min(currentStep + 1, TOTAL_STEPS);
+    setCurrentStep(nextStep);
+    // ステップ到達を記録（Q2以降のみ。Q1到達はform_startで記録済み）
+    trackEvent("form_step", { step: String(nextStep) });
   }
 
   function handleBack(): void {

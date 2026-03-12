@@ -451,17 +451,32 @@ export async function insertAdEvent(params: {
   pageUrl?: string;
   referrer?: string;
   userAgent?: string;
+  gclid?: string;
+  step?: string;
 }): Promise<void> {
+  // form_step イベントの場合、event_type を "form_step_N" 形式で保存
+  const eventType = params.step
+    ? `${params.eventType}_${params.step}`
+    : params.eventType;
+
+  // gclid は utm_content カラムに "(gclid:xxx)" として付与（DBスキーマ変更不要）
+  let utmContent = params.utmContent ?? null;
+  if (params.gclid && !utmContent) {
+    utmContent = `gclid:${params.gclid}`;
+  } else if (params.gclid && utmContent) {
+    utmContent = `${utmContent}|gclid:${params.gclid}`;
+  }
+
   await query(
     `INSERT INTO opf_ad_events (event_type, user_id, utm_source, utm_medium, utm_campaign, utm_content, utm_term, session_id, page_url, referrer, user_agent)
      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
     [
-      params.eventType,
+      eventType,
       params.userId ?? null,
       params.utmSource ?? null,
       params.utmMedium ?? null,
       params.utmCampaign ?? null,
-      params.utmContent ?? null,
+      utmContent,
       params.utmTerm ?? null,
       params.sessionId ?? null,
       params.pageUrl ?? null,

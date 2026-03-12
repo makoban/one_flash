@@ -15,6 +15,7 @@ export interface UtmParams {
   utm_campaign?: string;
   utm_content?: string;
   utm_term?: string;
+  gclid?: string;
 }
 
 /** LP 到達時に呼ぶ: URL から UTM パラメータを取得し sessionStorage に保存 */
@@ -30,6 +31,30 @@ export function captureUtmParams(): void {
     if (value) {
       utm[key] = value;
       hasUtm = true;
+    }
+  }
+
+  // Google Ads の gclid パラメータをキャプチャ
+  const gclid = params.get("gclid");
+  if (gclid) {
+    utm.gclid = gclid;
+    // gclid があれば utm_source/medium を自動設定（未設定の場合のみ）
+    if (!utm.utm_source) utm.utm_source = "google";
+    if (!utm.utm_medium) utm.utm_medium = "cpc";
+    hasUtm = true;
+  }
+
+  // UTM もなく gclid もない場合、referrer から流入元を推定
+  if (!hasUtm) {
+    const referrer = document.referrer;
+    if (referrer && referrer.includes("google.")) {
+      // Google 検索からの流入（オーガニック）
+      const existing = sessionStorage.getItem(STORAGE_KEY);
+      if (!existing) {
+        utm.utm_source = "google";
+        utm.utm_medium = "organic";
+        hasUtm = true;
+      }
     }
   }
 
@@ -69,7 +94,7 @@ export function getSessionId(): string {
 /** イベント送信ヘルパー（/api/track に POST） */
 export async function trackEvent(
   eventType: string,
-  extra?: { pageUrl?: string }
+  extra?: { pageUrl?: string; step?: string }
 ): Promise<void> {
   try {
     const utm = getUtmParams();
@@ -81,6 +106,7 @@ export async function trackEvent(
         sessionId: getSessionId(),
         pageUrl: extra?.pageUrl ?? window.location.href,
         referrer: document.referrer || undefined,
+        step: extra?.step,
         ...utm,
       }),
     });

@@ -13,7 +13,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { insertAdEvent } from "@/lib/db";
 
-const ALLOWED_EVENTS = ["page_view", "form_start", "checkout_start"];
+const ALLOWED_EVENTS = ["page_view", "form_start", "form_step", "generate_start", "generate_complete", "checkout_start"];
 
 interface TrackRequestBody {
   eventType: string;
@@ -25,6 +25,9 @@ interface TrackRequestBody {
   utm_campaign?: string;
   utm_content?: string;
   utm_term?: string;
+  gclid?: string;
+  /** form_step イベント時: "step_1", "step_2", ... "step_6" */
+  step?: string;
 }
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
@@ -49,6 +52,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       utmCampaign: body.utm_campaign,
       utmContent: body.utm_content,
       utmTerm: body.utm_term,
+      gclid: body.gclid,
+      step: body.step,
     });
 
     return NextResponse.json({ ok: true }, { status: 200 });
