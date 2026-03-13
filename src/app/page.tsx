@@ -157,27 +157,27 @@ export default function HomePage() {
       </nav>
 
       {/* ヒーローセクション */}
-      <section id="hero" className="relative flex items-center overflow-hidden pt-14 sm:pt-16 pb-6 sm:pb-10">
+      <section id="hero" className="relative overflow-hidden pt-16 sm:pt-20 pb-6 sm:pb-10">
         {/* 背景: 暖色アンビエントグロー */}
         <div className="absolute inset-0 bg-gradient-to-br from-indigo-900/20 via-transparent to-amber-900/10" />
         <div className="absolute top-1/3 left-1/4 w-96 h-96 bg-amber-500/5 rounded-full blur-3xl" />
         <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-indigo-500/5 rounded-full blur-3xl" />
 
         <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 w-full">
-          <div className="flex flex-col lg:flex-row items-center gap-5 lg:gap-10">
+          <div className="flex flex-col lg:flex-row lg:items-start items-center gap-5 lg:gap-10">
             {/* 左カラム: テキスト + CTA */}
-            <div className="flex-1 text-center lg:text-left">
+            <div className="flex-1 text-center lg:text-left lg:pt-4">
               <p className="inline-block px-3 py-1 bg-amber-500/10 text-amber-400 border border-amber-500/20 text-xs font-semibold rounded-full mb-3 sm:mb-4 tracking-wider">
                 AI自動生成 · 最短10分 · 月額480円
               </p>
 
-              <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black leading-[1.25] sm:leading-[1.2] mb-3 sm:mb-4">
+              <h1 className="text-2xl sm:text-3xl lg:text-[2.7rem] font-black leading-[1.25] sm:leading-[1.2] mb-3 sm:mb-4">
                 今日中に、あなたの<br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-amber-500">ホームページ</span>が完成します。
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-amber-500">ホームページ</span>が<br className="hidden lg:block" />完成します。
               </h1>
 
               <p className="text-sm sm:text-base text-slate-300 leading-relaxed mb-2 sm:mb-3">
-                6つの質問に答えるだけ。AIがプロ品質のHPを自動生成。<br className="hidden sm:block" />初期3,980円 + 月額480円。サーバー・SSL込み。
+                6つの質問に答えるだけ。<br className="hidden sm:block" />AIがプロ品質のHPを自動生成。<br className="hidden sm:block" />初期3,980円 + 月額480円。サーバー・SSL込み。
               </p>
 
               {/* トラストシグナル */}
