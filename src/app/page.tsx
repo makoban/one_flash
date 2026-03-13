@@ -157,14 +157,14 @@ export default function HomePage() {
       </nav>
 
       {/* ヒーローセクション */}
-      <section id="hero" className="relative min-h-[100svh] flex items-center overflow-hidden pt-14 sm:pt-20 pb-10 sm:pb-16">
+      <section id="hero" className="relative min-h-[80vh] sm:min-h-[90vh] flex items-center overflow-hidden pt-16 pb-8 sm:pb-12">
         {/* 背景: 暖色アンビエントグロー */}
         <div className="absolute inset-0 bg-gradient-to-br from-indigo-900/20 via-transparent to-amber-900/10" />
         <div className="absolute top-1/3 left-1/4 w-96 h-96 bg-amber-500/5 rounded-full blur-3xl" />
         <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-indigo-500/5 rounded-full blur-3xl" />
 
         <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 w-full">
-          <div className="flex flex-col-reverse lg:flex-row items-center gap-8 lg:gap-12">
+          <div className="flex flex-col lg:flex-row items-center gap-6 lg:gap-12">
             {/* 左カラム: テキスト + CTA */}
             <div className="flex-1 text-center lg:text-left">
               <p className="inline-block px-3 py-1 sm:px-4 sm:py-1.5 bg-amber-500/10 text-amber-400 border border-amber-500/20 text-xs font-semibold rounded-full mb-5 sm:mb-6 tracking-wider">
