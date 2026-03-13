@@ -157,57 +157,112 @@ export default function HomePage() {
       </nav>
 
       {/* ヒーローセクション */}
-      <section id="hero" className="relative min-h-[80vh] sm:min-h-[90vh] flex items-center justify-center overflow-hidden pt-12 sm:pt-16">
-        {/* 背景 */}
-        <div className="absolute inset-0 bg-gradient-to-br from-indigo-900/20 via-transparent to-violet-900/20" />
-        <div
-          className="absolute inset-0 opacity-[0.07]"
-          style={{
-            backgroundImage:
-              "linear-gradient(rgba(99,102,241,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(99,102,241,0.3) 1px, transparent 1px)",
-            backgroundSize: "64px 64px",
-          }}
-        />
+      <section id="hero" className="relative min-h-[100svh] flex items-center overflow-hidden pt-14 sm:pt-20 pb-10 sm:pb-16">
+        {/* 背景: 暖色アンビエントグロー */}
+        <div className="absolute inset-0 bg-gradient-to-br from-indigo-900/20 via-transparent to-amber-900/10" />
+        <div className="absolute top-1/3 left-1/4 w-96 h-96 bg-amber-500/5 rounded-full blur-3xl" />
+        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-indigo-500/5 rounded-full blur-3xl" />
 
-        <div className="relative z-10 text-center max-w-3xl mx-auto px-2 sm:px-4">
-          <p className="inline-block px-2 py-0.5 sm:px-4 sm:py-1.5 bg-amber-500/10 text-amber-400 border border-amber-500/20 text-[2.2vw] sm:text-xs font-semibold rounded-full mb-5 sm:mb-8 tracking-wider whitespace-nowrap">
-            質問6個でHP完成 · 最短10分 · AI自動生成
-          </p>
+        <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 w-full">
+          <div className="flex flex-col-reverse lg:flex-row items-center gap-8 lg:gap-12">
+            {/* 左カラム: テキスト + CTA */}
+            <div className="flex-1 text-center lg:text-left">
+              <p className="inline-block px-3 py-1 sm:px-4 sm:py-1.5 bg-amber-500/10 text-amber-400 border border-amber-500/20 text-xs font-semibold rounded-full mb-5 sm:mb-6 tracking-wider">
+                AI自動生成 · 最短10分 · 月額480円
+              </p>
 
-          <h1 className="text-[5vw] sm:text-3xl md:text-4xl lg:text-5xl font-black leading-[1.5] sm:leading-[1.3] mb-3 sm:mb-6 whitespace-nowrap">
-            HPがない？ 6つの質問に答えて。
-            <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-amber-500">
-              3,980円
-            </span>
-            でURL発行まで完了。
-          </h1>
+              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black leading-[1.4] sm:leading-[1.3] mb-4 sm:mb-6">
+                今日中に、あなたの
+                <br className="hidden sm:block" />
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-amber-500">
+                  ホームページ
+                </span>
+                が完成します。
+              </h1>
 
-          <p className="text-[3.2vw] sm:text-lg md:text-xl text-slate-300 leading-relaxed mb-2 sm:mb-3 whitespace-nowrap">
-            業界No.1のコスト。秘密はAI自動生成。
-            <br />
-            サーバー・SSL込み月480円。HPをお急ぎの方へ。
-          </p>
+              <p className="text-base sm:text-lg text-slate-300 leading-relaxed mb-3 sm:mb-4">
+                6つの質問に答えるだけ。AIがプロ品質のHPを自動生成。
+                <br className="hidden sm:block" />
+                初期3,980円 + 月額480円。サーバー・SSL込み。
+              </p>
 
-          <p className="text-[2.8vw] sm:text-sm text-slate-500 mb-6 sm:mb-10 whitespace-nowrap">
-            初期3,980円 + 月額480円（税込・初月無料・サーバーSSL込）/ いつでも解約可
-          </p>
+              {/* トラストシグナル */}
+              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-x-4 gap-y-1 text-xs text-slate-400 mb-6 sm:mb-8">
+                <span className="flex items-center gap-1">
+                  <svg className="w-3.5 h-3.5 text-amber-400" fill="currentColor" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/></svg>
+                  初月無料
+                </span>
+                <span className="flex items-center gap-1">
+                  <svg className="w-3.5 h-3.5 text-amber-400" fill="currentColor" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/></svg>
+                  いつでも解約可
+                </span>
+                <span className="flex items-center gap-1">
+                  <svg className="w-3.5 h-3.5 text-amber-400" fill="currentColor" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/></svg>
+                  プレビュー後に決済
+                </span>
+              </div>
 
-          <div className="flex flex-col sm:flex-row gap-2.5 sm:gap-4 justify-center px-0 sm:px-2">
-            <Link
-              href="/create"
-              onClick={handleCtaClick}
-              className="inline-flex items-center justify-center gap-1.5 bg-amber-500 hover:bg-amber-400 text-gray-900 font-bold px-5 py-2.5 sm:px-8 sm:py-4 rounded-lg sm:rounded-xl text-[3vw] sm:text-lg transition-all duration-300 hover:scale-105 shadow-[0_0_30px_rgba(245,158,11,0.35)] hover:shadow-[0_0_50px_rgba(245,158,11,0.55)] whitespace-nowrap"
-            >
-              無料でプレビューを見る
-              <svg className="w-3.5 h-3.5 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
-            </Link>
-            <Link
-              href="/edit"
-              className="inline-flex items-center justify-center gap-1.5 border border-slate-600 hover:border-amber-500/50 text-slate-300 hover:text-amber-400 font-medium px-5 py-2.5 sm:px-8 sm:py-4 rounded-lg sm:rounded-xl text-[3vw] sm:text-lg transition-all duration-300 whitespace-nowrap"
-            >
-              既存サイトを修正する
-            </Link>
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center lg:justify-start">
+                <Link
+                  href="/create"
+                  onClick={handleCtaClick}
+                  className="inline-flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-400 text-gray-900 font-bold px-6 py-3 sm:px-8 sm:py-4 rounded-xl text-base sm:text-lg transition-all duration-300 hover:scale-105 shadow-[0_0_30px_rgba(245,158,11,0.35)] hover:shadow-[0_0_50px_rgba(245,158,11,0.55)]"
+                >
+                  無料でサイトを見てみる
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                </Link>
+                <Link
+                  href="/edit"
+                  className="inline-flex items-center justify-center gap-1.5 border border-slate-600 hover:border-amber-500/50 text-slate-300 hover:text-amber-400 font-medium px-6 py-3 sm:px-8 sm:py-4 rounded-xl text-base sm:text-lg transition-all duration-300"
+                >
+                  既存サイトを修正する
+                </Link>
+              </div>
+            </div>
+
+            {/* 右カラム: サンプルサイト画像2枚 */}
+            <div className="flex-1 w-full max-w-md lg:max-w-lg relative">
+              <div className="relative">
+                {/* PC サンプル（税理士事務所） */}
+                <a
+                  href={`${WORKER_BASE}/sample-tax`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block rounded-xl overflow-hidden border border-[#2D2D44] hover:border-amber-500/50 transition-all duration-500 shadow-2xl hover:shadow-amber-500/10 group"
+                >
+                  <Image
+                    src="/samples/pc-1.png"
+                    alt="AIが作った税理士事務所のホームページ"
+                    width={640}
+                    height={360}
+                    className="w-full h-auto object-cover group-hover:scale-[1.02] transition-transform duration-500"
+                    priority
+                  />
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-3">
+                    <span className="text-xs text-white/80">税理士事務所 · 8分で完成</span>
+                  </div>
+                </a>
+                {/* モバイル サンプル（美容室）— 右下にオーバーラップ */}
+                <a
+                  href={`${WORKER_BASE}/sample-bloom`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="absolute -bottom-6 -right-3 sm:-right-6 w-28 sm:w-36 rounded-lg overflow-hidden border-2 border-[#0F0F1A] shadow-xl hover:shadow-amber-500/10 transition-all duration-500 group"
+                >
+                  <Image
+                    src="/samples/pc-2.png"
+                    alt="AIが作った美容室のホームページ"
+                    width={320}
+                    height={180}
+                    className="w-full h-auto object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                </a>
+              </div>
+              {/* サンプルセクションへの誘導 */}
+              <a href="#samples" className="block text-center mt-10 text-xs text-slate-500 hover:text-amber-400 transition-colors">
+                他3業種のサンプルも見る ↓
+              </a>
+            </div>
           </div>
         </div>
       </section>
@@ -581,7 +636,7 @@ export default function HomePage() {
 
           <div className="border-t border-[#2D2D44] pt-4 sm:pt-6">
             <div className="flex flex-col items-center gap-2 sm:gap-3 text-[2.2vw] sm:text-xs text-slate-600">
-              <p className="text-center whitespace-nowrap">&copy; 2026 OnePage-Flash（株式会社バンテックス）<span className="ml-1 sm:ml-2 text-slate-700">v0.7.4</span></p>
+              <p className="text-center whitespace-nowrap">&copy; 2026 OnePage-Flash（株式会社バンテックス）<span className="ml-1 sm:ml-2 text-slate-700">v0.7.5</span></p>
               <div className="flex items-center gap-3 sm:gap-4">
                 <span className="flex items-center gap-1 sm:gap-1.5">
                   <svg className="w-3 h-3 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
