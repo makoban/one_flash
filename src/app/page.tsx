@@ -157,37 +157,31 @@ export default function HomePage() {
       </nav>
 
       {/* ヒーローセクション */}
-      <section id="hero" className="relative min-h-[80vh] sm:min-h-[90vh] flex items-center overflow-hidden pt-16 pb-8 sm:pb-12">
+      <section id="hero" className="relative flex items-center overflow-hidden pt-14 sm:pt-16 pb-6 sm:pb-10">
         {/* 背景: 暖色アンビエントグロー */}
         <div className="absolute inset-0 bg-gradient-to-br from-indigo-900/20 via-transparent to-amber-900/10" />
         <div className="absolute top-1/3 left-1/4 w-96 h-96 bg-amber-500/5 rounded-full blur-3xl" />
         <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-indigo-500/5 rounded-full blur-3xl" />
 
         <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 w-full">
-          <div className="flex flex-col lg:flex-row items-center gap-6 lg:gap-12">
+          <div className="flex flex-col lg:flex-row items-center gap-5 lg:gap-10">
             {/* 左カラム: テキスト + CTA */}
             <div className="flex-1 text-center lg:text-left">
-              <p className="inline-block px-3 py-1 sm:px-4 sm:py-1.5 bg-amber-500/10 text-amber-400 border border-amber-500/20 text-xs font-semibold rounded-full mb-5 sm:mb-6 tracking-wider">
+              <p className="inline-block px-3 py-1 bg-amber-500/10 text-amber-400 border border-amber-500/20 text-xs font-semibold rounded-full mb-3 sm:mb-4 tracking-wider">
                 AI自動生成 · 最短10分 · 月額480円
               </p>
 
-              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black leading-[1.4] sm:leading-[1.3] mb-4 sm:mb-6">
-                今日中に、あなたの
-                <br className="hidden sm:block" />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-amber-500">
-                  ホームページ
-                </span>
-                が完成します。
+              <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black leading-[1.25] sm:leading-[1.2] mb-3 sm:mb-4">
+                今日中に、あなたの<br />
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-amber-500">ホームページ</span>が完成します。
               </h1>
 
-              <p className="text-base sm:text-lg text-slate-300 leading-relaxed mb-3 sm:mb-4">
-                6つの質問に答えるだけ。AIがプロ品質のHPを自動生成。
-                <br className="hidden sm:block" />
-                初期3,980円 + 月額480円。サーバー・SSL込み。
+              <p className="text-sm sm:text-base text-slate-300 leading-relaxed mb-2 sm:mb-3">
+                6つの質問に答えるだけ。AIがプロ品質のHPを自動生成。<br className="hidden sm:block" />初期3,980円 + 月額480円。サーバー・SSL込み。
               </p>
 
               {/* トラストシグナル */}
-              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-x-4 gap-y-1 text-xs text-slate-400 mb-6 sm:mb-8">
+              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-x-3 gap-y-0.5 text-xs text-slate-400 mb-4 sm:mb-5">
                 <span className="flex items-center gap-1">
                   <svg className="w-3.5 h-3.5 text-amber-400" fill="currentColor" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/></svg>
                   初月無料
@@ -202,18 +196,18 @@ export default function HomePage() {
                 </span>
               </div>
 
-              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center lg:justify-start">
+              <div className="flex flex-col sm:flex-row gap-2.5 sm:gap-3 justify-center lg:justify-start">
                 <Link
                   href="/create"
                   onClick={handleCtaClick}
-                  className="inline-flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-400 text-gray-900 font-bold px-6 py-3 sm:px-8 sm:py-4 rounded-xl text-base sm:text-lg transition-all duration-300 hover:scale-105 shadow-[0_0_30px_rgba(245,158,11,0.35)] hover:shadow-[0_0_50px_rgba(245,158,11,0.55)]"
+                  className="inline-flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-400 text-gray-900 font-bold px-6 py-3 sm:px-8 sm:py-3.5 rounded-xl text-base sm:text-lg transition-all duration-300 hover:scale-105 shadow-[0_0_30px_rgba(245,158,11,0.35)] hover:shadow-[0_0_50px_rgba(245,158,11,0.55)]"
                 >
                   無料でサイトを見てみる
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
                 </Link>
                 <Link
                   href="/edit"
-                  className="inline-flex items-center justify-center gap-1.5 border border-slate-600 hover:border-amber-500/50 text-slate-300 hover:text-amber-400 font-medium px-6 py-3 sm:px-8 sm:py-4 rounded-xl text-base sm:text-lg transition-all duration-300"
+                  className="inline-flex items-center justify-center gap-1.5 border border-slate-600 hover:border-amber-500/50 text-slate-300 hover:text-amber-400 font-medium px-6 py-3 sm:px-8 sm:py-3.5 rounded-xl text-base sm:text-lg transition-all duration-300"
                 >
                   既存サイトを修正する
                 </Link>
@@ -221,7 +215,7 @@ export default function HomePage() {
             </div>
 
             {/* 右カラム: サンプルサイト画像2枚 */}
-            <div className="flex-1 w-full max-w-md lg:max-w-lg relative">
+            <div className="flex-1 w-full max-w-sm lg:max-w-md relative">
               <div className="relative">
                 {/* PC サンプル（税理士事務所） */}
                 <a
@@ -247,7 +241,7 @@ export default function HomePage() {
                   href={`${WORKER_BASE}/sample-bloom`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="absolute -bottom-6 -right-3 sm:-right-6 w-28 sm:w-36 rounded-lg overflow-hidden border-2 border-[#0F0F1A] shadow-xl hover:shadow-amber-500/10 transition-all duration-500 group"
+                  className="absolute -bottom-4 -right-2 sm:-right-4 w-24 sm:w-32 rounded-lg overflow-hidden border-2 border-[#0F0F1A] shadow-xl hover:shadow-amber-500/10 transition-all duration-500 group"
                 >
                   <Image
                     src="/samples/pc-2.png"
@@ -259,7 +253,7 @@ export default function HomePage() {
                 </a>
               </div>
               {/* サンプルセクションへの誘導 */}
-              <a href="#samples" className="block text-center mt-10 text-xs text-slate-500 hover:text-amber-400 transition-colors">
+              <a href="#samples" className="block text-center mt-6 text-xs text-slate-500 hover:text-amber-400 transition-colors">
                 他3業種のサンプルも見る ↓
               </a>
             </div>
