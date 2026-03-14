@@ -37,6 +37,9 @@ interface PreviewSectionProps {
   history: HistoryEntry[];
   currentHistoryIndex: number;
   onRestoreFromHistory: (historyId: number) => void;
+  isAdmin?: boolean;
+  coconalaOrderId?: string;
+  onCoconalaOrderIdChange?: (id: string) => void;
 }
 
 type DeviceTab = "pc" | "mobile";
@@ -72,6 +75,9 @@ export default function PreviewSection({
   history,
   currentHistoryIndex,
   onRestoreFromHistory,
+  isAdmin = false,
+  coconalaOrderId = "",
+  onCoconalaOrderIdChange,
 }: PreviewSectionProps) {
   const [activeTab, setActiveTab] = useState<DeviceTab>("pc");
   const [editData, setEditData] = useState<SiteFormData>(formData);
@@ -158,24 +164,45 @@ export default function PreviewSection({
 
           {/* 公開ボタン（プレビュー下） */}
           <div className="mt-6">
+            {isAdmin && (
+              <div className="mb-4">
+                <label className="block text-xs font-medium text-gray-500 mb-1">ココナラ注文ID（任意）</label>
+                <input
+                  type="text"
+                  value={coconalaOrderId}
+                  onChange={(e) => onCoconalaOrderIdChange?.(e.target.value)}
+                  placeholder="例: abc123..."
+                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-400"
+                />
+              </div>
+            )}
             <button
               type="button"
               onClick={onPublish}
               disabled={isRegenerating || isPublishing}
-              className="w-full py-4 px-6 bg-indigo-600 text-white rounded-xl font-bold text-base hover:bg-indigo-700 active:bg-indigo-800 transition-colors shadow-md disabled:opacity-60 disabled:cursor-not-allowed"
+              className={`w-full py-4 px-6 ${isAdmin ? "bg-amber-500 hover:bg-amber-600 active:bg-amber-700" : "bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800"} text-white rounded-xl font-bold text-base transition-colors shadow-md disabled:opacity-60 disabled:cursor-not-allowed`}
             >
               {isPublishing ? (
                 <span className="flex items-center justify-center gap-2">
                   <SpinnerIcon />
-                  決済画面へ移動中...
+                  {isAdmin ? "公開処理中..." : "決済画面へ移動中..."}
                 </span>
+              ) : isAdmin ? (
+                "このサイトを公開する"
               ) : (
                 "このサイトを公開する（決済へ進む）"
               )}
             </button>
-            <p className="text-center text-xs text-gray-400 mt-2">
-              初期制作費 3,980円（税込）+ 月額 480円/月（税込・初月無料）
-            </p>
+            {!isAdmin && (
+              <p className="text-center text-xs text-gray-400 mt-2">
+                初期制作費 3,980円（税込）+ 月額 480円/月（税込・初月無料）
+              </p>
+            )}
+            {isAdmin && (
+              <p className="text-center text-xs text-amber-600 mt-2">
+                管理者モード: Stripe決済をスキップして直接公開します
+              </p>
+            )}
           </div>
         </div>
 

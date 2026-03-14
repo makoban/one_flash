@@ -144,6 +144,10 @@ export interface OpfSubscriptionRow {
   current_period_end: Date | null;
   cancel_at_period_end: boolean;
   canceled_at: Date | null;
+  payment_source: "stripe" | "coconala";
+  coconala_order_id: string | null;
+  expires_at: Date | null;
+  notes: string | null;
   created_at: Date;
   updated_at: Date;
   [key: string]: unknown;
@@ -484,4 +488,201 @@ export async function insertAdEvent(params: {
       params.userAgent ?? null,
     ]
   );
+}
+
+// ---------------------------------------------------------------------------
+// ココナラ連携: サブスクリプション・課金管理
+// ---------------------------------------------------------------------------
+
+export async function createCoconalaSubscription(params: {
+  userId: string;
+  coconalaOrderId?: string;
+  notes?: string;
+}): Promise<OpfSubscriptionRow> {
+  const fakeSubId = params.coconalaOrderId
+    ? `coconala_${params.coconalaOrderId}`
+    : `coconala_${crypto.randomUUID()}`;
+  const result = await query<OpfSubscriptionRow>(
+    `INSERT INTO opf_subscriptions (user_id, stripe_subscription_id, status, payment_source, coconala_order_id, expires_at, notes)
+     VALUES ($1, $2, 'active', 'coconala', $3, NOW() + INTERVAL '35 days', $4)
+     RETURNING *`,
+    [params.userId, fakeSubId, params.coconalaOrderId ?? null, params.notes ?? null]
+  );
+  return result.rows[0];
+}
+
+export async function extendSubscriptionExpiry(
+  subscriptionId: string,
+  days: number = 35
+): Promise<{ newExpiresAt: Date }> {
+  const result = await query<{ expires_at: Date }>(
+    `UPDATE opf_subscriptions
+     SET expires_at = GREATEST(expires_at, NOW()) + ($2 || ' days')::INTERVAL,
+         status = 'active',
+         updated_at = NOW()
+     WHERE id = $1
+     RETURNING expires_at`,
+    [subscriptionId, days.toString()]
+  );
+  return { newExpiresAt: result.rows[0].expires_at };
+}
+
+export interface OpfPaymentLogRow {
+  id: string;
+  subscription_id: string;
+  confirmed_at: Date;
+  period_start: Date;
+  period_end: Date;
+  amount: number;
+  source: string;
+  memo: string | null;
+  created_at: Date;
+}
+
+export async function insertPaymentLog(params: {
+  subscriptionId: string;
+  amount?: number;
+  source?: string;
+  memo?: string;
+}): Promise<{ id: string; confirmedAt: Date; periodStart: Date; periodEnd: Date }> {
+  const result = await query<OpfPaymentLogRow>(
+    `INSERT INTO opf_payment_logs (subscription_id, period_start, period_end, amount, source, memo)
+     VALUES ($1, CURRENT_DATE, CURRENT_DATE + INTERVAL '35 days', $2, $3, $4)
+     RETURNING *`,
+    [params.subscriptionId, params.amount ?? 1000, params.source ?? "coconala", params.memo ?? null]
+  );
+  const row = result.rows[0];
+  return { id: row.id, confirmedAt: row.confirmed_at, periodStart: row.period_start, periodEnd: row.period_end };
+}
+
+// ---------------------------------------------------------------------------
+// 顧客一覧（Stripe + ココナラ統合）
+// ---------------------------------------------------------------------------
+
+export interface CustomerListItem {
+  siteId: string;
+  subdomain: string;
+  siteName: string | null;
+  email: string;
+  paymentSource: "stripe" | "coconala";
+  coconalaOrderId: string | null;
+  subscriptionId: string | null;
+  subscriptionStatus: string;
+  isActive: boolean;
+  expiresAt: Date | null;
+  daysRemaining: number | null;
+  createdAt: Date;
+  lastPaymentConfirmedAt: Date | null;
+}
+
+export async function getCustomerList(params?: {
+  filter?: "all" | "active" | "inactive" | "expiring";
+  search?: string;
+}): Promise<{ customers: CustomerListItem[]; summary: { total: number; active: number; inactive: number; stripeCount: number; coconalaCount: number; expiringCount: number } }> {
+  const filter = params?.filter ?? "all";
+  const search = params?.search?.trim() ?? "";
+
+  let whereClause = "WHERE 1=1";
+  const queryParams: unknown[] = [];
+  let paramIndex = 1;
+
+  if (filter === "active") {
+    whereClause += ` AND s.is_active = true`;
+  } else if (filter === "inactive") {
+    whereClause += ` AND s.is_active = false`;
+  } else if (filter === "expiring") {
+    whereClause += ` AND sub.payment_source = 'coconala' AND sub.expires_at IS NOT NULL AND sub.expires_at < NOW() + INTERVAL '7 days' AND s.is_active = true`;
+  }
+
+  if (search) {
+    whereClause += ` AND (s.site_name ILIKE $${paramIndex} OR u.email ILIKE $${paramIndex})`;
+    queryParams.push(`%${search}%`);
+    paramIndex++;
+  }
+
+  const result = await query<{
+    site_id: string;
+    subdomain: string;
+    site_name: string | null;
+    email: string;
+    payment_source: string | null;
+    coconala_order_id: string | null;
+    subscription_id: string | null;
+    subscription_status: string | null;
+    is_active: boolean;
+    expires_at: Date | null;
+    days_remaining: number | null;
+    created_at: Date;
+    last_payment_confirmed_at: Date | null;
+  }>(
+    `SELECT
+       s.id as site_id,
+       s.subdomain,
+       s.site_name,
+       u.email,
+       COALESCE(sub.payment_source, 'stripe') as payment_source,
+       sub.coconala_order_id,
+       sub.id as subscription_id,
+       sub.status as subscription_status,
+       s.is_active,
+       sub.expires_at,
+       CASE WHEN sub.expires_at IS NOT NULL THEN EXTRACT(DAY FROM sub.expires_at - NOW())::INT ELSE NULL END as days_remaining,
+       s.created_at,
+       (SELECT MAX(pl.confirmed_at) FROM opf_payment_logs pl WHERE pl.subscription_id = sub.id) as last_payment_confirmed_at
+     FROM opf_sites s
+     LEFT JOIN opf_subscriptions sub ON s.subscription_id = sub.id
+     LEFT JOIN opf_users u ON s.user_id = u.id
+     ${whereClause}
+     ORDER BY s.created_at DESC`,
+    queryParams
+  );
+
+  const customers: CustomerListItem[] = result.rows.map((r) => ({
+    siteId: r.site_id,
+    subdomain: r.subdomain,
+    siteName: r.site_name,
+    email: r.email,
+    paymentSource: (r.payment_source === "coconala" ? "coconala" : "stripe") as "stripe" | "coconala",
+    coconalaOrderId: r.coconala_order_id,
+    subscriptionId: r.subscription_id,
+    subscriptionStatus: r.subscription_status ?? "unknown",
+    isActive: r.is_active,
+    expiresAt: r.expires_at,
+    daysRemaining: r.days_remaining,
+    createdAt: r.created_at,
+    lastPaymentConfirmedAt: r.last_payment_confirmed_at,
+  }));
+
+  // Summary counts (from all data, not filtered)
+  const summaryResult = await query<{
+    total: string;
+    active: string;
+    inactive: string;
+    stripe_count: string;
+    coconala_count: string;
+    expiring_count: string;
+  }>(
+    `SELECT
+       COUNT(*)::TEXT as total,
+       COUNT(*) FILTER (WHERE s.is_active = true)::TEXT as active,
+       COUNT(*) FILTER (WHERE s.is_active = false)::TEXT as inactive,
+       COUNT(*) FILTER (WHERE COALESCE(sub.payment_source, 'stripe') = 'stripe')::TEXT as stripe_count,
+       COUNT(*) FILTER (WHERE sub.payment_source = 'coconala')::TEXT as coconala_count,
+       COUNT(*) FILTER (WHERE sub.payment_source = 'coconala' AND sub.expires_at IS NOT NULL AND sub.expires_at < NOW() + INTERVAL '7 days' AND s.is_active = true)::TEXT as expiring_count
+     FROM opf_sites s
+     LEFT JOIN opf_subscriptions sub ON s.subscription_id = sub.id`
+  );
+
+  const sr = summaryResult.rows[0];
+  return {
+    customers,
+    summary: {
+      total: parseInt(sr.total),
+      active: parseInt(sr.active),
+      inactive: parseInt(sr.inactive),
+      stripeCount: parseInt(sr.stripe_count),
+      coconalaCount: parseInt(sr.coconala_count),
+      expiringCount: parseInt(sr.expiring_count),
+    },
+  };
 }

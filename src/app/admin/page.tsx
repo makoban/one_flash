@@ -15,6 +15,7 @@ import { useSearchParams } from "next/navigation";
 import { KpiCard, formatYen } from "./AdminComponents";
 import { OpfTab } from "./OpfTab";
 import { PurchaseTab } from "./PurchaseTab";
+import { CustomersTab } from "./CustomersTab";
 import type {
   OpfStatsData,
   PurchaseStats,
@@ -25,7 +26,7 @@ import type {
 // 型定義
 // ---------------------------------------------------------------------------
 
-type TabId = "overview" | "opf" | "fudosan" | "shoken" | "shigyo";
+type TabId = "overview" | "opf" | "customers" | "fudosan" | "shoken" | "shigyo";
 
 interface TabConfig {
   id: TabId;
@@ -36,6 +37,7 @@ interface TabConfig {
 const TABS: TabConfig[] = [
   { id: "overview", label: "全体", service: "overview" },
   { id: "opf", label: "OnePage-Flash", service: "opf" },
+  { id: "customers", label: "顧客管理", service: "customers" },
   { id: "fudosan", label: "ai-fudosan", service: "fudosan" },
   { id: "shoken", label: "ai-shoken", service: "shoken" },
   { id: "shigyo", label: "ai-shigyo", service: "shigyo" },
@@ -45,6 +47,7 @@ const TABS: TabConfig[] = [
 const TAB_ACTIVE_STYLES: Record<TabId, string> = {
   overview: "bg-indigo-100 text-indigo-800 font-bold",
   opf: "bg-blue-100 text-blue-800 font-bold",
+  customers: "bg-amber-100 text-amber-800 font-bold",
   fudosan: "bg-green-100 text-green-800 font-bold",
   shoken: "bg-amber-100 text-amber-800 font-bold",
   shigyo: "bg-rose-100 text-rose-800 font-bold",
@@ -265,6 +268,7 @@ function AdminContent() {
   const isLoadingActive =
     (activeTab === "overview" && loadingOverview) ||
     (activeTab === "opf" && loadingOpf) ||
+    (activeTab === "customers" && false) ||
     (activeTab === "fudosan" && loadingFudosan) ||
     (activeTab === "shoken" && loadingShoken) ||
     (activeTab === "shigyo" && loadingShigyo);
@@ -328,6 +332,10 @@ function AdminContent() {
               <EmptyPlaceholder message="データなし。「更新」ボタンを押してください。" />
             )}
           </>
+        )}
+
+        {activeTab === "customers" && (
+          <CustomersTab pw={pw} />
         )}
 
         {activeTab === "fudosan" && (

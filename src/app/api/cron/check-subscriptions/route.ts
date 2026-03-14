@@ -72,6 +72,8 @@ interface SiteWithSubscription {
   stripe_subscription_id: string | null;
   subscription_status: string | null;
   user_email: string;
+  payment_source: string | null;
+  expires_at: Date | null;
 }
 
 interface BatchResult {
@@ -121,7 +123,9 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
          s.subscription_id,
          sub.stripe_subscription_id,
          sub.status as subscription_status,
-         u.email as user_email
+         u.email as user_email,
+         sub.payment_source,
+         sub.expires_at
        FROM opf_sites s
        LEFT JOIN opf_subscriptions sub ON s.subscription_id = sub.id
        LEFT JOIN opf_users u ON s.user_id = u.id
@@ -134,7 +138,41 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     for (const site of sites) {
       result.checked++;
 
-      // サブスクリプションIDがない場合はスキップ（デモサイト等）
+      // --- ココナラ顧客: expires_at ベースで判定 ---
+      if (site.payment_source === "coconala") {
+        try {
+          if (!site.expires_at) {
+            result.skipped++;
+            continue;
+          }
+
+          const expiresAt = new Date(site.expires_at);
+          const now = new Date();
+          const daysRemaining = (expiresAt.getTime() - now.getTime()) / (1000 * 60 * 60 * 24);
+
+          if (expiresAt < now && site.is_active) {
+            // 有効期限切れ → 非公開化
+            await deactivateAndUpdate(site, "expired", result);
+            await updateSubscriptionStatus(site.stripe_subscription_id!, "canceled", new Date());
+            await notifySlack(
+              "[ココナラ] 有効期限切れ → 非公開化",
+              `${site.site_name ?? site.subdomain}（${site.subdomain}）の有効期限が切れました。サイトを非公開化しました。`
+            );
+          } else if (daysRemaining <= 7 && daysRemaining > 0 && site.is_active) {
+            // 7日以内に期限切れ → Slack通知のみ
+            await notifySlack(
+              "[ココナラ] 有効期限が近づいています",
+              `${site.site_name ?? site.subdomain}（${site.subdomain}）の有効期限が${Math.ceil(daysRemaining)}日後です。課金確認してください。`
+            );
+          }
+        } catch (err: unknown) {
+          const message = err instanceof Error ? err.message : String(err);
+          result.errors.push(`${site.subdomain} (coconala): ${message}`);
+        }
+        continue;
+      }
+
+      // --- Stripe顧客: stripe_subscription_id がない場合はスキップ ---
       if (!site.stripe_subscription_id) {
         result.skipped++;
         continue;
@@ -334,12 +372,16 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       is_active: boolean;
       subscription_status: string | null;
       stripe_subscription_id: string | null;
+      payment_source: string | null;
+      expires_at: Date | null;
     }>(
       `SELECT
          s.subdomain,
          s.is_active,
          sub.status as subscription_status,
-         sub.stripe_subscription_id
+         sub.stripe_subscription_id,
+         sub.payment_source,
+         sub.expires_at
        FROM opf_sites s
        LEFT JOIN opf_subscriptions sub ON s.subscription_id = sub.id
        ORDER BY s.created_at ASC`

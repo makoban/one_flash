@@ -10,7 +10,8 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import CardStepForm from "@/components/CardStepForm";
 import PreviewSection from "@/app/create/PreviewSection";
@@ -61,7 +62,20 @@ const MAX_REGENERATIONS = 6;
 // メインページコンポーネント
 // ---------------------------------------------------------------------------
 
-export default function CreatePage() {
+export default function CreatePageWrapper() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gradient-to-br from-slate-50 to-indigo-50" />}>
+      <CreatePage />
+    </Suspense>
+  );
+}
+
+function CreatePage() {
+  const searchParams = useSearchParams();
+  // adminモード判定はクライアント側では pw をそのまま保持し、API呼び出し時に検証
+  const adminPw = searchParams.get("pw") ?? "";
+  const adminMode = searchParams.get("mode") === "admin" && adminPw.length > 0;
+
   const [pageState, setPageState] = useState<PageState>("form");
   const [formData, setFormData] = useState<SiteFormData | null>(null);
   const [previewData, setPreviewData] = useState<PreviewData | null>(null);
@@ -154,15 +168,70 @@ export default function CreatePage() {
     }
   }
 
-  // --- 公開（Stripe Checkout セッション作成 → 決済ページへリダイレクト） ---
+  // --- 公開 ---
   const [isPublishing, setIsPublishing] = useState(false);
+  const [coconalaOrderId, setCoconalaOrderId] = useState("");
+  const [adminPublishResult, setAdminPublishResult] = useState<{
+    publicUrl: string;
+    revisionUrl: string;
+    revisionToken: string;
+    expiresAt: string;
+  } | null>(null);
 
-  async function handlePublish(): Promise<void> {
+  // adminモード: 直接公開
+  async function handleAdminPublish(): Promise<void> {
     if (!previewData || !formData) return;
     setError(null);
     setIsPublishing(true);
 
-    // checkout_start イベント
+    try {
+      const response = await fetch("/api/admin/publish-site", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          pw: adminPw,
+          formData: { ...formData, subdomain: formData.siteName.toLowerCase().replace(/[^a-z0-9]/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "") || `site-${Date.now()}` },
+          html: previewData.html,
+          coconalaOrderId: coconalaOrderId || undefined,
+          sendEmail: true,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = (await response.json()) as { error?: string };
+        throw new Error(errorData.error ?? "サイト公開に失敗しました");
+      }
+
+      const result = (await response.json()) as {
+        site: { publicUrl: string; revisionUrl: string; revisionToken: string };
+        subscription: { expiresAt: string };
+      };
+      setAdminPublishResult({
+        publicUrl: result.site.publicUrl,
+        revisionUrl: result.site.revisionUrl,
+        revisionToken: result.site.revisionToken,
+        expiresAt: result.subscription.expiresAt,
+      });
+      setPageState("complete");
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error ? err.message : "エラーが発生しました。";
+      setError(message);
+    } finally {
+      setIsPublishing(false);
+    }
+  }
+
+  // 通常モード: Stripe Checkout
+  async function handlePublish(): Promise<void> {
+    if (adminMode) {
+      return handleAdminPublish();
+    }
+
+    if (!previewData || !formData) return;
+    setError(null);
+    setIsPublishing(true);
+
     trackEvent("checkout_start");
 
     try {
@@ -184,7 +253,6 @@ export default function CreatePage() {
       }
 
       const { url } = (await response.json()) as { url: string };
-      // Stripe Checkout ページへリダイレクト
       window.location.href = url;
     } catch (err: unknown) {
       const message =
@@ -196,8 +264,15 @@ export default function CreatePage() {
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-slate-50 to-indigo-50 py-10 px-4">
+      {/* adminモードバー */}
+      {adminMode && (
+        <div className="fixed top-0 left-0 right-0 z-50 bg-amber-500 text-white text-center py-2 text-sm font-bold shadow-md">
+          管理者モード（ココナラ対応）
+        </div>
+      )}
+
       {/* ヘッダー */}
-      <div className="text-center mb-8">
+      <div className={`text-center mb-8 ${adminMode ? "mt-10" : ""}`}>
         <Link
           href="/"
           className="inline-flex items-center gap-1 text-sm text-gray-400 hover:text-indigo-600 transition-colors mb-4"
@@ -253,11 +328,59 @@ export default function CreatePage() {
           history={history}
           currentHistoryIndex={currentHistoryIndex}
           onRestoreFromHistory={handleRestoreFromHistory}
+          isAdmin={adminMode}
+          coconalaOrderId={coconalaOrderId}
+          onCoconalaOrderIdChange={setCoconalaOrderId}
         />
         </>
       )}
 
-      {pageState === "complete" && formData && (
+      {pageState === "complete" && adminMode && adminPublishResult && (
+        <div className="max-w-lg mx-auto py-16 px-4">
+          <div className="bg-white rounded-2xl shadow-sm border p-8">
+            <div className="text-center mb-6">
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+              </div>
+              <h2 className="text-xl font-bold text-gray-900">サイトを公開しました</h2>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-xs font-medium text-gray-500 mb-1">公開URL</label>
+                <div className="flex gap-2">
+                  <input type="text" readOnly value={adminPublishResult.publicUrl} className="flex-1 px-3 py-2 text-sm bg-gray-50 border rounded-lg" />
+                  <button onClick={() => navigator.clipboard.writeText(adminPublishResult.publicUrl)} className="px-3 py-2 text-xs bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">コピー</button>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-gray-500 mb-1">修正用URL</label>
+                <div className="flex gap-2">
+                  <input type="text" readOnly value={adminPublishResult.revisionUrl} className="flex-1 px-3 py-2 text-sm bg-gray-50 border rounded-lg" />
+                  <button onClick={() => navigator.clipboard.writeText(adminPublishResult.revisionUrl)} className="px-3 py-2 text-xs bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">コピー</button>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-gray-500 mb-1">有効期限</label>
+                <p className="text-sm text-gray-700">{new Date(adminPublishResult.expiresAt).toLocaleDateString("ja-JP")}</p>
+              </div>
+
+              <div className="flex gap-3 mt-6">
+                <a href={adminPublishResult.publicUrl} target="_blank" rel="noopener noreferrer" className="flex-1 py-3 text-center bg-indigo-600 text-white rounded-xl font-bold text-sm hover:bg-indigo-700">
+                  サイトを確認
+                </a>
+                <button onClick={() => { setPageState("form"); setAdminPublishResult(null); setPreviewData(null); setFormData(null); }} className="flex-1 py-3 text-center border border-gray-300 rounded-xl font-bold text-sm text-gray-700 hover:bg-gray-50">
+                  次のサイトを作成
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {pageState === "complete" && !adminMode && formData && (
         <div className="max-w-lg mx-auto text-center py-16 px-4">
           <p className="text-gray-500">決済ページへリダイレクト中...</p>
         </div>
