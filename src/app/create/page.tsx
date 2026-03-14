@@ -190,10 +190,17 @@ function CreatePage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           pw: adminPw,
-          formData: { ...formData, subdomain: formData.siteName.toLowerCase().replace(/[^a-z0-9]/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "") || `site-${Date.now()}` },
+          formData: {
+            siteName: formData.siteName,
+            catchphrase: formData.catchphrase,
+            description: formData.description,
+            contactInfo: formData.contactInfo,
+            colorTheme: formData.colorTheme,
+            subdomain: formData.siteName.toLowerCase().replace(/[^a-z0-9]/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "") || `site-${Date.now()}`,
+          },
           html: previewData.html,
           coconalaOrderId: coconalaOrderId || undefined,
-          sendEmail: true,
+          sendEmail: false,
         }),
       });
 
@@ -295,7 +302,7 @@ function CreatePage() {
 
       {/* 状態別コンテンツ */}
       {pageState === "form" && (
-        <CardStepForm onSubmit={handleFormSubmit} isSubmitting={isSubmitting} onFirstInteraction={trackFormStart} />
+        <CardStepForm onSubmit={handleFormSubmit} isSubmitting={isSubmitting} onFirstInteraction={trackFormStart} isAdmin={adminMode} />
       )}
 
       {pageState === "generating" && (

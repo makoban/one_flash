@@ -33,10 +33,10 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  // バリデーション
-  if (!formData?.siteName || !formData?.email || !formData?.subdomain || !html) {
+  // バリデーション（emailはココナラ顧客の場合不要）
+  if (!formData?.siteName || !formData?.subdomain || !html) {
     return NextResponse.json(
-      { error: "Missing required fields: siteName, email, subdomain, html" },
+      { error: "Missing required fields: siteName, subdomain, html" },
       { status: 400 }
     );
   }
@@ -90,8 +90,9 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       throw new Error(`R2 publish failed: ${errorData.error ?? publishResponse.statusText}`);
     }
 
-    // DB登録
-    const user = await findOrCreateUser(email);
+    // DB登録（emailなしの場合はsubdomain@coconala.localをダミーとして使用）
+    const userEmail = email || `${subdomain}@coconala.local`;
+    const user = await findOrCreateUser(userEmail);
     const subscription = await createCoconalaSubscription({
       userId: user.id,
       coconalaOrderId: coconalaOrderId || undefined,
@@ -101,7 +102,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       subscriptionId: subscription.id,
       subdomain,
       siteName,
-      inputSnapshot: { siteName, catchphrase, description, contactInfo, colorTheme, email },
+      inputSnapshot: { siteName, catchphrase, description, contactInfo, colorTheme },
     });
 
     const publicUrl = `${workerUrl}/s/${subdomain}`;

@@ -64,6 +64,7 @@ interface CardStepFormProps {
   onSubmit: (formData: SiteFormData) => Promise<void>;
   isSubmitting: boolean;
   onFirstInteraction?: () => void;
+  isAdmin?: boolean;
 }
 
 type FormErrors = Partial<Record<keyof SiteFormData, string>>;
@@ -86,7 +87,8 @@ const INITIAL_FORM_DATA: SiteFormData = {
 // メインコンポーネント
 // ---------------------------------------------------------------------------
 
-export default function CardStepForm({ onSubmit, isSubmitting, onFirstInteraction }: CardStepFormProps) {
+export default function CardStepForm({ onSubmit, isSubmitting, onFirstInteraction, isAdmin = false }: CardStepFormProps) {
+  const totalSteps = isAdmin ? 5 : TOTAL_STEPS;
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState<SiteFormData>(INITIAL_FORM_DATA);
   const [errors, setErrors] = useState<FormErrors>({});
@@ -201,7 +203,7 @@ export default function CardStepForm({ onSubmit, isSubmitting, onFirstInteractio
       setModerating(false);
     }
 
-    const nextStep = Math.min(currentStep + 1, TOTAL_STEPS);
+    const nextStep = Math.min(currentStep + 1, totalSteps);
     setCurrentStep(nextStep);
     // ステップ到達を記録（Q2以降のみ。Q1到達はform_startで記録済み）
     trackEvent("form_step", { step: String(nextStep) });
@@ -223,13 +225,13 @@ export default function CardStepForm({ onSubmit, isSubmitting, onFirstInteractio
   function handleKeyDown(e: React.KeyboardEvent, isTextarea = false): void {
     if (e.key === "Enter" && !isTextarea) {
       e.preventDefault();
-      if (currentStep < TOTAL_STEPS) {
+      if (currentStep < totalSteps) {
         void handleNext();
       }
     }
   }
 
-  const progressPercent = Math.round((currentStep / TOTAL_STEPS) * 100);
+  const progressPercent = Math.round((currentStep / totalSteps) * 100);
 
   return (
     <div className="w-full max-w-2xl mx-auto">
@@ -237,7 +239,7 @@ export default function CardStepForm({ onSubmit, isSubmitting, onFirstInteractio
       <div className="mb-6">
         <div className="flex justify-between items-center mb-2">
           <span className="text-sm font-semibold text-indigo-600">
-            ステップ {currentStep}/{TOTAL_STEPS}
+            ステップ {currentStep}/{totalSteps}
           </span>
           <span className="text-xs text-gray-400">{progressPercent}% 完了</span>
         </div>
@@ -306,7 +308,7 @@ export default function CardStepForm({ onSubmit, isSubmitting, onFirstInteractio
             onChange={(v) => handleChange("colorTheme", v)}
           />
         )}
-        {currentStep === 6 && (
+        {currentStep === 6 && !isAdmin && (
           <StepEmail
             email={formData.email}
             emailError={errors.email}
@@ -337,7 +339,7 @@ export default function CardStepForm({ onSubmit, isSubmitting, onFirstInteractio
             </button>
           )}
 
-          {currentStep < TOTAL_STEPS ? (
+          {currentStep < totalSteps ? (
             <button
               type="button"
               onClick={() => { void handleNext(); }}
