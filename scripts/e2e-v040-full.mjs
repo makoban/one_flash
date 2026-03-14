@@ -46,7 +46,7 @@ if (fs.existsSync(envPath)) {
 // 設定
 // ---------------------------------------------------------------------------
 const RENDER_URL = "https://oneflash.bantex.jp";
-const WORKER_URL = process.env.WORKER_URL || "https://onepage-flash-router.ai-fudosan.workers.dev";
+const WORKER_URL = process.env.WORKER_URL || "https://sites.oneflash.net";
 const UPLOAD_SECRET = process.env.UPLOAD_SECRET;
 const DB_URL = process.env.DATABASE_URL;
 const STRIPE_SK = process.env.STRIPE_SECRET_KEY;

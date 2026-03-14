@@ -12,7 +12,7 @@ import pg from "pg";
 const STRIPE_SK = process.env.STRIPE_SECRET_KEY;
 const WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET;
 const RENDER_URL = process.env.RENDER_URL || "https://onepage-flash.onrender.com";
-const WORKER_URL = process.env.WORKER_URL || "https://onepage-flash-router.ai-fudosan.workers.dev";
+const WORKER_URL = process.env.WORKER_URL || "https://sites.oneflash.net";
 const DB_URL = process.env.DATABASE_URL;
 
 if (!STRIPE_SK) {

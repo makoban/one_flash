@@ -64,7 +64,7 @@ export function CustomersTab({ pw }: CustomersTabProps) {
   // 状態変更中
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
-  const workerUrl = "https://onepage-flash-router.ai-fudosan.workers.dev";
+  const workerUrl = "https://sites.oneflash.net";
 
   const fetchCustomers = useCallback(async () => {
     setLoading(true);

@@ -10,13 +10,13 @@
  *
  * オプション:
  *   APP_URL=https://oneflash.bantex.jp  (デフォルト)
- *   WORKER_URL=https://onepage-flash-router.ai-fudosan.workers.dev  (デフォルト)
+ *   WORKER_URL=https://sites.oneflash.net  (デフォルト)
  */
 
 import pg from "pg";
 
 const APP_URL = process.env.APP_URL || "https://oneflash.bantex.jp";
-const WORKER_URL = process.env.WORKER_URL || "https://onepage-flash-router.ai-fudosan.workers.dev";
+const WORKER_URL = process.env.WORKER_URL || "https://sites.oneflash.net";
 const ADMIN_PW = process.env.ADMIN_PASSWORD;
 const DB_URL = process.env.DATABASE_URL;
 

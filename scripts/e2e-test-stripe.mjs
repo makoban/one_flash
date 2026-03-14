@@ -21,7 +21,7 @@ import Stripe from "stripe";
 // 環境変数から読み込む（.env ファイルまたはシェルで設定）
 // 使い方: STRIPE_SECRET_KEY=sk_test_... node scripts/e2e-test-stripe.mjs
 const BASE_URL = process.env.BASE_URL || "https://onepage-flash.onrender.com";
-const WORKER_URL = process.env.WORKER_URL || "https://onepage-flash-router.ai-fudosan.workers.dev";
+const WORKER_URL = process.env.WORKER_URL || "https://sites.oneflash.net";
 const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
 const DATABASE_URL = process.env.DATABASE_URL;
 

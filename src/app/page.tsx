@@ -46,7 +46,7 @@ function handleCtaClick(e: React.MouseEvent<HTMLAnchorElement>): void {
   }, 300);
 }
 
-const WORKER_BASE = "https://onepage-flash-router.ai-fudosan.workers.dev/s";
+const WORKER_BASE = "https://sites.oneflash.net/s";
 
 const SAMPLES = [
   { slug: "sample-tax", label: "税理士事務所", time: "8分", img: "/samples/pc-1.png" },

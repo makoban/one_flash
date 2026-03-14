@@ -25,7 +25,7 @@ import crypto from "crypto";
 // ---------------------------------------------------------------------------
 // 設定
 // ---------------------------------------------------------------------------
-const WORKER_URL = process.env.WORKER_URL || "https://onepage-flash-router.ai-fudosan.workers.dev";
+const WORKER_URL = process.env.WORKER_URL || "https://sites.oneflash.net";
 const UPLOAD_SECRET = process.env.UPLOAD_SECRET;
 const DATABASE_URL = process.env.DATABASE_URL;
 const SCREENSHOT_DIR = "C:\\Users\\banma\\Pictures\\Screenshots";
