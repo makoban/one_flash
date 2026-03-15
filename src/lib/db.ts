@@ -498,13 +498,15 @@ export async function createCoconalaSubscription(params: {
   userId: string;
   coconalaOrderId?: string;
   notes?: string;
+  expiryDays?: number;
 }): Promise<OpfSubscriptionRow> {
   const fakeSubId = params.coconalaOrderId
     ? `coconala_${params.coconalaOrderId}`
     : `coconala_${crypto.randomUUID()}`;
+  const days = params.expiryDays ?? 365;
   const result = await query<OpfSubscriptionRow>(
     `INSERT INTO opf_subscriptions (user_id, stripe_subscription_id, status, payment_source, coconala_order_id, expires_at, notes)
-     VALUES ($1, $2, 'active', 'coconala', $3, NOW() + INTERVAL '35 days', $4)
+     VALUES ($1, $2, 'active', 'coconala', $3, NOW() + INTERVAL '${days} days', $4)
      RETURNING *`,
     [params.userId, fakeSubId, params.coconalaOrderId ?? null, params.notes ?? null]
   );

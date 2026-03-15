@@ -27,8 +27,9 @@ import {
   updateSubscriptionStatus,
   updateSiteIsActive,
 } from "@/lib/db";
-import { deactivateSite, reactivateSite } from "@/lib/r2";
+import { deactivateSite, reactivateSite, getSitePublicUrl } from "@/lib/r2";
 import { notifySlack } from "@/lib/slack";
+import { sendRenewalReminderEmail } from "@/lib/email";
 import type Stripe from "stripe";
 
 export const runtime = "nodejs";
@@ -158,10 +159,36 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
               "[ココナラ] 有効期限切れ → 非公開化",
               `${site.site_name ?? site.subdomain}（${site.subdomain}）の有効期限が切れました。サイトを非公開化しました。`
             );
-          } else if (daysRemaining <= 7 && daysRemaining > 0 && site.is_active) {
-            // 7日以内に期限切れ → Slack通知のみ
+          } else if (daysRemaining <= 30 && daysRemaining > 29 && site.is_active) {
+            // 30日前 → 更新案内メール送信 + Slack通知
+            if (site.user_email && !site.user_email.endsWith("@coconala.local")) {
+              const workerUrl = process.env.WORKER_URL ?? "https://sites.oneflash.net";
+              await sendRenewalReminderEmail({
+                to: site.user_email,
+                siteName: site.site_name ?? site.subdomain,
+                publicUrl: `${workerUrl}/s/${site.subdomain}`,
+                expiresAt,
+                daysRemaining: Math.ceil(daysRemaining),
+              }).catch((err: unknown) => console.warn("[cron] Renewal email failed:", err));
+            }
             await notifySlack(
-              "[ココナラ] 有効期限が近づいています",
+              "[ココナラ] 更新案内メール送信（30日前）",
+              `${site.site_name ?? site.subdomain}（${site.subdomain}）の有効期限が30日後です。更新案内メールを送信しました。`
+            );
+          } else if (daysRemaining <= 7 && daysRemaining > 6 && site.is_active) {
+            // 7日前 → 更新案内メール（2回目）+ Slack通知
+            if (site.user_email && !site.user_email.endsWith("@coconala.local")) {
+              const workerUrl = process.env.WORKER_URL ?? "https://sites.oneflash.net";
+              await sendRenewalReminderEmail({
+                to: site.user_email,
+                siteName: site.site_name ?? site.subdomain,
+                publicUrl: `${workerUrl}/s/${site.subdomain}`,
+                expiresAt,
+                daysRemaining: Math.ceil(daysRemaining),
+              }).catch((err: unknown) => console.warn("[cron] Renewal email failed:", err));
+            }
+            await notifySlack(
+              "[ココナラ] 有効期限が近づいています（7日前）",
               `${site.site_name ?? site.subdomain}（${site.subdomain}）の有効期限が${Math.ceil(daysRemaining)}日後です。課金確認してください。`
             );
           }

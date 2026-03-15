@@ -290,3 +290,52 @@ function buildPaymentFailureEmailHtml(params: {
 </html>
   `.trim();
 }
+
+// ---------------------------------------------------------------------------
+// 更新案内メール（ココナラ顧客向け）
+// ---------------------------------------------------------------------------
+
+export async function sendRenewalReminderEmail(params: {
+  to: string;
+  siteName: string;
+  publicUrl: string;
+  expiresAt: Date;
+  daysRemaining: number;
+}): Promise<void> {
+  const { to, siteName, publicUrl, expiresAt, daysRemaining } = params;
+  const expiresStr = expiresAt.toLocaleDateString("ja-JP", { year: "numeric", month: "long", day: "numeric" });
+
+  await resend.emails.send({
+    from: FROM_EMAIL,
+    to,
+    subject: `【${SERVICE_NAME}】「${siteName}」の契約更新のご案内（残り${daysRemaining}日）`,
+    html: `
+<!DOCTYPE html>
+<html lang="ja">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+<body style="font-family: 'Helvetica Neue', Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+  <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; border-radius: 12px 12px 0 0; text-align: center;">
+    <h1 style="color: white; margin: 0; font-size: 24px;">${SERVICE_NAME}</h1>
+    <p style="color: rgba(255,255,255,0.9); margin: 8px 0 0;">契約更新のご案内</p>
+  </div>
+  <div style="background: #fff; padding: 30px; border: 1px solid #e8e8e8; border-top: none;">
+    <p>いつも ${SERVICE_NAME} をご利用いただきありがとうございます。</p>
+    <p>「<strong>${siteName}</strong>」のホームページの契約期間が <strong style="color: #e74c3c;">あと${daysRemaining}日</strong> で満了となります。</p>
+    <div style="background: #fef5f5; border-left: 4px solid #e74c3c; padding: 16px; margin: 20px 0; border-radius: 0 8px 8px 0;">
+      <p style="margin: 0; font-size: 14px;"><strong>契約満了日: ${expiresStr}</strong></p>
+      <p style="margin: 8px 0 0; font-size: 13px; color: #666;">期限を過ぎるとホームページが非公開になります。</p>
+    </div>
+    <p style="font-size: 14px; color: #666;">引き続きご利用いただける場合は、ココナラにて更新のご購入をお願いいたします。更新料は <strong>20,000円（税込）</strong> で、さらに1年間ご利用いただけます。</p>
+    <div style="background: #f8f9fa; border-radius: 8px; padding: 20px; margin: 20px 0; text-align: center;">
+      <p style="margin: 0 0 12px; font-size: 14px; color: #666;">現在のホームページ</p>
+      <a href="${publicUrl}" style="display: inline-block; background: #667eea; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold;">サイトを確認する</a>
+    </div>
+    <p style="font-size: 13px; color: #999;">更新をご希望されない場合は、特にお手続きは不要です。期限後にサイトは非公開となりますが、データは保持されますので、再度ご契約いただければすぐに復旧可能です。</p>
+  </div>
+  <div style="background: #f8f9fa; padding: 16px; border-radius: 0 0 12px 12px; text-align: center;">
+    <p style="margin: 0; font-size: 12px; color: #999;">&copy; ${SERVICE_NAME}</p>
+  </div>
+</body>
+</html>`.trim(),
+  });
+}
