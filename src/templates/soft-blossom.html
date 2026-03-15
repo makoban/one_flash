@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{SITE_NAME}}</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&family=Noto+Sans+JP:wght@300;400;500&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Quicksand"', '"Noto Sans JP"', 'sans-serif'],
+                    },
+                    colors: {
+                        sand: {
+                            50: '#fcfbf9',
+                            100: '#f6f3eb',
+                            200: '#ede6d5',
+                            300: '#dfceb5',
+                            400: '#cbb08f',
+                            500: '#bc9670',
+                            600: '#af805c',
+                            800: '#755541',
+                            900: '#5e4537',
+                        },
+                        sage: {
+                            50: '#f9faf9',
+                            100: '#eff2ef',
+                            200: '#dde3dd',
+                            500: '#9cb09c',
+                            600: '#7a917a',
+                            800: '#465446',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .fade-in { animation: fadeIn 1.2s ease-out forwards; opacity: 0; transform: translateY(20px); }
+        @keyframes fadeIn { to { opacity: 1; transform: translateY(0); } }
+        .delay-100 { animation-delay: 150ms; }
+        .delay-200 { animation-delay: 300ms; }
+        .scroll-mt-24 { scroll-margin-top: 6rem; }
+        
+        .blob-shape {
+            border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+            animation: morph 8s ease-in-out infinite alternate;
+        }
+        @keyframes morph {
+            0% { border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; }
+            100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
+        }
+    </style>
+</head>
+<body class="font-sans text-sand-900 bg-sand-50 antialiased selection:bg-sage-200 selection:text-sage-800">
+
+    <!-- Header -->
+    <header class="fixed w-full top-0 bg-sand-50/80 backdrop-blur-md z-50 transition-all shadow-[0_4px_30px_rgba(0,0,0,0.03)] border-b border-sand-100/50">
+        <div class="max-w-6xl mx-auto px-4 h-20 flex items-center justify-between">
+            <div class="text-2xl font-bold text-sage-800 tracking-wider flex items-center gap-2">
+                <i data-lucide="leaf" class="w-6 h-6 text-sage-500"></i>
+                {{SITE_NAME}}
+            </div>
+            
+            <div class="hidden md:flex items-center">
+                <a href="tel:{{PHONE}}" class="flex items-center gap-2 text-sage-800 hover:text-sage-600 transition-colors font-medium border-2 border-sage-200 hover:border-sage-500 px-5 py-2 rounded-full">
+                    <i data-lucide="phone" class="w-4 h-4"></i>
+                    <span class="tracking-widest">{{PHONE}}</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="relative pt-20 h-[85vh] min-h-[600px] flex items-center overflow-hidden">
+        <!-- Background Decor -->
+        <div class="absolute top-0 right-0 w-[800px] h-[800px] bg-sage-100/50 blob-shape translate-x-1/3 -translate-y-1/4 z-0"></div>
+        <div class="absolute bottom-0 left-0 w-[600px] h-[600px] bg-sand-200/40 blob-shape -translate-x-1/3 translate-y-1/4 z-0" style="animation-delay: -4s"></div>
+        
+        <div class="max-w-6xl mx-auto px-4 w-full relative z-10 flex flex-col md:flex-row items-center gap-12">
+            
+            <!-- Content -->
+            <div class="w-full md:w-1/2 fade-in">
+                <span class="text-sage-600 font-semibold tracking-[0.3em] uppercase text-sm mb-4 block">Welcome to</span>
+                <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-sand-900 leading-[1.15] mb-8 font-sans">
+                    {{CATCHPHRASE}}
+                </h1>
+                <p class="text-lg text-sand-800/80 mb-10 leading-relaxed font-light">
+                    {{DESCRIPTION_SHORT}}
+                </p>
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <a href="#contact" class="inline-flex items-center gap-3 bg-sage-600 text-white px-8 py-4 rounded-full font-medium tracking-widest hover:bg-sage-800 transition-all shadow-lg hover:shadow-xl hover:-translate-y-1 justify-center">
+                        <i data-lucide="calendar" class="w-4 h-4"></i>
+                        ご予約・お問い合わせ
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Image Area -->
+            <div class="w-full md:w-1/2 fade-in delay-100 relative">
+                <div class="relative w-full aspect-[4/5] md:aspect-square max-w-lg mx-auto">
+                    <div class="absolute inset-0 bg-sand-200 blob-shape translate-x-4 -translate-y-4"></div>
+                    <img src="{{HERO_IMAGE_URL}}" alt="{{SITE_NAME}}" class="absolute inset-0 w-full h-full object-cover blob-shape shadow-2xl" />
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section class="py-24 bg-white relative" id="services">
+        <div class="max-w-6xl mx-auto px-4 relative z-10">
+            <div class="text-center mb-20 fade-in">
+                <h2 class="text-3xl font-bold text-sand-900 tracking-wide">メニュー・コース</h2>
+                <div class="flex justify-center mt-6">
+                    <div class="w-12 h-1 bg-sage-500 rounded-full"></div>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8 lg:gap-12">
+                <!-- サービス1 -->
+                <div class="bg-sand-50 p-10 rounded-[2rem] hover:bg-sage-50 transition-colors duration-500 fade-in group">
+                    <div class="w-16 h-16 bg-white text-sage-600 rounded-[1.5rem] flex items-center justify-center mb-6 shadow-sm group-hover:scale-110 transition-transform">
+                        <i data-lucide="scissors" class="w-7 h-7"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-sand-900 mb-4">{{SERVICE_1_TITLE}}</h3>
+                    <p class="text-sand-800/70 leading-relaxed font-light">{{SERVICE_1_DESC}}</p>
+                </div>
+                
+                <!-- サービス2 -->
+                <div class="bg-sand-50 p-10 rounded-[2rem] hover:bg-sage-50 transition-colors duration-500 fade-in delay-100 group">
+                    <div class="w-16 h-16 bg-white text-sage-600 rounded-[1.5rem] flex items-center justify-center mb-6 shadow-sm group-hover:scale-110 transition-transform">
+                        <i data-lucide="droplets" class="w-7 h-7"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-sand-900 mb-4">{{SERVICE_2_TITLE}}</h3>
+                    <p class="text-sand-800/70 leading-relaxed font-light">{{SERVICE_2_DESC}}</p>
+                </div>
+                
+                <!-- サービス3 -->
+                <div class="bg-sand-50 p-10 rounded-[2rem] hover:bg-sage-50 transition-colors duration-500 fade-in group">
+                    <div class="w-16 h-16 bg-white text-sage-600 rounded-[1.5rem] flex items-center justify-center mb-6 shadow-sm group-hover:scale-110 transition-transform">
+                        <i data-lucide="sparkles" class="w-7 h-7"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-sand-900 mb-4">{{SERVICE_3_TITLE}}</h3>
+                    <p class="text-sand-800/70 leading-relaxed font-light">{{SERVICE_3_DESC}}</p>
+                </div>
+                
+                <!-- サービス4 -->
+                <div class="bg-sand-50 p-10 rounded-[2rem] hover:bg-sage-50 transition-colors duration-500 fade-in delay-100 group">
+                    <div class="w-16 h-16 bg-white text-sage-600 rounded-[1.5rem] flex items-center justify-center mb-6 shadow-sm group-hover:scale-110 transition-transform">
+                        <i data-lucide="check-circle" class="w-7 h-7"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-sand-900 mb-4">{{SERVICE_4_TITLE}}</h3>
+                    <p class="text-sand-800/70 leading-relaxed font-light">{{SERVICE_4_DESC}}</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="py-24 bg-sage-50" id="features">
+        <div class="max-w-6xl mx-auto px-4">
+            <div class="text-center mb-20 fade-in">
+                <span class="text-sage-600 font-semibold tracking-[0.3em] uppercase text-sm mb-4 block">Concept</span>
+                <h2 class="text-3xl font-bold text-sand-900 tracking-wide">当サロンのこだわり</h2>
+                <div class="flex justify-center mt-6">
+                    <div class="w-12 h-1 bg-sage-500 rounded-full"></div>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
+                <!-- 特徴1 -->
+                <div class="bg-white p-10 rounded-[2rem] shadow-sm hover:-translate-y-2 transition-transform duration-500 fade-in">
+                    <i data-lucide="sun" class="w-12 h-12 text-sage-500 mb-8 border-b-2 border-sand-200 pb-2"></i>
+                    <h3 class="text-xl font-bold text-sand-900 mb-4">{{FEATURE_1_TITLE}}</h3>
+                    <p class="text-sand-800/70 font-light leading-relaxed">{{FEATURE_1_DESC}}</p>
+                </div>
+                
+                <!-- 特徴2 -->
+                <div class="bg-white p-10 rounded-[2rem] shadow-sm hover:-translate-y-2 transition-transform duration-500 fade-in delay-100">
+                    <i data-lucide="smile" class="w-12 h-12 text-sage-500 mb-8 border-b-2 border-sand-200 pb-2"></i>
+                    <h3 class="text-xl font-bold text-sand-900 mb-4">{{FEATURE_2_TITLE}}</h3>
+                    <p class="text-sand-800/70 font-light leading-relaxed">{{FEATURE_2_DESC}}</p>
+                </div>
+                
+                <!-- 特徴3 -->
+                <div class="bg-white p-10 rounded-[2rem] shadow-sm hover:-translate-y-2 transition-transform duration-500 fade-in delay-200">
+                    <i data-lucide="coffee" class="w-12 h-12 text-sage-500 mb-8 border-b-2 border-sand-200 pb-2"></i>
+                    <h3 class="text-xl font-bold text-sand-900 mb-4">{{FEATURE_3_TITLE}}</h3>
+                    <p class="text-sand-800/70 font-light leading-relaxed">{{FEATURE_3_DESC}}</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!--FORM_START-->
+    <section id="contact" class="py-24 bg-white scroll-mt-24">
+        <div class="max-w-4xl mx-auto px-4">
+            <div class="text-center mb-16 fade-in">
+                <span class="text-sage-600 font-semibold tracking-[0.3em] uppercase text-sm mb-4 block">Contact</span>
+                <h2 class="text-3xl font-bold text-sand-900">ご予約・お問い合わせ</h2>
+                <div class="flex justify-center mt-6">
+                    <div class="w-12 h-1 bg-sage-500 rounded-full"></div>
+                </div>
+            </div>
+            
+            <div class="bg-sand-50 p-10 md:p-14 rounded-[2rem] shadow-sm border border-sand-100 fade-in">
+                <form action="{{FORM_ACTION_URL}}" method="POST" class="space-y-8 tracking-wide">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div>
+                            <label for="name" class="block text-sm font-bold text-sand-900 mb-3">お名前 <span class="text-sage-600 ml-1">*</span></label>
+                            <input type="text" id="name" name="name" required class="w-full px-5 py-4 rounded-[1.2rem] border-none bg-white focus:ring-2 focus:ring-sage-500 outline-none transition-shadow text-sand-900 shadow-sm">
+                        </div>
+                        <div>
+                            <label for="email" class="block text-sm font-bold text-sand-900 mb-3">メールアドレス <span class="text-sage-600 ml-1">*</span></label>
+                            <input type="email" id="email" name="email" required class="w-full px-5 py-4 rounded-[1.2rem] border-none bg-white focus:ring-2 focus:ring-sage-500 outline-none transition-shadow text-sand-900 shadow-sm">
+                        </div>
+                    </div>
+                    <div>
+                        <label for="message" class="block text-sm font-bold text-sand-900 mb-3">お問い合わせ内容 <span class="text-sage-600 ml-1">*</span></label>
+                        <textarea id="message" name="message" rows="5" required class="w-full px-5 py-4 rounded-[1.2rem] border-none bg-white focus:ring-2 focus:ring-sage-500 outline-none transition-shadow text-sand-900 shadow-sm"></textarea>
+                    </div>
+                    <div class="text-center pt-8">
+                        <button type="submit" class="bg-sage-600 text-white px-14 py-4 rounded-full tracking-widest text-lg font-medium hover:bg-sage-800 transition-all shadow-md hover:shadow-lg hover:-translate-y-1 w-full md:w-auto">
+                            送信する
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+    <!--FORM_END-->
+
+    <!-- Access & Info Section -->
+    <section class="py-24 bg-sand-900 text-sand-50">
+        <div class="max-w-6xl mx-auto px-4">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+                <div class="fade-in">
+                    <span class="text-sage-400 font-semibold tracking-[0.3em] uppercase text-sm mb-4 block">Access & Info</span>
+                    <h2 class="text-3xl font-bold mb-10 text-white">サロン案内・アクセス</h2>
+                    
+                    <ul class="space-y-8 text-sand-100">
+                        <li class="flex items-start gap-6 border-b border-sand-800 pb-6">
+                            <i data-lucide="map-pin" class="w-6 h-6 text-sage-400 mt-1 shrink-0"></i>
+                            <div>
+                                <span class="block text-sm text-sand-400 mb-1 tracking-widest">所在地</span>
+                                <span class="font-light leading-relaxed text-lg">{{ADDRESS}}</span>
+                            </div>
+                        </li>
+                        
+                        <li class="flex items-start gap-6 border-b border-sand-800 pb-6">
+                            <i data-lucide="clock" class="w-6 h-6 text-sage-400 mt-1 shrink-0"></i>
+                            <div>
+                                <span class="block text-sm text-sand-400 mb-1 tracking-widest">営業時間</span>
+                                <span class="font-light whitespace-pre-line text-lg">{{HOURS}}</span>
+                            </div>
+                        </li>
+                        
+                        <li class="flex items-start gap-6 border-b border-sand-800 pb-6">
+                            <i data-lucide="calendar-x" class="w-6 h-6 text-sage-400 mt-1 shrink-0"></i>
+                            <div>
+                                <span class="block text-sm text-sand-400 mb-1 tracking-widest">定休日</span>
+                                <span class="font-light text-lg">{{HOLIDAY}}</span>
+                            </div>
+                        </li>
+                        
+                        <li class="flex items-start gap-6 border-b border-sand-800 pb-6">
+                            <i data-lucide="phone" class="w-6 h-6 text-sage-400 mt-1 shrink-0"></i>
+                            <div>
+                                <span class="block text-sm text-sand-400 mb-1 tracking-widest">電話番号</span>
+                                <span class="font-light text-xl">{{PHONE}}</span>
+                            </div>
+                        </li>
+                        
+                        <li class="flex items-start gap-6 pb-2">
+                            <i data-lucide="mail" class="w-6 h-6 text-sage-400 mt-1 shrink-0"></i>
+                            <div>
+                                <span class="block text-sm text-sand-400 mb-1 tracking-widest">メール</span>
+                                <span class="font-light text-lg">{{EMAIL}}</span>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                
+                <!--MAP_START-->
+                <div class="h-[600px] relative rounded-[2rem] overflow-hidden fade-in delay-100">
+                    <iframe src="{{MAP_EMBED_URL}}" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" class="absolute inset-0 grayscale-[20%] opacity-90 hover:grayscale-0 hover:opacity-100 transition-all duration-700"></iframe>
+                </div>
+                <!--MAP_END-->
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-sand-900 border-t border-sand-800 pt-16 pb-10 text-center">
+        <div class="max-w-6xl mx-auto px-4">
+            
+            <div class="flex items-center justify-center gap-3 mb-10">
+                <i data-lucide="leaf" class="w-6 h-6 text-sage-500"></i>
+                <h2 class="text-2xl font-bold tracking-widest text-white">{{SITE_NAME}}</h2>
+            </div>
+            
+            <!--SNS_START-->
+            <div class="flex flex-wrap justify-center gap-6 mb-12">
+                <!--SNS_INSTAGRAM_START-->
+                <a href="{{INSTAGRAM_URL}}" target="_blank" class="w-12 h-12 rounded-full bg-sand-800 flex items-center justify-center hover:bg-sage-600 text-sand-300 hover:text-white transition-all duration-300"><i data-lucide="instagram" class="w-5 h-5"></i></a>
+                <!--SNS_INSTAGRAM_END-->
+                
+                <!--SNS_YOUTUBE_START-->
+                <a href="{{YOUTUBE_URL}}" target="_blank" class="w-12 h-12 rounded-full bg-sand-800 flex items-center justify-center hover:bg-sage-600 text-sand-300 hover:text-white transition-all duration-300"><i data-lucide="youtube" class="w-5 h-5"></i></a>
+                <!--SNS_YOUTUBE_END-->
+                
+                <!--SNS_X_START-->
+                <a href="{{X_URL}}" target="_blank" class="w-12 h-12 rounded-full bg-sand-800 flex items-center justify-center hover:bg-sage-600 text-sand-300 hover:text-white transition-all duration-300">
+                    <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.008 5.961H5.078z"></path></svg>
+                </a>
+                <!--SNS_X_END-->
+                
+                <!--SNS_LINE_START-->
+                <a href="{{LINE_URL}}" target="_blank" class="w-12 h-12 rounded-full bg-sand-800 flex items-center justify-center hover:bg-sage-600 text-sand-300 hover:text-white transition-all duration-300">
+                    <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                      <path d="M21.4 10.3c0-4.3-4.3-7.8-9.6-7.8s-9.6 3.5-9.6 7.8c0 3.8 3.3 7 7.7 7.7.3.1.8.2.9.4.1.2.1.5.1.7v1.8c0 .2.1.3.3.4s.3.1.5.0c2.4-1.6 4.9-3.4 6.7-5.5 1.5-1.7 2.6-3.5 2.6-5.5zm-14.3.4c-.4 0-.7-.3-.7-.7V7.6c0-.4.3-.7.7-.7s.7.3.7.7v1.7h1.1c.4 0 .7.3.7.7s-.3.7-.7.7H7.1zm5.2 0c-.4 0-.7-.3-.7-.7V7.6c0-.4.3-.7.7-.7s.7.3.7.7v2.4c0 .4-.3.7-.7.7zm2.4 0c-.4 0-.7-.3-.7-.7V7.6c0-.4.3-.7.7-.7s.7.3.7.7v.7h1.1c.4 0 .7.3.7.7s-.3.7-.7.7h-1.8zM11.9 8.3c0-.4.3-.7.7-.7s.7.3.7.7v2.4c0 .4-.3.7-.7.7s-.7-.3-.7-.7V8.3z"></path>
+                    </svg>
+                </a>
+                <!--SNS_LINE_END-->
+                
+                <!--SNS_FACEBOOK_START-->
+                <a href="{{FACEBOOK_URL}}" target="_blank" class="w-12 h-12 rounded-full bg-sand-800 flex items-center justify-center hover:bg-sage-600 text-sand-300 hover:text-white transition-all duration-300"><i data-lucide="facebook" class="w-5 h-5"></i></a>
+                <!--SNS_FACEBOOK_END-->
+            </div>
+            <!--SNS_END-->
+            
+            <p class="text-sm tracking-widest text-sand-400">© 2026 {{SITE_NAME}}</p>
+            <p class="text-[10px] mt-8 text-sand-600 uppercase tracking-widest">Powered by OnePage-Flash</p>
+        </div>
+    </footer>
+
+    <script>
+        lucide.createIcons();
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if(target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

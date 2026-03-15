@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{SITE_NAME}}</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800;900&family=Noto+Sans+JP:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Poppins"', '"Noto Sans JP"', 'sans-serif'],
+                    },
+                    colors: {
+                        pop: {
+                            yellow: '#ffd800',
+                            yellowDark: '#e5c200',
+                            blue: '#4361ee',
+                            blueDark: '#3a0ca3',
+                            pink: '#f72585',
+                            cyan: '#4cc9f0',
+                            text: '#2b2d42',
+                            bg: '#f8f9fa',
+                        }
+                    },
+                    boxShadow: {
+                        'hard': '6px 6px 0px 0px rgba(43,45,66,1)',
+                        'hard-hover': '2px 2px 0px 0px rgba(43,45,66,1)',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .bounce-in { animation: bounceIn 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards; opacity: 0; transform: scale(0.9); }
+        @keyframes bounceIn { to { opacity: 1; transform: scale(1); } }
+        
+        .fade-up { animation: fadeUp 0.6s ease-out forwards; opacity: 0; transform: translateY(30px); }
+        @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
+        
+        .delay-100 { animation-delay: 100ms; }
+        .delay-200 { animation-delay: 200ms; }
+        .delay-300 { animation-delay: 300ms; }
+        .scroll-mt-24 { scroll-margin-top: 6rem; }
+
+        .blob-bg {
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill='%23FFD800' d='M44.7,-76.4C58.8,-69.2,71.8,-59.1,81.4,-46.3C91,-33.5,97.2,-18,97,-2.8C96.9,12.5,90.4,27.5,81.3,40.5C72.2,53.5,60.5,64.5,47.1,72.6C33.7,80.7,18.6,85.9,2.8,81.2C-13.1,76.5,-28.3,61.9,-42.2,50.4C-56.1,38.9,-68.8,30.5,-77.4,18.6C-86,6.7,-90.6,-8.7,-88.1,-23.1C-85.7,-37.5,-76.3,-50.8,-64.1,-59.8C-51.9,-68.8,-36.8,-73.4,-22.3,-77.2C-7.8,-81,7.2,-83.9,22.2,-82C37.2,-80.1,52.2,-73.4,61.1,-63L44.7,-76.4Z' transform='translate(100 100)' /%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right top;
+            background-size: 600px;
+        }
+        
+        .dot-pattern {
+            background-image: radial-gradient(#2b2d42 2px, transparent 2px);
+            background-size: 20px 20px;
+            opacity: 0.05;
+        }
+    </style>
+</head>
+<body class="font-sans text-pop-text bg-pop-bg antialiased selection:bg-pop-pink selection:text-white">
+
+    <!-- Header -->
+    <header class="fixed w-full top-0 bg-white border-b-4 border-pop-text z-50 transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 h-20 md:h-24 flex items-center justify-between">
+            <div class="text-2xl md:text-3xl font-black tracking-tight text-pop-blue flex items-center gap-3">
+                <div class="w-10 h-10 bg-pop-yellow rounded-full border-2 border-pop-text flex items-center justify-center text-pop-text shadow-hard-hover">
+                    <i data-lucide="zap" class="w-6 h-6"></i>
+                </div>
+                {{SITE_NAME}}
+            </div>
+            
+            <div class="hidden md:flex items-center gap-6">
+                <a href="tel:{{PHONE}}" class="flex items-center gap-2 text-pop-text font-bold text-lg hover:text-pop-pink transition-colors px-3 py-1 rounded-full border-2 border-transparent hover:border-pop-pink">
+                    <i data-lucide="phone" class="w-5 h-5"></i>
+                    <span>{{PHONE}}</span>
+                </a>
+                <a href="#contact" class="bg-pop-blue text-white font-bold px-8 py-3 rounded-full border-2 border-pop-text shadow-hard hover:shadow-hard-hover hover:translate-y-1 hover:translate-x-1 transition-all uppercase tracking-wider">
+                    体験予約
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="relative pt-24 min-h-[85vh] flex items-center bg-white overflow-hidden border-b-4 border-pop-text">
+        <div class="absolute inset-0 dot-pattern z-0"></div>
+        <div class="absolute right-0 top-0 w-[600px] h-[600px] blob-bg z-0 opacity-80 mix-blend-multiply"></div>
+        
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 w-full relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center py-16">
+            
+            <!-- Content -->
+            <div class="fade-up order-2 lg:order-1 relative">
+                <!-- Decorative elements -->
+                <i data-lucide="star" class="absolute -top-10 -left-6 w-10 h-10 text-pop-cyan fill-current animate-pulse"></i>
+                <i data-lucide="star" class="absolute -bottom-6 right-10 w-8 h-8 text-pop-pink fill-current animate-pulse delay-300"></i>
+                
+                <span class="inline-block bg-pop-pink text-white font-bold px-4 py-1 rounded-full text-sm uppercase tracking-widest mb-6 border-2 border-pop-text -rotate-3">
+                    Welcome to {{SITE_NAME}}
+                </span>
+                <h1 class="text-5xl md:text-6xl lg:text-7xl font-black text-pop-text leading-[1.1] mb-8 relative">
+                    {{CATCHPHRASE}}
+                </h1>
+                <p class="text-lg md:text-xl text-gray-700 mb-10 font-bold leading-relaxed max-w-xl bg-white/50 backdrop-blur rounded p-2">
+                    {{DESCRIPTION_SHORT}}
+                </p>
+                <div class="flex flex-wrap gap-4">
+                    <a href="#contact" class="bg-pop-yellow text-pop-text px-10 py-5 rounded-full font-black text-xl border-4 border-pop-text shadow-hard hover:shadow-hard-hover hover:translate-y-1 hover:translate-x-1 transition-all flex items-center gap-3">
+                        <i data-lucide="calendar-plus" class="w-6 h-6"></i>
+                        無料体験レッスン
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Image Area -->
+            <div class="bounce-in order-1 lg:order-2 relative">
+                <div class="relative w-full aspect-square max-w-lg mx-auto">
+                    <!-- Decor behind image -->
+                    <div class="absolute inset-0 bg-pop-cyan rounded-3xl border-4 border-pop-text translate-x-4 translate-y-4"></div>
+                    <div class="absolute inset-0 bg-pop-pink rounded-3xl border-4 border-pop-text -translate-x-4 -translate-y-4"></div>
+                    <div class="relative w-full h-full rounded-3xl overflow-hidden border-4 border-pop-text z-10 bg-white">
+                        <img src="{{HERO_IMAGE_URL}}" alt="{{SITE_NAME}}" class="w-full h-full object-cover" />
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </section>
+
+    <!-- Services / Courses Section -->
+    <section class="py-24 bg-pop-bg" id="services">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6">
+            <div class="text-center mb-20 fade-up">
+                <div class="inline-block relative">
+                    <h2 class="text-4xl md:text-5xl font-black text-pop-text uppercase border-b-8 border-pop-yellow pb-2">コース・クラス</h2>
+                    <i data-lucide="sparkles" class="absolute -top-6 -right-10 w-10 h-10 text-pop-yellow fill-current"></i>
+                </div>
+                <p class="text-gray-600 font-bold mt-6 text-lg">あなたにピッタリのクラスが見つかる！</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8 lg:gap-12">
+                <!-- サービス1 -->
+                <div class="bg-white p-8 rounded-3xl border-4 border-pop-text shadow-hard hover:-translate-y-2 hover:shadow-[10px_10px_0px_0px_rgba(43,45,66,1)] transition-all fade-up group">
+                    <div class="w-20 h-20 bg-pop-cyan text-white rounded-full border-4 border-pop-text flex items-center justify-center mb-6 shadow-hard group-hover:-rotate-12 transition-transform">
+                        <i data-lucide="book-open" class="w-10 h-10"></i>
+                    </div>
+                    <h3 class="text-2xl font-black text-pop-text mb-4">{{SERVICE_1_TITLE}}</h3>
+                    <p class="text-gray-700 font-bold leading-relaxed">{{SERVICE_1_DESC}}</p>
+                </div>
+                
+                <!-- サービス2 -->
+                <div class="bg-white p-8 rounded-3xl border-4 border-pop-text shadow-hard hover:-translate-y-2 hover:shadow-[10px_10px_0px_0px_rgba(43,45,66,1)] transition-all fade-up delay-100 group">
+                    <div class="w-20 h-20 bg-pop-pink text-white rounded-full border-4 border-pop-text flex items-center justify-center mb-6 shadow-hard group-hover:rotate-12 transition-transform">
+                        <i data-lucide="music" class="w-10 h-10"></i>
+                    </div>
+                    <h3 class="text-2xl font-black text-pop-text mb-4">{{SERVICE_2_TITLE}}</h3>
+                    <p class="text-gray-700 font-bold leading-relaxed">{{SERVICE_2_DESC}}</p>
+                </div>
+                
+                <!-- サービス3 -->
+                <div class="bg-white p-8 rounded-3xl border-4 border-pop-text shadow-hard hover:-translate-y-2 hover:shadow-[10px_10px_0px_0px_rgba(43,45,66,1)] transition-all fade-up group">
+                    <div class="w-20 h-20 bg-pop-yellow text-pop-text rounded-full border-4 border-pop-text flex items-center justify-center mb-6 shadow-hard group-hover:-rotate-12 transition-transform">
+                        <i data-lucide="users" class="w-10 h-10"></i>
+                    </div>
+                    <h3 class="text-2xl font-black text-pop-text mb-4">{{SERVICE_3_TITLE}}</h3>
+                    <p class="text-gray-700 font-bold leading-relaxed">{{SERVICE_3_DESC}}</p>
+                </div>
+                
+                <!-- サービス4 -->
+                <div class="bg-white p-8 rounded-3xl border-4 border-pop-text shadow-hard hover:-translate-y-2 hover:shadow-[10px_10px_0px_0px_rgba(43,45,66,1)] transition-all fade-up delay-100 group">
+                    <div class="w-20 h-20 bg-pop-blue text-white rounded-full border-4 border-pop-text flex items-center justify-center mb-6 shadow-hard group-hover:rotate-12 transition-transform">
+                        <i data-lucide="award" class="w-10 h-10"></i>
+                    </div>
+                    <h3 class="text-2xl font-black text-pop-text mb-4">{{SERVICE_4_TITLE}}</h3>
+                    <p class="text-gray-700 font-bold leading-relaxed">{{SERVICE_4_DESC}}</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="py-24 bg-pop-blue border-y-4 border-pop-text text-white relative overflow-hidden" id="features">
+        <div class="absolute inset-0 dot-pattern invert z-0"></div>
+        
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 relative z-10">
+            <div class="text-center mb-20 fade-up">
+                <span class="inline-block bg-white text-pop-blue font-black px-6 py-2 rounded-full border-2 border-pop-text shadow-hard mb-6 rotate-2">
+                    Why Choose Us?
+                </span>
+                <h2 class="text-4xl md:text-5xl font-black text-white drop-shadow-[4px_4px_0_rgba(43,45,66,1)]">選ばれる3つの理由</h2>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
+                <!-- 特徴1 -->
+                <div class="bg-white p-8 rounded-3xl border-4 border-pop-text shadow-hard text-center fade-up relative group">
+                    <div class="absolute -top-6 -right-6 w-16 h-16 bg-pop-yellow rounded-full border-4 border-pop-text flex items-center justify-center font-black text-2xl text-pop-text shadow-hard z-10 group-hover:rotate-12 transition-transform">
+                        1
+                    </div>
+                    <div class="w-24 h-24 mx-auto bg-pop-bg rounded-2xl border-4 border-pop-text flex items-center justify-center mb-6 shadow-hard group-hover:-translate-y-2 transition-transform">
+                        <i data-lucide="sun" class="w-12 h-12 text-pop-pink"></i>
+                    </div>
+                    <h3 class="text-2xl font-black text-pop-text mb-4">{{FEATURE_1_TITLE}}</h3>
+                    <p class="text-gray-700 font-bold leading-relaxed text-left">{{FEATURE_1_DESC}}</p>
+                </div>
+                
+                <!-- 特徴2 -->
+                <div class="bg-white p-8 rounded-3xl border-4 border-pop-text shadow-hard text-center fade-up delay-100 relative group">
+                    <div class="absolute -top-6 -right-6 w-16 h-16 bg-pop-cyan rounded-full border-4 border-pop-text flex items-center justify-center font-black text-2xl text-pop-text shadow-hard z-10 group-hover:-rotate-12 transition-transform">
+                        2
+                    </div>
+                    <div class="w-24 h-24 mx-auto bg-pop-bg rounded-2xl border-4 border-pop-text flex items-center justify-center mb-6 shadow-hard group-hover:-translate-y-2 transition-transform">
+                        <i data-lucide="smile" class="w-12 h-12 text-pop-blue"></i>
+                    </div>
+                    <h3 class="text-2xl font-black text-pop-text mb-4">{{FEATURE_2_TITLE}}</h3>
+                    <p class="text-gray-700 font-bold leading-relaxed text-left">{{FEATURE_2_DESC}}</p>
+                </div>
+                
+                <!-- 特徴3 -->
+                <div class="bg-white p-8 rounded-3xl border-4 border-pop-text shadow-hard text-center fade-up delay-200 relative group">
+                    <div class="absolute -top-6 -right-6 w-16 h-16 bg-pop-pink text-white rounded-full border-4 border-pop-text flex items-center justify-center font-black text-2xl shadow-hard z-10 group-hover:rotate-12 transition-transform">
+                        3
+                    </div>
+                    <div class="w-24 h-24 mx-auto bg-pop-bg rounded-2xl border-4 border-pop-text flex items-center justify-center mb-6 shadow-hard group-hover:-translate-y-2 transition-transform">
+                        <i data-lucide="heart" class="w-12 h-12 text-pop-yellow"></i>
+                    </div>
+                    <h3 class="text-2xl font-black text-pop-text mb-4">{{FEATURE_3_TITLE}}</h3>
+                    <p class="text-gray-700 font-bold leading-relaxed text-left">{{FEATURE_3_DESC}}</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!--FORM_START-->
+    <section id="contact" class="py-24 bg-pop-yellow relative overflow-hidden scroll-mt-20">
+        <div class="absolute inset-0 dot-pattern z-0"></div>
+        <i data-lucide="send" class="absolute top-10 right-10 w-32 h-32 text-white/50 -rotate-12"></i>
+        
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 relative z-10">
+            <div class="text-center mb-16 fade-up">
+                <h2 class="text-4xl md:text-5xl font-black text-pop-text mb-6">無料体験・お問い合わせ</h2>
+                <p class="text-pop-text font-bold bg-white/50 inline-block px-6 py-2 rounded-full border-2 border-pop-text shadow-hard">まずはお気軽にお問い合わせください！</p>
+            </div>
+            
+            <div class="bg-white p-8 md:p-14 rounded-3xl border-4 border-pop-text shadow-[10px_10px_0px_0px_rgba(43,45,66,1)] fade-up bounce-in">
+                <form action="{{FORM_ACTION_URL}}" method="POST" class="space-y-8">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div>
+                            <label for="name" class="block text-lg font-black text-pop-text mb-3">お名前 <span class="bg-pop-pink text-white text-xs px-2 py-1 rounded-full border border-pop-text ml-2">必須</span></label>
+                            <input type="text" id="name" name="name" required class="w-full px-5 py-4 bg-gray-50 border-4 border-pop-text rounded-2xl focus:bg-white focus:outline-none focus:ring-4 focus:ring-pop-cyan/50 text-pop-text font-bold transition-all shadow-hard-hover">
+                        </div>
+                        <div>
+                            <label for="email" class="block text-lg font-black text-pop-text mb-3">メールアドレス <span class="bg-pop-pink text-white text-xs px-2 py-1 rounded-full border border-pop-text ml-2">必須</span></label>
+                            <input type="email" id="email" name="email" required class="w-full px-5 py-4 bg-gray-50 border-4 border-pop-text rounded-2xl focus:bg-white focus:outline-none focus:ring-4 focus:ring-pop-cyan/50 text-pop-text font-bold transition-all shadow-hard-hover">
+                        </div>
+                    </div>
+                    <div>
+                        <label for="message" class="block text-lg font-black text-pop-text mb-3">お問い合わせ内容 <span class="bg-pop-pink text-white text-xs px-2 py-1 rounded-full border border-pop-text ml-2">必須</span></label>
+                        <textarea id="message" name="message" rows="5" required class="w-full px-5 py-4 bg-gray-50 border-4 border-pop-text rounded-2xl focus:bg-white focus:outline-none focus:ring-4 focus:ring-pop-cyan/50 text-pop-text font-bold transition-all shadow-hard-hover"></textarea>
+                    </div>
+                    <div class="text-center pt-8">
+                        <button type="submit" class="bg-pop-cyan text-pop-text px-16 py-5 rounded-full font-black text-2xl border-4 border-pop-text shadow-hard hover:shadow-hard-hover hover:translate-y-1 hover:translate-x-1 transition-all w-full md:w-auto">
+                            送信する！
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+    <!--FORM_END-->
+
+    <!-- Access & Info Section -->
+    <section class="py-24 bg-pop-bg border-t-4 border-pop-text">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6">
+            <div class="text-center mb-16 fade-up">
+                <h2 class="text-4xl md:text-5xl font-black text-pop-text mb-4">スクール情報・アクセス</h2>
+                <div class="w-24 h-2 bg-pop-cyan mx-auto border border-pop-text"></div>
+            </div>
+
+            <div class="grid grid-cols-1 auto-rows-fr lg:grid-cols-2 gap-12 border-4 border-pop-text rounded-3xl overflow-hidden shadow-hard bg-white">
+                <div class="fade-up p-8 md:p-12 order-2 lg:order-1 flex flex-col justify-center">
+                    <ul class="space-y-8 text-pop-text font-bold">
+                        <li class="flex items-start gap-6 border-b-2 border-dashed border-gray-200 pb-6">
+                            <div class="bg-pop-yellow w-12 h-12 rounded-full border-2 border-pop-text flex items-center justify-center shrink-0">
+                                <i data-lucide="map-pin" class="w-6 h-6"></i>
+                            </div>
+                            <div class="pt-2">
+                                <span class="block text-sm text-gray-500 mb-1 font-black uppercase">Address</span>
+                                <span class="text-lg leading-relaxed">{{ADDRESS}}</span>
+                            </div>
+                        </li>
+                        
+                        <li class="flex items-start gap-6 border-b-2 border-dashed border-gray-200 pb-6">
+                            <div class="bg-pop-cyan w-12 h-12 rounded-full border-2 border-pop-text flex items-center justify-center shrink-0">
+                                <i data-lucide="clock" class="w-6 h-6"></i>
+                            </div>
+                            <div class="pt-2">
+                                <span class="block text-sm text-gray-500 mb-1 font-black uppercase">Open Hours</span>
+                                <span class="text-lg whitespace-pre-line">{{HOURS}}</span>
+                            </div>
+                        </li>
+                        
+                        <li class="flex items-start gap-6 border-b-2 border-dashed border-gray-200 pb-6">
+                            <div class="bg-pop-pink w-12 h-12 rounded-full border-2 border-pop-text flex items-center justify-center text-white shrink-0">
+                                <i data-lucide="calendar-x" class="w-6 h-6"></i>
+                            </div>
+                            <div class="pt-2">
+                                <span class="block text-sm text-gray-500 mb-1 font-black uppercase">Close</span>
+                                <span class="text-lg">{{HOLIDAY}}</span>
+                            </div>
+                        </li>
+                        
+                        <li class="flex items-start gap-6 pb-2">
+                            <div class="bg-pop-blue w-12 h-12 rounded-full border-2 border-pop-text flex items-center justify-center text-white shrink-0">
+                                <i data-lucide="phone" class="w-6 h-6"></i>
+                            </div>
+                            <div class="pt-2">
+                                <span class="block text-sm text-gray-500 mb-1 font-black uppercase">Contact</span>
+                                <span class="text-2xl font-black block mb-1 text-pop-blue">{{PHONE}}</span>
+                                <span class="text-gray-600">{{EMAIL}}</span>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                
+                <!--MAP_START-->
+                <div class="h-[400px] lg:h-auto w-full relative order-1 lg:order-2 border-b-4 lg:border-b-0 lg:border-l-4 border-pop-text bg-gray-100 fade-up delay-100">
+                    <iframe src="{{MAP_EMBED_URL}}" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" class="absolute inset-0"></iframe>
+                </div>
+                <!--MAP_END-->
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t-4 border-pop-text pt-20 pb-12 overflow-hidden relative">
+        <div class="absolute inset-0 dot-pattern z-0"></div>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 relative z-10 flex flex-col items-center">
+            
+            <div class="bg-pop-yellow px-10 py-6 rounded-3xl border-4 border-pop-text shadow-hard mb-12 -rotate-2 hover:rotate-0 transition-transform cursor-default flex items-center gap-4">
+                <i data-lucide="zap" class="w-8 h-8 text-pop-text"></i>
+                <h2 class="text-3xl font-black text-pop-text">{{SITE_NAME}}</h2>
+            </div>
+            
+            <!--SNS_START-->
+            <div class="flex flex-wrap justify-center gap-6 mb-16">
+                <!--SNS_INSTAGRAM_START-->
+                <a href="{{INSTAGRAM_URL}}" target="_blank" class="w-14 h-14 bg-white rounded-full border-4 border-pop-text flex items-center justify-center hover:bg-pop-pink hover:text-white text-pop-text shadow-hard-hover hover:-translate-y-1 transition-all"><i data-lucide="instagram" class="w-6 h-6"></i></a>
+                <!--SNS_INSTAGRAM_END-->
+                
+                <!--SNS_YOUTUBE_START-->
+                <a href="{{YOUTUBE_URL}}" target="_blank" class="w-14 h-14 bg-white rounded-full border-4 border-pop-text flex items-center justify-center hover:bg-red-500 hover:text-white text-pop-text shadow-hard-hover hover:-translate-y-1 transition-all"><i data-lucide="youtube" class="w-6 h-6"></i></a>
+                <!--SNS_YOUTUBE_END-->
+                
+                <!--SNS_X_START-->
+                <a href="{{X_URL}}" target="_blank" class="w-14 h-14 bg-white rounded-full border-4 border-pop-text flex items-center justify-center hover:bg-black hover:text-white text-pop-text shadow-hard-hover hover:-translate-y-1 transition-all">
+                    <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.008 5.961H5.078z"></path></svg>
+                </a>
+                <!--SNS_X_END-->
+                
+                <!--SNS_LINE_START-->
+                <a href="{{LINE_URL}}" target="_blank" class="w-14 h-14 bg-white rounded-full border-4 border-pop-text flex items-center justify-center hover:bg-[#06C755] hover:text-white text-pop-text shadow-hard-hover hover:-translate-y-1 transition-all">
+                    <svg class="w-6 h-6 fill-current" viewBox="0 0 24 24">
+                      <path d="M21.4 10.3c0-4.3-4.3-7.8-9.6-7.8s-9.6 3.5-9.6 7.8c0 3.8 3.3 7 7.7 7.7.3.1.8.2.9.4.1.2.1.5.1.7v1.8c0 .2.1.3.3.4s.3.1.5.0c2.4-1.6 4.9-3.4 6.7-5.5 1.5-1.7 2.6-3.5 2.6-5.5zm-14.3.4c-.4 0-.7-.3-.7-.7V7.6c0-.4.3-.7.7-.7s.7.3.7.7v1.7h1.1c.4 0 .7.3.7.7s-.3.7-.7.7H7.1zm5.2 0c-.4 0-.7-.3-.7-.7V7.6c0-.4.3-.7.7-.7s.7.3.7.7v2.4c0 .4-.3.7-.7.7zm2.4 0c-.4 0-.7-.3-.7-.7V7.6c0-.4.3-.7.7-.7s.7.3.7.7v.7h1.1c.4 0 .7.3.7.7s-.3.7-.7.7h-1.8zM11.9 8.3c0-.4.3-.7.7-.7s.7.3.7.7v2.4c0 .4-.3.7-.7.7s-.7-.3-.7-.7V8.3z"></path>
+                    </svg>
+                </a>
+                <!--SNS_LINE_END-->
+                
+                <!--SNS_FACEBOOK_START-->
+                <a href="{{FACEBOOK_URL}}" target="_blank" class="w-14 h-14 bg-white rounded-full border-4 border-pop-text flex items-center justify-center hover:bg-[#1877F2] hover:text-white text-pop-text shadow-hard-hover hover:-translate-y-1 transition-all"><i data-lucide="facebook" class="w-6 h-6"></i></a>
+                <!--SNS_FACEBOOK_END-->
+            </div>
+            <!--SNS_END-->
+            
+            <p class="font-bold text-pop-text">© 2026 {{SITE_NAME}}</p>
+            <p class="text-[10px] mt-2 text-gray-500 font-bold uppercase tracking-widest bg-gray-100 px-3 py-1 rounded border border-gray-300">Powered by OnePage-Flash</p>
+        </div>
+    </footer>
+
+    <script>
+        lucide.createIcons();
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if(target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

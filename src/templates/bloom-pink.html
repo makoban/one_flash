@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{SITE_NAME}}</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=Noto+Sans+JP:wght@300;400;500&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        serif: ['"Lora"', 'serif'],
+                        sans: ['"Noto Sans JP"', 'sans-serif'],
+                    },
+                    colors: {
+                        rose: {
+                            50: '#fcf8f9',
+                            100: '#faeff1',
+                            300: '#ebd1d5',
+                            400: '#d9b1b6',
+                            500: '#c58b94',  /* Main accent */
+                            600: '#b0717b',
+                            800: '#69484d',
+                            900: '#4a3639',
+                        },
+                        gold: {
+                            400: '#d1b88e',
+                            500: '#baa076',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .fade-in { animation: fadeIn 1.2s cubic-bezier(0.25, 1, 0.5, 1) forwards; opacity: 0; transform: translateY(15px); }
+        @keyframes fadeIn { to { opacity: 1; transform: translateY(0); } }
+        .delay-100 { animation-delay: 150ms; }
+        .delay-200 { animation-delay: 300ms; }
+        .scroll-mt-24 { scroll-margin-top: 6rem; }
+    </style>
+</head>
+<body class="font-sans text-rose-900 bg-rose-50 antialiased selection:bg-rose-300 selection:text-white">
+
+    <!-- Header -->
+    <header class="fixed w-full top-0 bg-white/90 backdrop-blur-md shadow-[0_2px_15px_-3px_rgba(0,0,0,0.05)] z-50">
+        <div class="max-w-6xl mx-auto px-4 h-20 flex items-center justify-between">
+            <div class="text-2xl font-serif font-semibold text-rose-600 tracking-wide flex items-center gap-2">
+                <i data-lucide="flower-2" class="w-6 h-6 text-rose-400"></i>
+                {{SITE_NAME}}
+            </div>
+            
+            <div class="hidden md:flex items-center">
+                <a href="tel:{{PHONE}}" class="flex items-center gap-2 text-rose-600 hover:text-rose-800 transition-colors font-serif italic border-b border-rose-200 pb-1">
+                    <i data-lucide="phone" class="w-4 h-4"></i>
+                    <span class="tracking-widest">{{PHONE}}</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="relative pt-20 h-[80vh] min-h-[600px] flex items-center">
+        <!-- Background -->
+        <div class="absolute inset-0 z-0">
+            <img src="{{HERO_IMAGE_URL}}" alt="{{SITE_NAME}}" class="w-full h-full object-cover origin-center" />
+            <div class="absolute inset-0 bg-rose-100/30 mix-blend-overlay"></div>
+            <div class="absolute inset-0 bg-gradient-to-r from-white/90 via-white/70 to-transparent"></div>
+        </div>
+        
+        <!-- Content -->
+        <div class="relative z-10 w-full max-w-6xl mx-auto px-4">
+            <div class="max-w-xl fade-in pr-8">
+                <span class="font-serif italic text-gold-500 mb-4 block text-lg tracking-widest">Welcome to</span>
+                <h1 class="text-4xl md:text-5xl lg:text-6xl font-serif font-medium text-rose-900 leading-[1.2] mb-8">
+                    {{CATCHPHRASE}}
+                </h1>
+                <p class="text-lg text-rose-800/80 mb-10 leading-relaxed font-light">
+                    {{DESCRIPTION_SHORT}}
+                </p>
+                <a href="#contact" class="inline-flex items-center gap-3 bg-rose-500 text-white px-10 py-4 rounded-full font-serif tracking-widest hover:bg-rose-600 transition-all shadow-[0_4px_14px_0_rgb(197,139,148,0.39)] hover:shadow-lg hover:-translate-y-0.5">
+                    <i data-lucide="heart" class="w-4 h-4"></i>
+                    ご予約・お問い合わせ
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section class="py-24 bg-rose-50/50" id="services">
+        <div class="max-w-6xl mx-auto px-4">
+            <div class="text-center mb-20 fade-in">
+                <h2 class="text-3xl font-serif font-medium text-rose-900">メニュー・料金</h2>
+                <div class="flex items-center justify-center gap-4 mt-6">
+                    <div class="w-12 h-[1px] bg-gold-400"></div>
+                    <i data-lucide="sparkles" class="w-4 h-4 text-gold-400"></i>
+                    <div class="w-12 h-[1px] bg-gold-400"></div>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
+                <!-- サービス1 -->
+                <div class="group bg-white p-10 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(197,139,148,0.1)] transition-all fade-in border border-rose-100/50 relative overflow-hidden">
+                    <div class="absolute -right-8 -top-8 w-32 h-32 bg-rose-50 rounded-full group-hover:bg-rose-100 transition-colors z-0"></div>
+                    <div class="relative z-10">
+                        <div class="w-14 h-14 bg-rose-100 text-rose-600 rounded-2xl flex items-center justify-center mb-6">
+                            <i data-lucide="paintbrush" class="w-6 h-6"></i>
+                        </div>
+                        <h3 class="text-2xl font-serif text-rose-900 mb-3">{{SERVICE_1_TITLE}}</h3>
+                        <p class="text-rose-800/70 leading-relaxed font-light">{{SERVICE_1_DESC}}</p>
+                    </div>
+                </div>
+                
+                <!-- サービス2 -->
+                <div class="group bg-white p-10 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(197,139,148,0.1)] transition-all fade-in delay-100 border border-rose-100/50 relative overflow-hidden">
+                    <div class="absolute -right-8 -top-8 w-32 h-32 bg-rose-50 rounded-full group-hover:bg-rose-100 transition-colors z-0"></div>
+                    <div class="relative z-10">
+                        <div class="w-14 h-14 bg-rose-100 text-rose-600 rounded-2xl flex items-center justify-center mb-6">
+                            <i data-lucide="scissors" class="w-6 h-6"></i>
+                        </div>
+                        <h3 class="text-2xl font-serif text-rose-900 mb-3">{{SERVICE_2_TITLE}}</h3>
+                        <p class="text-rose-800/70 leading-relaxed font-light">{{SERVICE_2_DESC}}</p>
+                    </div>
+                </div>
+                
+                <!-- サービス3 -->
+                <div class="group bg-white p-10 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(197,139,148,0.1)] transition-all fade-in border border-rose-100/50 relative overflow-hidden">
+                    <div class="absolute -right-8 -top-8 w-32 h-32 bg-rose-50 rounded-full group-hover:bg-rose-100 transition-colors z-0"></div>
+                    <div class="relative z-10">
+                        <div class="w-14 h-14 bg-rose-100 text-rose-600 rounded-2xl flex items-center justify-center mb-6">
+                            <i data-lucide="drop" class="w-6 h-6"></i>
+                        </div>
+                        <h3 class="text-2xl font-serif text-rose-900 mb-3">{{SERVICE_3_TITLE}}</h3>
+                        <p class="text-rose-800/70 leading-relaxed font-light">{{SERVICE_3_DESC}}</p>
+                    </div>
+                </div>
+                
+                <!-- サービス4 -->
+                <div class="group bg-white p-10 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(197,139,148,0.1)] transition-all fade-in delay-100 border border-rose-100/50 relative overflow-hidden">
+                    <div class="absolute -right-8 -top-8 w-32 h-32 bg-rose-50 rounded-full group-hover:bg-rose-100 transition-colors z-0"></div>
+                    <div class="relative z-10">
+                        <div class="w-14 h-14 bg-rose-100 text-rose-600 rounded-2xl flex items-center justify-center mb-6">
+                            <i data-lucide="star" class="w-6 h-6"></i>
+                        </div>
+                        <h3 class="text-2xl font-serif text-rose-900 mb-3">{{SERVICE_4_TITLE}}</h3>
+                        <p class="text-rose-800/70 leading-relaxed font-light">{{SERVICE_4_DESC}}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="py-24 bg-white" id="features">
+        <div class="max-w-6xl mx-auto px-4">
+            <div class="text-center mb-20 fade-in">
+                <h2 class="text-3xl font-serif font-medium text-rose-900">サロンの魅力</h2>
+                <div class="flex items-center justify-center gap-4 mt-6">
+                    <div class="w-12 h-[1px] bg-gold-400"></div>
+                    <i data-lucide="sparkles" class="w-4 h-4 text-gold-400"></i>
+                    <div class="w-12 h-[1px] bg-gold-400"></div>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-10 lg:gap-14">
+                <!-- 特徴1 -->
+                <div class="text-center fade-in">
+                    <div class="w-32 h-32 mx-auto bg-rose-50 rounded-full flex items-center justify-center mb-8 border border-rose-100">
+                        <div class="w-24 h-24 bg-white rounded-full shadow-sm flex items-center justify-center text-rose-500">
+                            <i data-lucide="heart" class="w-8 h-8"></i>
+                        </div>
+                    </div>
+                    <h3 class="text-xl font-serif text-rose-900 mb-4">{{FEATURE_1_TITLE}}</h3>
+                    <p class="text-rose-800/70 font-light leading-relaxed">{{FEATURE_1_DESC}}</p>
+                </div>
+                
+                <!-- 特徴2 -->
+                <div class="text-center fade-in delay-100">
+                    <div class="w-32 h-32 mx-auto bg-rose-50 rounded-full flex items-center justify-center mb-8 border border-rose-100">
+                        <div class="w-24 h-24 bg-white rounded-full shadow-sm flex items-center justify-center text-rose-500">
+                            <i data-lucide="shield-check" class="w-8 h-8"></i>
+                        </div>
+                    </div>
+                    <h3 class="text-xl font-serif text-rose-900 mb-4">{{FEATURE_2_TITLE}}</h3>
+                    <p class="text-rose-800/70 font-light leading-relaxed">{{FEATURE_2_DESC}}</p>
+                </div>
+                
+                <!-- 特徴3 -->
+                <div class="text-center fade-in delay-200">
+                    <div class="w-32 h-32 mx-auto bg-rose-50 rounded-full flex items-center justify-center mb-8 border border-rose-100">
+                        <div class="w-24 h-24 bg-white rounded-full shadow-sm flex items-center justify-center text-rose-500">
+                            <i data-lucide="smile" class="w-8 h-8"></i>
+                        </div>
+                    </div>
+                    <h3 class="text-xl font-serif text-rose-900 mb-4">{{FEATURE_3_TITLE}}</h3>
+                    <p class="text-rose-800/70 font-light leading-relaxed">{{FEATURE_3_DESC}}</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!--FORM_START-->
+    <section id="contact" class="py-24 bg-rose-50 scroll-mt-24 relative overflow-hidden">
+        <!-- Decor element -->
+        <i data-lucide="flower-2" class="absolute -right-20 top-20 w-80 h-80 text-rose-100/50 -rotate-45"></i>
+        <i data-lucide="flower-2" class="absolute -left-20 bottom-10 w-64 h-64 text-rose-100/50 rotate-45"></i>
+        
+        <div class="max-w-3xl mx-auto px-4 relative z-10">
+            <div class="text-center mb-16 fade-in">
+                <h2 class="text-3xl font-serif font-medium text-rose-900">ご予約・お問い合わせ</h2>
+                <div class="flex items-center justify-center gap-4 mt-6">
+                    <div class="w-12 h-[1px] bg-gold-400"></div>
+                </div>
+            </div>
+            
+            <div class="bg-white p-10 md:p-14 rounded-[2rem] shadow-[0_10px_40px_rgb(0,0,0,0.03)] border border-rose-100/50 fade-in">
+                <form action="{{FORM_ACTION_URL}}" method="POST" class="space-y-8 tracking-wide">
+                    <div>
+                        <label for="name" class="block text-sm font-serif text-rose-900 mb-2">お名前 <span class="text-rose-500 ml-1">*</span></label>
+                        <input type="text" id="name" name="name" required class="w-full px-5 py-3 border-b border-rose-200 focus:border-rose-500 bg-transparent outline-none transition-colors text-rose-900 font-light">
+                    </div>
+                    <div>
+                        <label for="email" class="block text-sm font-serif text-rose-900 mb-2">メールアドレス <span class="text-rose-500 ml-1">*</span></label>
+                        <input type="email" id="email" name="email" required class="w-full px-5 py-3 border-b border-rose-200 focus:border-rose-500 bg-transparent outline-none transition-colors text-rose-900 font-light">
+                    </div>
+                    <div>
+                        <label for="message" class="block text-sm font-serif text-rose-900 mb-3">お問い合わせ内容 <span class="text-rose-500 ml-1">*</span></label>
+                        <textarea id="message" name="message" rows="5" required class="w-full px-5 py-4 border border-rose-200 focus:border-rose-500 rounded-2xl bg-rose-50/30 outline-none transition-colors text-rose-900 font-light"></textarea>
+                    </div>
+                    <div class="text-center pt-8">
+                        <button type="submit" class="bg-rose-500 text-white px-14 py-4 rounded-full font-serif tracking-widest text-lg hover:bg-rose-600 transition-all shadow-[0_4px_14px_0_rgb(197,139,148,0.39)] hover:shadow-lg w-full md:w-auto">
+                            送信する
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+    <!--FORM_END-->
+
+    <!-- Access & Info Section -->
+    <section class="py-24 bg-white border-t border-rose-100">
+        <div class="max-w-6xl mx-auto px-4">
+            <div class="text-center mb-16 fade-in">
+                <h2 class="text-3xl font-serif font-medium text-rose-900">サロン情報・アクセス</h2>
+                <div class="flex items-center justify-center gap-4 mt-6 mb-12">
+                    <div class="w-12 h-[1px] bg-gold-400"></div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+                <div class="fade-in order-2 lg:order-1">
+                    <div class="bg-rose-50 p-10 md:p-12 rounded-[2rem]">
+                        <ul class="space-y-8 text-rose-900">
+                            <li class="flex items-start gap-5">
+                                <i data-lucide="map-pin" class="w-5 h-5 text-rose-500 mt-1 shrink-0"></i>
+                                <div>
+                                    <span class="block text-xs text-rose-800/60 mb-1 uppercase tracking-widest font-serif">Address</span>
+                                    <span class="font-light leading-relaxed">{{ADDRESS}}</span>
+                                </div>
+                            </li>
+                            
+                            <li class="flex items-start gap-5">
+                                <i data-lucide="clock" class="w-5 h-5 text-rose-500 mt-1 shrink-0"></i>
+                                <div>
+                                    <span class="block text-xs text-rose-800/60 mb-1 uppercase tracking-widest font-serif">Open</span>
+                                    <span class="font-light whitespace-pre-line">{{HOURS}}</span>
+                                </div>
+                            </li>
+                            
+                            <li class="flex items-start gap-5">
+                                <i data-lucide="calendar-x" class="w-5 h-5 text-rose-500 mt-1 shrink-0"></i>
+                                <div>
+                                    <span class="block text-xs text-rose-800/60 mb-1 uppercase tracking-widest font-serif">Close</span>
+                                    <span class="font-light">{{HOLIDAY}}</span>
+                                </div>
+                            </li>
+                            
+                            <li class="flex items-start gap-5">
+                                <i data-lucide="phone" class="w-5 h-5 text-rose-500 mt-1 shrink-0"></i>
+                                <div>
+                                    <span class="block text-xs text-rose-800/60 mb-1 uppercase tracking-widest font-serif">Tel</span>
+                                    <span class="font-light text-lg">{{PHONE}}</span>
+                                </div>
+                            </li>
+                            
+                            <li class="flex items-start gap-5">
+                                <i data-lucide="mail" class="w-5 h-5 text-rose-500 mt-1 shrink-0"></i>
+                                <div>
+                                    <span class="block text-xs text-rose-800/60 mb-1 uppercase tracking-widest font-serif">Email</span>
+                                    <span class="font-light">{{EMAIL}}</span>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <!--MAP_START-->
+                <div class="order-1 lg:order-2 h-[500px] relative rounded-[2rem] overflow-hidden shadow-[0_10px_40px_rgb(0,0,0,0.05)] fade-in delay-100">
+                    <iframe src="{{MAP_EMBED_URL}}" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" class="absolute inset-0 grayscale-[30%] sepia-[10%] hue-rotate-30 hover:grayscale-0 transition-all duration-700"></iframe>
+                </div>
+                <!--MAP_END-->
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-rose-900 text-rose-100 pt-20 pb-10">
+        <div class="max-w-6xl mx-auto px-4 flex flex-col items-center">
+            
+            <div class="flex items-center gap-3 mb-8">
+                <i data-lucide="flower-2" class="w-6 h-6 text-rose-300"></i>
+                <h2 class="text-2xl font-serif font-medium tracking-widest">{{SITE_NAME}}</h2>
+            </div>
+            
+            <!--SNS_START-->
+            <div class="flex flex-wrap justify-center gap-6 mb-12">
+                <!--SNS_INSTAGRAM_START-->
+                <a href="{{INSTAGRAM_URL}}" target="_blank" class="w-12 h-12 rounded-full border border-rose-700 flex items-center justify-center hover:bg-rose-800 hover:border-rose-400 text-rose-300 transition-all duration-300"><i data-lucide="instagram" class="w-5 h-5"></i></a>
+                <!--SNS_INSTAGRAM_END-->
+                
+                <!--SNS_YOUTUBE_START-->
+                <a href="{{YOUTUBE_URL}}" target="_blank" class="w-12 h-12 rounded-full border border-rose-700 flex items-center justify-center hover:bg-rose-800 hover:border-rose-400 text-rose-300 transition-all duration-300"><i data-lucide="youtube" class="w-5 h-5"></i></a>
+                <!--SNS_YOUTUBE_END-->
+                
+                <!--SNS_X_START-->
+                <a href="{{X_URL}}" target="_blank" class="w-12 h-12 rounded-full border border-rose-700 flex items-center justify-center hover:bg-rose-800 hover:border-rose-400 text-rose-300 transition-all duration-300">
+                    <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.008 5.961H5.078z"></path></svg>
+                </a>
+                <!--SNS_X_END-->
+                
+                <!--SNS_LINE_START-->
+                <a href="{{LINE_URL}}" target="_blank" class="w-12 h-12 rounded-full border border-rose-700 flex items-center justify-center hover:bg-rose-800 hover:border-rose-400 text-rose-300 transition-all duration-300">
+                    <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                      <path d="M21.4 10.3c0-4.3-4.3-7.8-9.6-7.8s-9.6 3.5-9.6 7.8c0 3.8 3.3 7 7.7 7.7.3.1.8.2.9.4.1.2.1.5.1.7v1.8c0 .2.1.3.3.4s.3.1.5.0c2.4-1.6 4.9-3.4 6.7-5.5 1.5-1.7 2.6-3.5 2.6-5.5zm-14.3.4c-.4 0-.7-.3-.7-.7V7.6c0-.4.3-.7.7-.7s.7.3.7.7v1.7h1.1c.4 0 .7.3.7.7s-.3.7-.7.7H7.1zm5.2 0c-.4 0-.7-.3-.7-.7V7.6c0-.4.3-.7.7-.7s.7.3.7.7v2.4c0 .4-.3.7-.7.7zm2.4 0c-.4 0-.7-.3-.7-.7V7.6c0-.4.3-.7.7-.7s.7.3.7.7v.7h1.1c.4 0 .7.3.7.7s-.3.7-.7.7h-1.8zM11.9 8.3c0-.4.3-.7.7-.7s.7.3.7.7v2.4c0 .4-.3.7-.7.7s-.7-.3-.7-.7V8.3z"></path>
+                    </svg>
+                </a>
+                <!--SNS_LINE_END-->
+                
+                <!--SNS_FACEBOOK_START-->
+                <a href="{{FACEBOOK_URL}}" target="_blank" class="w-12 h-12 rounded-full border border-rose-700 flex items-center justify-center hover:bg-rose-800 hover:border-rose-400 text-rose-300 transition-all duration-300"><i data-lucide="facebook" class="w-5 h-5"></i></a>
+                <!--SNS_FACEBOOK_END-->
+            </div>
+            <!--SNS_END-->
+            
+            <p class="text-sm tracking-widest font-serif text-rose-400">© 2026 {{SITE_NAME}}</p>
+            <p class="text-[10px] mt-8 text-rose-800 uppercase tracking-widest">Powered by OnePage-Flash</p>
+        </div>
+    </footer>
+
+    <script>
+        // Initialize Lucide Icons
+        lucide.createIcons();
+
+        // Smooth Scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if(target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

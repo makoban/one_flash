@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{SITE_NAME}}</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Inter"', '"Helvetica Neue"', '"Noto Sans JP"', 'sans-serif'],
+                    },
+                    colors: {
+                        minimal: {
+                            50: '#fafafa',
+                            100: '#f5f5f5',
+                            200: '#e5e5e5',
+                            300: '#d4d4d4',
+                            400: '#a3a3a3',
+                            500: '#737373',
+                            600: '#525252',
+                            700: '#404040',
+                            800: '#262626',
+                            900: '#171717',
+                            950: '#0a0a0a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .fade-in { animation: fadeIn 1.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; transform: translateY(20px); }
+        @keyframes fadeIn { to { opacity: 1; transform: translateY(0); } }
+        .delay-100 { animation-delay: 150ms; }
+        .delay-200 { animation-delay: 300ms; }
+        .scroll-mt-32 { scroll-margin-top: 8rem; }
+        
+        .border-left-hover {
+            position: relative;
+        }
+        .border-left-hover::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 2px;
+            background-color: #171717;
+            transform: scaleY(0);
+            transform-origin: bottom;
+            transition: transform 0.4s ease;
+        }
+        .border-left-hover:hover::before {
+            transform: scaleY(1);
+            transform-origin: top;
+        }
+
+        .line-hover {
+            position: relative;
+            display: inline-block;
+        }
+        .line-hover::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            transform: scaleX(0);
+            height: 1px;
+            bottom: 0;
+            left: 0;
+            background-color: #171717;
+            transform-origin: bottom right;
+            transition: transform 0.4s ease-out;
+        }
+        .line-hover:hover::after {
+            transform: scaleX(1);
+            transform-origin: bottom left;
+        }
+    </style>
+</head>
+<body class="font-sans text-minimal-900 bg-white antialiased selection:bg-minimal-900 selection:text-white">
+
+    <!-- Header -->
+    <header class="fixed w-full top-0 bg-white/95 backdrop-blur-sm z-50 border-b border-minimal-100 transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-6 lg:px-12 h-20 md:h-24 flex items-center justify-between">
+            <div class="text-xl md:text-2xl font-bold tracking-tight text-minimal-900">
+                {{SITE_NAME}}
+            </div>
+            
+            <div class="hidden md:flex items-center gap-10">
+                <a href="tel:{{PHONE}}" class="text-minimal-500 hover:text-minimal-900 transition-colors tracking-wide text-sm font-medium flex items-center gap-2">
+                    <i data-lucide="phone" class="w-4 h-4"></i> {{PHONE}}
+                </a>
+                <a href="#contact" class="text-minimal-900 hover:text-white hover:bg-minimal-900 border border-minimal-900 px-6 py-2 transition-all duration-300 text-sm tracking-widest uppercase font-medium">
+                    Contact
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="relative pt-24 min-h-screen flex items-center bg-white px-6 lg:px-12">
+        <div class="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+            
+            <!-- Content -->
+            <div class="fade-in max-w-xl order-2 lg:order-1 pt-10 lg:pt-0">
+                <div class="mb-4 flex items-center gap-4">
+                    <div class="w-10 h-[1px] bg-minimal-900"></div>
+                    <span class="text-xs font-bold tracking-[0.2em] uppercase text-minimal-500">Corporate Solution</span>
+                </div>
+                <h1 class="text-4xl md:text-5xl lg:text-6xl font-black text-minimal-900 leading-[1.1] mb-8 tracking-tighter">
+                    {{CATCHPHRASE}}
+                </h1>
+                <p class="text-lg text-minimal-500 mb-12 leading-relaxed font-light">
+                    {{DESCRIPTION_SHORT}}
+                </p>
+                <div class="flex flex-wrap gap-6">
+                    <a href="#contact" class="bg-minimal-900 text-white px-10 py-4 text-sm font-bold tracking-widest uppercase hover:bg-minimal-800 transition-colors flex items-center gap-3">
+                        ご相談
+                        <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Image Area -->
+            <div class="fade-in delay-200 order-1 lg:order-2">
+                <div class="relative w-full aspect-[4/3] lg:aspect-square group overflow-hidden bg-minimal-50">
+                    <img src="{{HERO_IMAGE_URL}}" alt="{{SITE_NAME}}" class="w-full h-full object-cover grayscale-[20%] group-hover:grayscale-0 transition-all duration-1000 scale-100 group-hover:scale-105" />
+                    <!-- Minimalist accent square -->
+                    <div class="absolute bottom-0 left-0 w-24 h-24 bg-white hidden md:block z-10"></div>
+                </div>
+            </div>
+            
+        </div>
+        
+        <!-- Scroll indicator -->
+        <a href="#services" class="absolute bottom-10 left-6 lg:left-12 hidden md:flex flex-col items-center gap-2 text-minimal-400 hover:text-minimal-900 transition-colors">
+            <span class="text-[10px] tracking-[0.2em] uppercase origin-left rotate-90 mb-8 font-bold">Scroll</span>
+            <div class="w-[1px] h-12 bg-minimal-200 relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-full h-full bg-minimal-900 origin-top animate-[scrolldown_2s_ease-in-out_infinite]"></div>
+            </div>
+        </a>
+        <style>
+            @keyframes scrolldown {
+                0% { transform: scaleY(0); transform-origin: top; }
+                50% { transform: scaleY(1); transform-origin: top; }
+                51% { transform: scaleY(1); transform-origin: bottom; }
+                100% { transform: scaleY(0); transform-origin: bottom; }
+            }
+        </style>
+    </section>
+
+    <!-- Services Section -->
+    <section class="py-32 bg-minimal-50 px-6 lg:px-12" id="services">
+        <div class="max-w-7xl mx-auto">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-24 fade-in">
+                <div>
+                    <h2 class="text-4xl md:text-5xl font-black text-minimal-900 tracking-tighter mb-4">Services.</h2>
+                    <span class="text-minimal-500 font-medium tracking-wide">提供する専門性の高い業務内容</span>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-px bg-minimal-200">
+                <!-- サービス1 -->
+                <div class="bg-minimal-50 p-10 md:p-14 hover:bg-white transition-colors duration-500 fade-in border-left-hover group">
+                    <i data-lucide="calculator" class="w-8 h-8 text-minimal-400 group-hover:text-minimal-900 transition-colors mb-10"></i>
+                    <h3 class="text-2xl font-bold text-minimal-900 mb-4 tracking-tight">{{SERVICE_1_TITLE}}</h3>
+                    <p class="text-minimal-500 leading-relaxed font-light">{{SERVICE_1_DESC}}</p>
+                </div>
+                
+                <!-- サービス2 -->
+                <div class="bg-minimal-50 p-10 md:p-14 hover:bg-white transition-colors duration-500 fade-in delay-100 border-left-hover group">
+                    <i data-lucide="line-chart" class="w-8 h-8 text-minimal-400 group-hover:text-minimal-900 transition-colors mb-10"></i>
+                    <h3 class="text-2xl font-bold text-minimal-900 mb-4 tracking-tight">{{SERVICE_2_TITLE}}</h3>
+                    <p class="text-minimal-500 leading-relaxed font-light">{{SERVICE_2_DESC}}</p>
+                </div>
+                
+                <!-- サービス3 -->
+                <div class="bg-minimal-50 p-10 md:p-14 hover:bg-white transition-colors duration-500 fade-in border-left-hover group">
+                    <i data-lucide="briefcase" class="w-8 h-8 text-minimal-400 group-hover:text-minimal-900 transition-colors mb-10"></i>
+                    <h3 class="text-2xl font-bold text-minimal-900 mb-4 tracking-tight">{{SERVICE_3_TITLE}}</h3>
+                    <p class="text-minimal-500 leading-relaxed font-light">{{SERVICE_3_DESC}}</p>
+                </div>
+                
+                <!-- サービス4 -->
+                <div class="bg-minimal-50 p-10 md:p-14 hover:bg-white transition-colors duration-500 fade-in delay-100 border-left-hover group">
+                    <i data-lucide="clipboard-check" class="w-8 h-8 text-minimal-400 group-hover:text-minimal-900 transition-colors mb-10"></i>
+                    <h3 class="text-2xl font-bold text-minimal-900 mb-4 tracking-tight">{{SERVICE_4_TITLE}}</h3>
+                    <p class="text-minimal-500 leading-relaxed font-light">{{SERVICE_4_DESC}}</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="py-32 bg-white px-6 lg:px-12" id="features">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-24 fade-in">
+                <h2 class="text-4xl md:text-5xl font-black text-minimal-900 tracking-tighter mb-4">Features.</h2>
+                <span class="text-minimal-500 font-medium tracking-wide">選ばれる3つの理由</span>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-16 lg:gap-12">
+                <!-- 特徴1 -->
+                <div class="fade-in group px-6">
+                    <span class="text-6xl font-black text-minimal-100 group-hover:text-minimal-200 transition-colors block mb-4">01</span>
+                    <h3 class="text-xl font-bold text-minimal-900 mb-4">{{FEATURE_1_TITLE}}</h3>
+                    <p class="text-minimal-500 font-light leading-relaxed">{{FEATURE_1_DESC}}</p>
+                </div>
+                
+                <!-- 特徴2 -->
+                <div class="fade-in delay-100 group px-6 lg:border-l lg:border-minimal-100">
+                    <span class="text-6xl font-black text-minimal-100 group-hover:text-minimal-200 transition-colors block mb-4">02</span>
+                    <h3 class="text-xl font-bold text-minimal-900 mb-4">{{FEATURE_2_TITLE}}</h3>
+                    <p class="text-minimal-500 font-light leading-relaxed">{{FEATURE_2_DESC}}</p>
+                </div>
+                
+                <!-- 特徴3 -->
+                <div class="fade-in delay-200 group px-6 lg:border-l lg:border-minimal-100">
+                    <span class="text-6xl font-black text-minimal-100 group-hover:text-minimal-200 transition-colors block mb-4">03</span>
+                    <h3 class="text-xl font-bold text-minimal-900 mb-4">{{FEATURE_3_TITLE}}</h3>
+                    <p class="text-minimal-500 font-light leading-relaxed">{{FEATURE_3_DESC}}</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!--FORM_START-->
+    <section id="contact" class="py-32 bg-minimal-900 text-white px-6 lg:px-12 scroll-mt-32">
+        <div class="max-w-5xl mx-auto">
+            <div class="mb-20 fade-in text-center md:text-left">
+                <h2 class="text-4xl md:text-5xl font-black tracking-tighter mb-4">Contact.</h2>
+                <span class="text-minimal-400 font-light tracking-wide">無料相談・お問い合わせ</span>
+                <p class="text-minimal-400 mt-6 font-light max-w-xl">複雑な課題に直面している場合も、まずはお気軽にご相談ください。専門家が丁寧に対応いたします。</p>
+            </div>
+            
+            <div class="fade-in">
+                <form action="{{FORM_ACTION_URL}}" method="POST" class="space-y-10">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+                        <div class="relative">
+                            <label for="name" class="block text-[10px] tracking-[0.2em] uppercase text-minimal-400 mb-2">Name <span class="text-white">*</span></label>
+                            <input type="text" id="name" name="name" required class="w-full bg-transparent border-0 border-b border-minimal-700 focus:border-white focus:ring-0 outline-none transition-colors text-white py-2 px-0 text-lg">
+                        </div>
+                        <div class="relative">
+                            <label for="email" class="block text-[10px] tracking-[0.2em] uppercase text-minimal-400 mb-2">Email <span class="text-white">*</span></label>
+                            <input type="email" id="email" name="email" required class="w-full bg-transparent border-0 border-b border-minimal-700 focus:border-white focus:ring-0 outline-none transition-colors text-white py-2 px-0 text-lg">
+                        </div>
+                    </div>
+                    <div class="relative">
+                        <label for="message" class="block text-[10px] tracking-[0.2em] uppercase text-minimal-400 mb-2">Message <span class="text-white">*</span></label>
+                        <textarea id="message" name="message" rows="4" required class="w-full bg-transparent border-0 border-b border-minimal-700 focus:border-white focus:ring-0 outline-none transition-colors text-white py-2 px-0 text-lg resize-none"></textarea>
+                    </div>
+                    <div class="pt-8 flex justify-end">
+                        <button type="submit" class="bg-white text-minimal-900 px-14 py-4 text-sm font-bold tracking-widest uppercase hover:bg-minimal-200 transition-colors w-full md:w-auto">
+                            Submit Send
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+    <!--FORM_END-->
+
+    <!-- Access & Info Section -->
+    <section class="py-32 bg-white px-6 lg:px-12 border-b border-minimal-100">
+        <div class="max-w-7xl mx-auto">
+            <div class="flex flex-col lg:flex-row justify-between gap-16 lg:gap-24">
+                <div class="fade-in w-full lg:w-1/3">
+                    <h2 class="text-4xl md:text-5xl font-black text-minimal-900 tracking-tighter mb-4">Location.</h2>
+                    <span class="text-minimal-500 font-medium tracking-wide block mb-12">アクセス情報</span>
+                    
+                    <ul class="space-y-12 text-minimal-900 font-light">
+                        <li>
+                            <span class="block text-[10px] text-minimal-400 mb-2 uppercase tracking-[0.2em] font-bold">Address</span>
+                            <span class="text-lg leading-relaxed block">{{ADDRESS}}</span>
+                        </li>
+                        
+                        <li>
+                            <span class="block text-[10px] text-minimal-400 mb-2 uppercase tracking-[0.2em] font-bold">Hours</span>
+                            <span class="text-lg whitespace-pre-line block">{{HOURS}}</span>
+                        </li>
+                        
+                        <li>
+                            <span class="block text-[10px] text-minimal-400 mb-2 uppercase tracking-[0.2em] font-bold">Closed</span>
+                            <span class="text-lg block">{{HOLIDAY}}</span>
+                        </li>
+                        
+                        <li>
+                            <span class="block text-[10px] text-minimal-400 mb-2 uppercase tracking-[0.2em] font-bold">Contact</span>
+                            <span class="text-xl font-medium block mb-1 tracking-wide">{{PHONE}}</span>
+                            <span class="text-minimal-500">{{EMAIL}}</span>
+                        </li>
+                    </ul>
+                </div>
+                
+                <!--MAP_START-->
+                <div class="fade-in delay-100 w-full lg:w-2/3 h-[500px] lg:h-auto bg-minimal-50 overflow-hidden relative border border-minimal-100">
+                    <iframe src="{{MAP_EMBED_URL}}" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" class="absolute inset-0 grayscale-[100%] contrast-[110%] opacity-90 hover:grayscale-0 hover:opacity-100 transition-all duration-700"></iframe>
+                </div>
+                <!--MAP_END-->
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-white py-12 px-6 lg:px-12">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8 border-t border-minimal-100 pt-12">
+            
+            <div class="text-xl font-bold tracking-tight text-minimal-900">
+                {{SITE_NAME}}
+            </div>
+            
+            <!--SNS_START-->
+            <div class="flex gap-8">
+                <!--SNS_INSTAGRAM_START-->
+                <a href="{{INSTAGRAM_URL}}" target="_blank" class="text-minimal-400 hover:text-minimal-900 transition-colors"><i data-lucide="instagram" class="w-5 h-5"></i></a>
+                <!--SNS_INSTAGRAM_END-->
+                
+                <!--SNS_YOUTUBE_START-->
+                <a href="{{YOUTUBE_URL}}" target="_blank" class="text-minimal-400 hover:text-minimal-900 transition-colors"><i data-lucide="youtube" class="w-5 h-5"></i></a>
+                <!--SNS_YOUTUBE_END-->
+                
+                <!--SNS_X_START-->
+                <a href="{{X_URL}}" target="_blank" class="text-minimal-400 hover:text-minimal-900 transition-colors">
+                    <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.008 5.961H5.078z"></path></svg>
+                </a>
+                <!--SNS_X_END-->
+                
+                <!--SNS_LINE_START-->
+                <a href="{{LINE_URL}}" target="_blank" class="text-minimal-400 hover:text-minimal-900 transition-colors">
+                    <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                      <path d="M21.4 10.3c0-4.3-4.3-7.8-9.6-7.8s-9.6 3.5-9.6 7.8c0 3.8 3.3 7 7.7 7.7.3.1.8.2.9.4.1.2.1.5.1.7v1.8c0 .2.1.3.3.4s.3.1.5.0c2.4-1.6 4.9-3.4 6.7-5.5 1.5-1.7 2.6-3.5 2.6-5.5zm-14.3.4c-.4 0-.7-.3-.7-.7V7.6c0-.4.3-.7.7-.7s.7.3.7.7v1.7h1.1c.4 0 .7.3.7.7s-.3.7-.7.7H7.1zm5.2 0c-.4 0-.7-.3-.7-.7V7.6c0-.4.3-.7.7-.7s.7.3.7.7v2.4c0 .4-.3.7-.7.7zm2.4 0c-.4 0-.7-.3-.7-.7V7.6c0-.4.3-.7.7-.7s.7.3.7.7v.7h1.1c.4 0 .7.3.7.7s-.3.7-.7.7h-1.8zM11.9 8.3c0-.4.3-.7.7-.7s.7.3.7.7v2.4c0 .4-.3.7-.7.7s-.7-.3-.7-.7V8.3z"></path>
+                    </svg>
+                </a>
+                <!--SNS_LINE_END-->
+                
+                <!--SNS_FACEBOOK_START-->
+                <a href="{{FACEBOOK_URL}}" target="_blank" class="text-minimal-400 hover:text-minimal-900 transition-colors"><i data-lucide="facebook" class="w-5 h-5"></i></a>
+                <!--SNS_FACEBOOK_END-->
+            </div>
+            <!--SNS_END-->
+            
+            <div class="text-right">
+                <p class="text-xs text-minimal-500">© 2026 {{SITE_NAME}}</p>
+                <p class="text-[9px] mt-1 text-minimal-300 uppercase tracking-widest font-bold">Powered by OnePage-Flash</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        lucide.createIcons();
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if(target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+        
+        // Header scroll behavior
+        window.addEventListener('scroll', () => {
+            const header = document.querySelector('header');
+            if (window.scrollY > 50) {
+                header.classList.add('shadow-sm');
+                header.classList.remove('py-2');
+            } else {
+                header.classList.remove('shadow-sm');
+                header.classList.add('py-2');
+            }
+        });
+    </script>
+</body>
+</html>

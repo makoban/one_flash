@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{SITE_NAME}}</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Noto+Sans+JP:wght@300;400;500&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        serif: ['"Playfair Display"', 'serif'],
+                        sans: ['"Noto Sans JP"', 'sans-serif'],
+                    },
+                    colors: {
+                        cafe: {
+                            50: '#fdf8f5',
+                            100: '#faecd9',
+                            200: '#f3d6b0',
+                            300: '#eab87f',
+                            400: '#df9451',
+                            500: '#d57630',
+                            600: '#c75e25',
+                            700: '#a64a21',
+                            800: '#853e21',
+                            900: '#4a2311', // Deep roast
+                            950: '#2b1208',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .fade-in { animation: fadeIn 1s ease-out forwards; opacity: 0; transform: translateY(20px); }
+        @keyframes fadeIn { to { opacity: 1; transform: translateY(0); } }
+        .delay-100 { animation-delay: 150ms; }
+        .delay-200 { animation-delay: 300ms; }
+        .scroll-mt-24 { scroll-margin-top: 6rem; }
+        
+        .bg-pattern {
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23d57630' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+    </style>
+</head>
+<body class="font-sans text-cafe-900 bg-cafe-50 antialiased selection:bg-cafe-200 selection:text-cafe-900">
+
+    <!-- Header -->
+    <header class="fixed w-full top-0 bg-white/95 backdrop-blur-md shadow-sm z-50 border-b border-cafe-100">
+        <div class="max-w-6xl mx-auto px-4 h-24 flex items-center justify-between">
+            <div class="text-2xl md:text-3xl font-serif font-bold text-cafe-800 tracking-wide flex items-center gap-3">
+                <i data-lucide="coffee" class="w-8 h-8 text-cafe-500"></i>
+                {{SITE_NAME}}
+            </div>
+            
+            <div class="hidden md:flex items-center">
+                <a href="tel:{{PHONE}}" class="flex items-center gap-2 text-cafe-800 hover:text-cafe-500 transition-colors font-serif italic text-lg px-2">
+                    <i data-lucide="phone" class="w-5 h-5"></i>
+                    <span>{{PHONE}}</span>
+                </a>
+                <a href="#contact" class="hidden lg:flex ml-6 bg-cafe-800 text-white px-6 py-2.5 rounded hover:bg-cafe-700 transition-colors font-sans text-sm tracking-widest">
+                    ご予約・お問い合わせ
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="relative pt-24 h-[85vh] min-h-[600px] flex flex-col justify-center bg-cafe-900">
+        <!-- Background -->
+        <div class="absolute inset-0 z-0">
+            <img src="{{HERO_IMAGE_URL}}" alt="{{SITE_NAME}}" class="w-full h-full object-cover opacity-70 mix-blend-overlay" />
+            <div class="absolute inset-0 bg-gradient-to-t from-cafe-950 via-cafe-900/50 to-transparent"></div>
+        </div>
+        
+        <!-- Content -->
+        <div class="relative z-10 w-full max-w-6xl mx-auto px-4 text-center">
+            <div class="max-w-3xl mx-auto fade-in">
+                <i data-lucide="croissant" class="w-12 h-12 text-cafe-400 mx-auto mb-6 opacity-80"></i>
+                <h1 class="text-4xl md:text-5xl lg:text-7xl font-serif font-bold text-white leading-[1.1] mb-6 drop-shadow-md">
+                    {{CATCHPHRASE}}
+                </h1>
+                <div class="w-16 h-1 bg-cafe-400 mx-auto mb-8"></div>
+                <p class="text-lg md:text-xl text-cafe-100 mb-10 leading-relaxed font-light drop-shadow">
+                    {{DESCRIPTION_SHORT}}
+                </p>
+                <a href="#menu" class="inline-flex items-center gap-3 bg-cafe-500 text-white px-8 py-4 font-serif text-lg tracking-widest hover:bg-cafe-400 transition-colors">
+                    Menu & About
+                    <i data-lucide="arrow-down" class="w-4 h-4"></i>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services / Menu Section -->
+    <section class="py-24 bg-pattern relative" id="menu">
+        <div class="max-w-6xl mx-auto px-4 relative z-10">
+            <div class="text-center mb-16 fade-in">
+                <span class="font-serif italic text-cafe-500 text-xl block mb-2">Our Menu & Services</span>
+                <h2 class="text-3xl md:text-4xl font-serif font-bold text-cafe-900">メニュー・サービス</h2>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8 lg:gap-12">
+                <!-- サービス1 -->
+                <div class="bg-white p-8 border border-cafe-100 shadow-sm hover:shadow-md transition-shadow fade-in flex items-start gap-6">
+                    <div class="w-16 h-16 bg-cafe-50 text-cafe-600 rounded-full flex items-center justify-center shrink-0 border border-cafe-100">
+                        <i data-lucide="coffee" class="w-8 h-8"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-serif font-bold text-cafe-900 mb-2">{{SERVICE_1_TITLE}}</h3>
+                        <p class="text-cafe-800/70 leading-relaxed font-light">{{SERVICE_1_DESC}}</p>
+                    </div>
+                </div>
+                
+                <!-- サービス2 -->
+                <div class="bg-white p-8 border border-cafe-100 shadow-sm hover:shadow-md transition-shadow fade-in delay-100 flex items-start gap-6">
+                    <div class="w-16 h-16 bg-cafe-50 text-cafe-600 rounded-full flex items-center justify-center shrink-0 border border-cafe-100">
+                        <i data-lucide="cake-slice" class="w-8 h-8"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-serif font-bold text-cafe-900 mb-2">{{SERVICE_2_TITLE}}</h3>
+                        <p class="text-cafe-800/70 leading-relaxed font-light">{{SERVICE_2_DESC}}</p>
+                    </div>
+                </div>
+                
+                <!-- サービス3 -->
+                <div class="bg-white p-8 border border-cafe-100 shadow-sm hover:shadow-md transition-shadow fade-in flex items-start gap-6">
+                    <div class="w-16 h-16 bg-cafe-50 text-cafe-600 rounded-full flex items-center justify-center shrink-0 border border-cafe-100">
+                        <i data-lucide="croissant" class="w-8 h-8"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-serif font-bold text-cafe-900 mb-2">{{SERVICE_3_TITLE}}</h3>
+                        <p class="text-cafe-800/70 leading-relaxed font-light">{{SERVICE_3_DESC}}</p>
+                    </div>
+                </div>
+                
+                <!-- サービス4 -->
+                <div class="bg-white p-8 border border-cafe-100 shadow-sm hover:shadow-md transition-shadow fade-in delay-100 flex items-start gap-6">
+                    <div class="w-16 h-16 bg-cafe-50 text-cafe-600 rounded-full flex items-center justify-center shrink-0 border border-cafe-100">
+                        <i data-lucide="utensils" class="w-8 h-8"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-serif font-bold text-cafe-900 mb-2">{{SERVICE_4_TITLE}}</h3>
+                        <p class="text-cafe-800/70 leading-relaxed font-light">{{SERVICE_4_DESC}}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="py-24 bg-cafe-900 text-cafe-50 border-t-8 border-cafe-500" id="features">
+        <div class="max-w-6xl mx-auto px-4">
+            <div class="text-center mb-16 fade-in">
+                <span class="font-serif italic text-cafe-400 text-xl block mb-2">Our Commitments</span>
+                <h2 class="text-3xl md:text-4xl font-serif font-bold text-white">当店のこだわり</h2>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-12 text-center">
+                <!-- 特徴1 -->
+                <div class="fade-in">
+                    <div class="w-20 h-20 mx-auto border-2 border-cafe-500 text-cafe-400 rounded-full flex items-center justify-center mb-6">
+                        <i data-lucide="sun" class="w-10 h-10"></i>
+                    </div>
+                    <h3 class="text-xl font-serif font-bold text-white mb-4">{{FEATURE_1_TITLE}}</h3>
+                    <p class="text-cafe-200/80 font-light leading-relaxed">{{FEATURE_1_DESC}}</p>
+                </div>
+                
+                <!-- 特徴2 -->
+                <div class="fade-in delay-100">
+                    <div class="w-20 h-20 mx-auto border-2 border-cafe-500 text-cafe-400 rounded-full flex items-center justify-center mb-6">
+                        <i data-lucide="heart" class="w-10 h-10"></i>
+                    </div>
+                    <h3 class="text-xl font-serif font-bold text-white mb-4">{{FEATURE_2_TITLE}}</h3>
+                    <p class="text-cafe-200/80 font-light leading-relaxed">{{FEATURE_2_DESC}}</p>
+                </div>
+                
+                <!-- 特徴3 -->
+                <div class="fade-in delay-200">
+                    <div class="w-20 h-20 mx-auto border-2 border-cafe-500 text-cafe-400 rounded-full flex items-center justify-center mb-6">
+                        <i data-lucide="sparkles" class="w-10 h-10"></i>
+                    </div>
+                    <h3 class="text-xl font-serif font-bold text-white mb-4">{{FEATURE_3_TITLE}}</h3>
+                    <p class="text-cafe-200/80 font-light leading-relaxed">{{FEATURE_3_DESC}}</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!--FORM_START-->
+    <section id="contact" class="py-24 bg-pattern scroll-mt-24">
+        <div class="max-w-3xl mx-auto px-4">
+            <div class="bg-white p-10 md:p-16 border-t-8 border-cafe-500 shadow-xl fade-in relative">
+                <!-- Decorative coffee bean -->
+                <i data-lucide="coffee" class="absolute -top-6 left-1/2 -translate-x-1/2 w-10 h-10 bg-white text-cafe-500 p-1 border border-cafe-200 rounded-full shadow-sm"></i>
+                
+                <div class="text-center mb-12 mt-4">
+                    <span class="font-serif italic text-cafe-500 text-lg block mb-2">Reservation</span>
+                    <h2 class="text-3xl font-serif font-bold text-cafe-900">ご予約・お問い合わせ</h2>
+                </div>
+                
+                <form action="{{FORM_ACTION_URL}}" method="POST" class="space-y-6">
+                    <div>
+                        <label for="name" class="block text-sm font-bold text-cafe-900 mb-2">お名前 <span class="text-cafe-500 font-normal">*</span></label>
+                        <input type="text" id="name" name="name" required class="w-full px-4 py-3 border border-cafe-200 focus:border-cafe-500 bg-cafe-50 focus:bg-white outline-none transition-colors text-cafe-900">
+                    </div>
+                    <div>
+                        <label for="email" class="block text-sm font-bold text-cafe-900 mb-2">メールアドレス <span class="text-cafe-500 font-normal">*</span></label>
+                        <input type="email" id="email" name="email" required class="w-full px-4 py-3 border border-cafe-200 focus:border-cafe-500 bg-cafe-50 focus:bg-white outline-none transition-colors text-cafe-900">
+                    </div>
+                    <div>
+                        <label for="message" class="block text-sm font-bold text-cafe-900 mb-2">お問い合わせ内容 <span class="text-cafe-500 font-normal">*</span></label>
+                        <textarea id="message" name="message" rows="5" required class="w-full px-4 py-3 border border-cafe-200 focus:border-cafe-500 bg-cafe-50 focus:bg-white outline-none transition-colors text-cafe-900"></textarea>
+                    </div>
+                    <div class="text-center pt-6">
+                        <button type="submit" class="bg-cafe-800 text-white px-12 py-4 font-serif text-lg tracking-widest hover:bg-cafe-700 transition-colors w-full md:w-auto shadow-md">
+                            送信する
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+    <!--FORM_END-->
+
+    <!-- Access & Info Section -->
+    <section class="py-24 bg-white border-t border-cafe-200">
+        <div class="max-w-6xl mx-auto px-4">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                <div class="fade-in bg-cafe-50 p-10 md:p-14 border border-cafe-100">
+                    <span class="font-serif italic text-cafe-500 text-xl block mb-2">Information</span>
+                    <h2 class="text-3xl font-serif font-bold text-cafe-900 mb-10">店舗情報・アクセス</h2>
+                    
+                    <ul class="space-y-8 text-cafe-800">
+                        <li class="flex items-start gap-5">
+                            <i data-lucide="map-pin" class="w-5 h-5 text-cafe-500 mt-1 shrink-0"></i>
+                            <div>
+                                <span class="block text-xs text-cafe-500 mb-1 uppercase tracking-widest font-bold">Address</span>
+                                <span class="leading-relaxed">{{ADDRESS}}</span>
+                            </div>
+                        </li>
+                        
+                        <li class="flex items-start gap-5">
+                            <i data-lucide="clock" class="w-5 h-5 text-cafe-500 mt-1 shrink-0"></i>
+                            <div>
+                                <span class="block text-xs text-cafe-500 mb-1 uppercase tracking-widest font-bold">Open Hours</span>
+                                <span class="whitespace-pre-line">{{HOURS}}</span>
+                            </div>
+                        </li>
+                        
+                        <li class="flex items-start gap-5">
+                            <i data-lucide="calendar-x" class="w-5 h-5 text-cafe-500 mt-1 shrink-0"></i>
+                            <div>
+                                <span class="block text-xs text-cafe-500 mb-1 uppercase tracking-widest font-bold">Closed</span>
+                                <span>{{HOLIDAY}}</span>
+                            </div>
+                        </li>
+                        
+                        <li class="flex items-start gap-5">
+                            <i data-lucide="phone" class="w-5 h-5 text-cafe-500 mt-1 shrink-0"></i>
+                            <div>
+                                <span class="block text-xs text-cafe-500 mb-1 uppercase tracking-widest font-bold">Phone</span>
+                                <span class="text-lg font-serif italic">{{PHONE}}</span>
+                            </div>
+                        </li>
+                        
+                        <li class="flex items-start gap-5">
+                            <i data-lucide="mail" class="w-5 h-5 text-cafe-500 mt-1 shrink-0"></i>
+                            <div>
+                                <span class="block text-xs text-cafe-500 mb-1 uppercase tracking-widest font-bold">Email</span>
+                                <span>{{EMAIL}}</span>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                
+                <!--MAP_START-->
+                <div class="h-full min-h-[400px] relative fade-in delay-100 border border-cafe-200">
+                    <iframe src="{{MAP_EMBED_URL}}" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" class="absolute inset-0 sepia-[40%] hue-rotate-15 hover:sepia-0 transition-all duration-700"></iframe>
+                </div>
+                <!--MAP_END-->
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-cafe-950 text-cafe-200 py-16 text-center border-t border-cafe-900">
+        <div class="max-w-6xl mx-auto px-4 flex flex-col items-center">
+            
+            <div class="flex items-center justify-center gap-3 mb-8">
+                <i data-lucide="coffee" class="w-6 h-6 text-cafe-500"></i>
+                <h2 class="text-2xl font-serif font-bold tracking-widest text-white">{{SITE_NAME}}</h2>
+            </div>
+            
+            <div class="w-16 h-[1px] bg-cafe-800 mb-8"></div>
+            
+            <!--SNS_START-->
+            <div class="flex flex-wrap justify-center gap-8 mb-12">
+                <!--SNS_INSTAGRAM_START-->
+                <a href="{{INSTAGRAM_URL}}" target="_blank" class="hover:text-cafe-400 transition-colors duration-300"><i data-lucide="instagram" class="w-5 h-5"></i></a>
+                <!--SNS_INSTAGRAM_END-->
+                
+                <!--SNS_YOUTUBE_START-->
+                <a href="{{YOUTUBE_URL}}" target="_blank" class="hover:text-cafe-400 transition-colors duration-300"><i data-lucide="youtube" class="w-5 h-5"></i></a>
+                <!--SNS_YOUTUBE_END-->
+                
+                <!--SNS_X_START-->
+                <a href="{{X_URL}}" target="_blank" class="hover:text-cafe-400 transition-colors duration-300">
+                    <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.008 5.961H5.078z"></path></svg>
+                </a>
+                <!--SNS_X_END-->
+                
+                <!--SNS_LINE_START-->
+                <a href="{{LINE_URL}}" target="_blank" class="hover:text-cafe-400 transition-colors duration-300">
+                    <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                      <path d="M21.4 10.3c0-4.3-4.3-7.8-9.6-7.8s-9.6 3.5-9.6 7.8c0 3.8 3.3 7 7.7 7.7.3.1.8.2.9.4.1.2.1.5.1.7v1.8c0 .2.1.3.3.4s.3.1.5.0c2.4-1.6 4.9-3.4 6.7-5.5 1.5-1.7 2.6-3.5 2.6-5.5zm-14.3.4c-.4 0-.7-.3-.7-.7V7.6c0-.4.3-.7.7-.7s.7.3.7.7v1.7h1.1c.4 0 .7.3.7.7s-.3.7-.7.7H7.1zm5.2 0c-.4 0-.7-.3-.7-.7V7.6c0-.4.3-.7.7-.7s.7.3.7.7v2.4c0 .4-.3.7-.7.7zm2.4 0c-.4 0-.7-.3-.7-.7V7.6c0-.4.3-.7.7-.7s.7.3.7.7v.7h1.1c.4 0 .7.3.7.7s-.3.7-.7.7h-1.8zM11.9 8.3c0-.4.3-.7.7-.7s.7.3.7.7v2.4c0 .4-.3.7-.7.7s-.7-.3-.7-.7V8.3z"></path>
+                    </svg>
+                </a>
+                <!--SNS_LINE_END-->
+                
+                <!--SNS_FACEBOOK_START-->
+                <a href="{{FACEBOOK_URL}}" target="_blank" class="hover:text-cafe-400 transition-colors duration-300"><i data-lucide="facebook" class="w-5 h-5"></i></a>
+                <!--SNS_FACEBOOK_END-->
+            </div>
+            <!--SNS_END-->
+            
+            <p class="text-sm tracking-widest font-serif text-cafe-500">© 2026 {{SITE_NAME}}</p>
+            <p class="text-[10px] mt-8 text-cafe-800 uppercase tracking-widest font-sans">Powered by OnePage-Flash</p>
+        </div>
+    </footer>
+
+    <script>
+        lucide.createIcons();
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if(target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{SITE_NAME}}</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,300;0,400;0,600;0,800;1,300&family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Noto Sans JP"', 'sans-serif'],
+                        wave: ['"Raleway"', 'sans-serif'],
+                    },
+                    colors: {
+                        wave: {
+                            light: '#f8fcfa',
+                            teal: '#0d9488', // Teal-600
+                            tealLight: '#14b8a6', // Teal-500
+                            coral: '#f43f5e', // Rose-500
+                            dark: '#0f172a', // Slate-900
+                            gray: '#64748b' // Slate-500
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .fade-in-up { animation: fadeInUp 1s ease-out forwards; opacity: 0; transform: translateY(40px); }
+        @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
+        
+        .fade-in { animation: fadeIn 1.5s ease-out forwards; opacity: 0; }
+        @keyframes fadeIn { to { opacity: 1; } }
+        
+        .delay-100 { animation-delay: 150ms; }
+        .delay-200 { animation-delay: 300ms; }
+        .delay-300 { animation-delay: 450ms; }
+        .scroll-mt-24 { scroll-margin-top: 6rem; }
+
+        .blob-shape {
+            border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+            animation: morph 8s ease-in-out infinite both alternate;
+        }
+        
+        @keyframes morph {
+            0%, 100% { border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; }
+            34% { border-radius: 70% 30% 50% 50% / 30% 30% 70% 70%; }
+            67% { border-radius: 100% 60% 60% 100% / 100% 100% 60% 60%; }
+        }
+
+        .svg-wave {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            overflow: hidden;
+            line-height: 0;
+            transform: rotate(180deg);
+        }
+        .svg-wave svg {
+            position: relative;
+            display: block;
+            width: calc(100% + 1.3px);
+            height: 60px;
+        }
+        .svg-wave .shape-fill {
+            fill: #f8fcfa;
+        }
+    </style>
+</head>
+<body class="font-sans text-wave-dark bg-wave-light antialiased selection:bg-wave-coral selection:text-white overflow-x-hidden">
+
+    <!-- Header -->
+    <header class="fixed w-full top-0 bg-white/80 backdrop-blur-md z-50 transition-all duration-300 border-b border-gray-100">
+        <div class="max-w-7xl mx-auto px-6 h-20 md:h-24 flex items-center justify-between">
+            <div class="text-2xl font-black tracking-tighter text-wave-dark font-wave flex items-center gap-2 relative group">
+                <span class="absolute -inset-2 bg-wave-tealLight/20 rounded-full scale-0 group-hover:scale-100 transition-transform duration-500 ease-out"></span>
+                <i data-lucide="feather" class="w-6 h-6 text-wave-teal relative z-10"></i>
+                <span class="relative z-10">{{SITE_NAME}}</span>
+            </div>
+            
+            <div class="hidden md:flex items-center gap-8">
+                <a href="tel:{{PHONE}}" class="text-wave-dark hover:text-wave-teal transition-colors font-wave font-semibold tracking-wide flex items-center gap-2">
+                    <i data-lucide="phone" class="w-4 h-4 text-wave-coral"></i>
+                    {{PHONE}}
+                </a>
+                <a href="#contact" class="relative inline-flex items-center justify-center px-8 py-3 text-sm font-bold text-white transition-all duration-300 bg-wave-teal font-wave tracking-widest uppercase hover:bg-wave-dark hover:tracking-[0.2em] rounded-full overflow-hidden group">
+                    <span class="absolute w-0 h-0 transition-all duration-500 ease-out bg-white rounded-full group-hover:w-56 group-hover:h-56 opacity-10"></span>
+                    <span class="relative">Contact Me</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="relative pt-24 min-h-screen flex items-center bg-white overflow-hidden">
+        <!-- Abstract Background Elements -->
+        <div class="absolute top-20 -right-20 w-[500px] h-[500px] bg-wave-tealLight/10 blob-shape z-0 blur-3xl"></div>
+        <div class="absolute -bottom-40 -left-20 w-[600px] h-[600px] bg-wave-coral/10 blob-shape z-0 blur-3xl" style="animation-delay: -4s;"></div>
+        
+        <div class="max-w-7xl mx-auto px-6 w-full relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center min-h-[calc(100vh-6rem)]">
+            
+            <!-- Content -->
+            <div class="lg:col-span-5 fade-in-up order-2 lg:order-1 pt-10 lg:pt-0">
+                <div class="flex items-center gap-4 mb-6">
+                    <div class="w-12 h-px bg-wave-coral"></div>
+                    <span class="font-wave font-bold text-wave-coral tracking-[0.2em] uppercase text-sm">Creative Studio</span>
+                </div>
+                <h1 class="text-5xl md:text-6xl lg:text-7xl font-black text-wave-dark leading-[1.1] mb-8 font-wave tracking-tighter relative inline-block">
+                    {{CATCHPHRASE}}
+                    <span class="absolute -bottom-2 left-0 w-full h-4 bg-wave-tealLight/30 -z-10 skew-x-12"></span>
+                </h1>
+                <p class="text-lg text-wave-gray mb-10 leading-relaxed font-light max-w-lg">
+                    {{DESCRIPTION_SHORT}}
+                </p>
+                <div class="flex flex-wrap gap-6 items-center">
+                    <a href="#portfolio" class="font-wave font-bold text-wave-dark hover:text-wave-teal tracking-widest uppercase text-sm flex items-center gap-2 group transition-colors">
+                        View Work 
+                        <span class="w-8 h-8 rounded-full border border-wave-dark group-hover:border-wave-teal flex items-center justify-center transition-colors group-hover:translate-x-2">
+                            <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                        </span>
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Image Area -->
+            <div class="lg:col-span-7 fade-in order-1 lg:order-2 relative mt-10 lg:mt-0">
+                <div class="relative w-full aspect-[4/3] max-w-2xl mx-auto md:ml-auto md:mr-0 z-10">
+                    <img src="{{HERO_IMAGE_URL}}" alt="{{SITE_NAME}}" class="w-full h-full object-cover rounded-2xl shadow-2xl relative z-10" />
+                    <!-- Offset Decoration -->
+                    <div class="absolute -top-6 -right-6 w-full h-full border-2 border-wave-teal rounded-2xl -z-10"></div>
+                    <!-- Accents -->
+                    <div class="absolute -bottom-8 -left-8 w-32 h-32 bg-wave-coral blob-shape opacity-80 z-20 mix-blend-multiply hidden md:block"></div>
+                </div>
+            </div>
+            
+        </div>
+        
+        <div class="svg-wave">
+            <svg data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
+                <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" class="shape-fill"></path>
+            </svg>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section class="py-32 bg-wave-light relative" id="portfolio">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="flex flex-col md:flex-row justify-between items-end mb-20 fade-in-up">
+                <div class="max-w-2xl">
+                    <h2 class="text-4xl md:text-5xl font-black text-wave-dark font-wave tracking-tighter mb-4">What I Do</h2>
+                    <p class="text-wave-gray font-light text-lg">柔軟な発想と確かな技術で、あなたのビジョンを形にします。</p>
+                </div>
+                <div class="mt-6 md:mt-0">
+                    <i data-lucide="layers" class="w-12 h-12 text-wave-tealLight opacity-20"></i>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 lg:gap-16">
+                <!-- サービス1 -->
+                <div class="fade-in-up group">
+                    <div class="overflow-hidden rounded-2xl mb-6 relative">
+                        <div class="absolute inset-0 bg-wave-teal/80 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                            <i data-lucide="monitor-smartphone" class="w-12 h-12 text-white transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500"></i>
+                        </div>
+                        <div class="w-full h-64 bg-gray-200">
+                            <img src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&q=80&w=800" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
+                        </div>
+                    </div>
+                    <span class="text-wave-teal font-wave font-bold tracking-widest text-xs uppercase block mb-3">Service 01</span>
+                    <h3 class="text-2xl font-black text-wave-dark mb-4">{{SERVICE_1_TITLE}}</h3>
+                    <p class="text-wave-gray font-light leading-relaxed">{{SERVICE_1_DESC}}</p>
+                </div>
+                
+                <!-- サービス2 -->
+                <div class="fade-in-up delay-100 group md:mt-16">
+                    <div class="overflow-hidden rounded-2xl mb-6 relative">
+                        <div class="absolute inset-0 bg-wave-coral/80 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                            <i data-lucide="camera" class="w-12 h-12 text-white transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500"></i>
+                        </div>
+                        <div class="w-full h-64 bg-gray-200">
+                            <img src="https://images.unsplash.com/photo-1542038784456-1ea8e935640e?auto=format&fit=crop&q=80&w=800" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
+                        </div>
+                    </div>
+                    <span class="text-wave-coral font-wave font-bold tracking-widest text-xs uppercase block mb-3">Service 02</span>
+                    <h3 class="text-2xl font-black text-wave-dark mb-4">{{SERVICE_2_TITLE}}</h3>
+                    <p class="text-wave-gray font-light leading-relaxed">{{SERVICE_2_DESC}}</p>
+                </div>
+                
+                <!-- サービス3 -->
+                <div class="fade-in-up group">
+                    <div class="overflow-hidden rounded-2xl mb-6 relative">
+                        <div class="absolute inset-0 bg-wave-teal/80 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                            <i data-lucide="pen-tool" class="w-12 h-12 text-white transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500"></i>
+                        </div>
+                        <div class="w-full h-64 bg-gray-200">
+                            <img src="https://images.unsplash.com/photo-1561070791-2526d30994b5?auto=format&fit=crop&q=80&w=800" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
+                        </div>
+                    </div>
+                    <span class="text-wave-teal font-wave font-bold tracking-widest text-xs uppercase block mb-3">Service 03</span>
+                    <h3 class="text-2xl font-black text-wave-dark mb-4">{{SERVICE_3_TITLE}}</h3>
+                    <p class="text-wave-gray font-light leading-relaxed">{{SERVICE_3_DESC}}</p>
+                </div>
+                
+                <!-- サービス4 -->
+                <div class="fade-in-up delay-100 group md:mt-16">
+                    <div class="overflow-hidden rounded-2xl mb-6 relative">
+                        <div class="absolute inset-0 bg-wave-coral/80 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                            <i data-lucide="lightbulb" class="w-12 h-12 text-white transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500"></i>
+                        </div>
+                        <div class="w-full h-64 bg-gray-200">
+                            <img src="https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&q=80&w=800" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
+                        </div>
+                    </div>
+                    <span class="text-wave-coral font-wave font-bold tracking-widest text-xs uppercase block mb-3">Service 04</span>
+                    <h3 class="text-2xl font-black text-wave-dark mb-4">{{SERVICE_4_TITLE}}</h3>
+                    <p class="text-wave-gray font-light leading-relaxed">{{SERVICE_4_DESC}}</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="py-32 bg-wave-dark text-white relative overflow-hidden" id="features">
+        <div class="absolute -top-40 -right-40 w-96 h-96 bg-wave-teal blob-shape opacity-20 blur-3xl"></div>
+        <div class="absolute bottom-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-wave-gray to-transparent opacity-30"></div>
+        
+        <div class="max-w-7xl mx-auto px-6 relative z-10">
+            <div class="text-center mb-24 fade-in-up">
+                <h2 class="text-4xl md:text-5xl font-black font-wave tracking-tighter mb-4">Values</h2>
+                <span class="text-wave-tealLight font-light tracking-wide text-lg">制作・活動における3つのこだわり</span>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-12 lg:gap-20">
+                <!-- 特徴1 -->
+                <div class="text-center fade-in-up">
+                    <div class="w-20 h-20 mx-auto bg-transparent border border-wave-gray rounded-full flex items-center justify-center mb-6 text-wave-tealLight">
+                        <i data-lucide="zap" class="w-8 h-8"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-4">{{FEATURE_1_TITLE}}</h3>
+                    <p class="text-gray-400 font-light leading-relaxed text-sm">{{FEATURE_1_DESC}}</p>
+                </div>
+                
+                <!-- 特徴2 -->
+                <div class="text-center fade-in-up delay-100">
+                    <div class="w-20 h-20 mx-auto bg-transparent border border-wave-gray rounded-full flex items-center justify-center mb-6 text-wave-coral">
+                        <i data-lucide="eye" class="w-8 h-8"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-4">{{FEATURE_2_TITLE}}</h3>
+                    <p class="text-gray-400 font-light leading-relaxed text-sm">{{FEATURE_2_DESC}}</p>
+                </div>
+                
+                <!-- 特徴3 -->
+                <div class="text-center fade-in-up delay-200">
+                    <div class="w-20 h-20 mx-auto bg-transparent border border-wave-gray rounded-full flex items-center justify-center mb-6 text-wave-tealLight">
+                        <i data-lucide="heart-handshake" class="w-8 h-8"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-4">{{FEATURE_3_TITLE}}</h3>
+                    <p class="text-gray-400 font-light leading-relaxed text-sm">{{FEATURE_3_DESC}}</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!--FORM_START-->
+    <section id="contact" class="py-32 bg-white scroll-mt-20">
+        <div class="max-w-4xl mx-auto px-6">
+            <div class="text-center mb-16 fade-in-up">
+                <h2 class="text-4xl md:text-5xl font-black text-wave-dark font-wave tracking-tighter mb-4">Let's Talk</h2>
+                <p class="text-wave-gray font-light">プロジェクトのご相談、お見積りなどお気軽にお問い合わせください。</p>
+            </div>
+            
+            <div class="fade-in-up delay-100 relative">
+                <!-- Abstract decorative line -->
+                <svg class="absolute -top-10 -left-10 w-32 h-32 text-wave-coral/20 -z-10" viewBox="0 0 100 100">
+                    <path fill="none" stroke="currentColor" stroke-width="2" d="M10,90 Q50,0 90,90" />
+                    <line x1="10" y1="90" x2="90" y2="90" stroke="currentColor" stroke-width="2" stroke-dasharray="4" />
+                </svg>
+
+                <form action="{{FORM_ACTION_URL}}" method="POST" class="bg-wave-light p-8 md:p-14 rounded-3xl shadow-xl shadow-wave-teal/5 border border-white">
+                    <div class="space-y-8">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div class="relative group">
+                                <input type="text" id="name" name="name" required class="block py-4 px-0 w-full text-base text-wave-dark bg-transparent border-0 border-b-2 border-gray-200 appearance-none focus:outline-none focus:ring-0 focus:border-wave-teal peer" placeholder=" ">
+                                <label for="name" class="peer-focus:font-medium absolute text-sm text-gray-400 duration-300 transform -translate-y-8 scale-75 top-5 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-wave-teal peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-8 font-wave tracking-widest uppercase">Name <span class="text-wave-coral">*</span></label>
+                            </div>
+                            <div class="relative group">
+                                <input type="email" id="email" name="email" required class="block py-4 px-0 w-full text-base text-wave-dark bg-transparent border-0 border-b-2 border-gray-200 appearance-none focus:outline-none focus:ring-0 focus:border-wave-teal peer" placeholder=" ">
+                                <label for="email" class="peer-focus:font-medium absolute text-sm text-gray-400 duration-300 transform -translate-y-8 scale-75 top-5 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-wave-teal peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-8 font-wave tracking-widest uppercase">Email <span class="text-wave-coral">*</span></label>
+                            </div>
+                        </div>
+                        <div class="relative group pt-4">
+                            <textarea id="message" name="message" rows="4" required class="block py-4 px-0 w-full text-base text-wave-dark bg-transparent border-0 border-b-2 border-gray-200 appearance-none focus:outline-none focus:ring-0 focus:border-wave-teal peer resize-none" placeholder=" "></textarea>
+                            <label for="message" class="peer-focus:font-medium absolute text-sm text-gray-400 duration-300 transform -translate-y-8 scale-75 top-5 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-wave-teal peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-8 font-wave tracking-widest uppercase">Message <span class="text-wave-coral">*</span></label>
+                        </div>
+                        <div class="pt-8 flex justify-center">
+                            <button type="submit" class="relative inline-flex items-center justify-center px-12 py-4 text-base font-bold text-white transition-all duration-300 bg-wave-dark font-wave tracking-widest uppercase hover:bg-wave-teal rounded-full overflow-hidden group w-full md:w-auto">
+                                <span class="absolute w-0 h-0 transition-all duration-500 ease-out bg-white rounded-full group-hover:w-full group-hover:h-56 opacity-10"></span>
+                                <span class="relative">Send Message</span>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+    <!--FORM_END-->
+
+    <!-- Access & Info Section -->
+    <section class="py-24 bg-wave-light border-t border-gray-100">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
+                <div class="lg:col-span-5 fade-in-up font-light">
+                    <span class="font-wave font-bold text-wave-teal tracking-widest uppercase text-xs mb-4 block">Information</span>
+                    <h2 class="text-3xl font-black text-wave-dark mb-10 font-wave tracking-tighter">About / Access</h2>
+                    
+                    <ul class="space-y-8 text-wave-dark/80">
+                        <li class="flex gap-4">
+                            <i data-lucide="map-pin" class="w-5 h-5 text-wave-coral shrink-0 mt-1"></i>
+                            <div>
+                                <span class="block text-[10px] text-gray-400 mb-1 uppercase tracking-[0.2em] font-bold font-wave">Studio / Address</span>
+                                <span class="leading-relaxed block">{{ADDRESS}}</span>
+                            </div>
+                        </li>
+                        
+                        <li class="flex gap-4">
+                            <i data-lucide="clock" class="w-5 h-5 text-wave-teal shrink-0 mt-1"></i>
+                            <div>
+                                <span class="block text-[10px] text-gray-400 mb-1 uppercase tracking-[0.2em] font-bold font-wave">Working Hours</span>
+                                <span class="whitespace-pre-line block">{{HOURS}}</span>
+                            </div>
+                        </li>
+                        
+                        <li class="flex gap-4">
+                            <i data-lucide="calendar-x" class="w-5 h-5 text-wave-coral shrink-0 mt-1"></i>
+                            <div>
+                                <span class="block text-[10px] text-gray-400 mb-1 uppercase tracking-[0.2em] font-bold font-wave">Holiday</span>
+                                <span class="block">{{HOLIDAY}}</span>
+                            </div>
+                        </li>
+                        
+                        <li class="flex gap-4">
+                            <i data-lucide="smartphone" class="w-5 h-5 text-wave-teal shrink-0 mt-1"></i>
+                            <div>
+                                <span class="block text-[10px] text-gray-400 mb-1 uppercase tracking-[0.2em] font-bold font-wave">Direct Contact</span>
+                                <span class="text-xl font-semibold tracking-wider block mb-1 font-wave">{{PHONE}}</span>
+                                <span class="text-sm border-b border-gray-300 pb-1">{{EMAIL}}</span>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                
+                <!--MAP_START-->
+                <div class="lg:col-span-7 h-[400px] lg:h-[500px] w-full relative fade-in-up delay-100 rounded-3xl overflow-hidden shadow-xl shadow-wave-dark/5">
+                    <iframe src="{{MAP_EMBED_URL}}" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" class="absolute inset-0 grayscale-[80%] hover:grayscale-0 transition-all duration-1000"></iframe>
+                </div>
+                <!--MAP_END-->
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-wave-dark text-white py-20 px-6 relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-64 h-64 bg-wave-tealLight blob-shape opacity-10 blur-3xl"></div>
+        <div class="max-w-7xl mx-auto flex flex-col items-center relative z-10">
+            
+            <div class="text-3xl font-black tracking-tighter font-wave flex items-center gap-2 mb-12">
+                <i data-lucide="feather" class="w-6 h-6 text-wave-tealLight"></i>
+                {{SITE_NAME}}
+            </div>
+            
+            <!--SNS_START-->
+            <div class="flex gap-8 mb-16">
+                <!--SNS_INSTAGRAM_START-->
+                <a href="{{INSTAGRAM_URL}}" target="_blank" class="text-gray-400 hover:text-wave-coral transition-colors hover:-translate-y-1 transform duration-300"><i data-lucide="instagram" class="w-5 h-5"></i></a>
+                <!--SNS_INSTAGRAM_END-->
+                
+                <!--SNS_YOUTUBE_START-->
+                <a href="{{YOUTUBE_URL}}" target="_blank" class="text-gray-400 hover:text-wave-coral transition-colors hover:-translate-y-1 transform duration-300"><i data-lucide="youtube" class="w-5 h-5"></i></a>
+                <!--SNS_YOUTUBE_END-->
+                
+                <!--SNS_X_START-->
+                <a href="{{X_URL}}" target="_blank" class="text-gray-400 hover:text-wave-tealLight transition-colors hover:-translate-y-1 transform duration-300">
+                    <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.008 5.961H5.078z"></path></svg>
+                </a>
+                <!--SNS_X_END-->
+                
+                <!--SNS_LINE_START-->
+                <a href="{{LINE_URL}}" target="_blank" class="text-gray-400 hover:text-wave-tealLight transition-colors hover:-translate-y-1 transform duration-300">
+                    <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                      <path d="M21.4 10.3c0-4.3-4.3-7.8-9.6-7.8s-9.6 3.5-9.6 7.8c0 3.8 3.3 7 7.7 7.7.3.1.8.2.9.4.1.2.1.5.1.7v1.8c0 .2.1.3.3.4s.3.1.5.0c2.4-1.6 4.9-3.4 6.7-5.5 1.5-1.7 2.6-3.5 2.6-5.5zm-14.3.4c-.4 0-.7-.3-.7-.7V7.6c0-.4.3-.7.7-.7s.7.3.7.7v1.7h1.1c.4 0 .7.3.7.7s-.3.7-.7.7H7.1zm5.2 0c-.4 0-.7-.3-.7-.7V7.6c0-.4.3-.7.7-.7s.7.3.7.7v2.4c0 .4-.3.7-.7.7zm2.4 0c-.4 0-.7-.3-.7-.7V7.6c0-.4.3-.7.7-.7s.7.3.7.7v.7h1.1c.4 0 .7.3.7.7s-.3.7-.7.7h-1.8zM11.9 8.3c0-.4.3-.7.7-.7s.7.3.7.7v2.4c0 .4-.3.7-.7.7s-.7-.3-.7-.7V8.3z"></path>
+                    </svg>
+                </a>
+                <!--SNS_LINE_END-->
+                
+                <!--SNS_FACEBOOK_START-->
+                <a href="{{FACEBOOK_URL}}" target="_blank" class="text-gray-400 hover:text-wave-tealLight transition-colors hover:-translate-y-1 transform duration-300"><i data-lucide="facebook" class="w-5 h-5"></i></a>
+                <!--SNS_FACEBOOK_END-->
+            </div>
+            <!--SNS_END-->
+            
+            <p class="text-[10px] font-wave tracking-[0.2em] text-gray-500 uppercase">© 2026 {{SITE_NAME}}</p>
+            <p class="text-[8px] mt-4 text-gray-700 uppercase tracking-widest font-sans">Powered by OnePage-Flash</p>
+        </div>
+    </footer>
+
+    <script>
+        lucide.createIcons();
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if(target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+
+        window.addEventListener('scroll', () => {
+            const header = document.querySelector('header');
+            if (window.scrollY > 20) {
+                header.classList.add('shadow-sm', 'bg-white/95');
+                header.classList.remove('bg-white/80', 'border-gray-100');
+            } else {
+                header.classList.add('bg-white/80', 'border-gray-100');
+                header.classList.remove('shadow-sm', 'bg-white/95');
+            }
+        });
+    </script>
+</body>
+</html>

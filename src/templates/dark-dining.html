@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="ja" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{SITE_NAME}}</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Noto+Sans+JP:wght@300;400;500&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Montserrat"', '"Noto Sans JP"', 'sans-serif'],
+                        serif: ['"Montserrat"', 'sans-serif'],
+                    },
+                    colors: {
+                        lux: {
+                            gold: '#d4af37',
+                            goldHover: '#b5952f',
+                            dark: '#0a0a0a',
+                            panel: '#141414',
+                            panelHover: '#1c1c1c',
+                            border: '#2a2a2a',
+                            text: '#f2f2f2',
+                            muted: '#a3a3a3'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #0a0a0a; color: #f2f2f2; }
+        .fade-in { animation: fadeIn 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; transform: translateY(30px); }
+        @keyframes fadeIn { to { opacity: 1; transform: translateY(0); } }
+        .delay-100 { animation-delay: 200ms; }
+        .delay-200 { animation-delay: 400ms; }
+        .scroll-mt-24 { scroll-margin-top: 6rem; }
+        
+        .glass-panel {
+            background: rgba(20, 20, 20, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+    </style>
+</head>
+<body class="font-sans antialiased selection:bg-lux-gold selection:text-black">
+
+    <!-- Header -->
+    <header class="fixed w-full top-0 glass-panel shadow-[0_4px_30px_rgba(0,0,0,0.5)] z-50 transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 h-24 flex items-center justify-between">
+            <div class="text-2xl font-bold tracking-[0.2em] text-white uppercase flex items-center gap-4">
+                <i data-lucide="wine" class="w-6 h-6 text-lux-gold"></i>
+                {{SITE_NAME}}
+            </div>
+            
+            <div class="hidden md:flex items-center gap-8">
+                <a href="tel:{{PHONE}}" class="flex items-center gap-3 text-lux-muted hover:text-lux-gold transition-colors duration-300">
+                    <i data-lucide="phone" class="w-4 h-4"></i>
+                    <span class="tracking-widest font-light">{{PHONE}}</span>
+                </a>
+                <a href="#contact" class="border border-lux-gold text-lux-gold hover:bg-lux-gold hover:text-black transition-all duration-500 px-8 py-3 text-sm tracking-[0.15em] uppercase">
+                    Reservation
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="relative h-screen min-h-[700px] flex items-center justify-center overflow-hidden">
+        <!-- Background -->
+        <div class="absolute inset-0 z-0">
+            <img src="{{HERO_IMAGE_URL}}" alt="{{SITE_NAME}}" class="w-full h-full object-cover scale-105" />
+            <div class="absolute inset-0 bg-black/70 mix-blend-multiply"></div>
+            <!-- Vignette effect -->
+            <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_20%,#0a0a0a_100%)]"></div>
+            <div class="absolute inset-0 bg-gradient-to-t from-lux-dark via-transparent to-transparent"></div>
+        </div>
+        
+        <!-- Content -->
+        <div class="relative z-10 w-full max-w-5xl mx-auto px-4 text-center mt-20">
+            <div class="fade-in">
+                <span class="text-lux-gold tracking-[0.3em] uppercase text-sm mb-6 block font-light">Welcome to</span>
+                <h1 class="text-5xl md:text-6xl lg:text-8xl font-bold text-white leading-tight mb-8 tracking-widest uppercase" style="text-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+                    {{CATCHPHRASE}}
+                </h1>
+                <div class="w-px h-16 bg-lux-gold mx-auto mb-8"></div>
+                <p class="text-xl text-lux-muted mb-12 leading-relaxed font-light max-w-2xl mx-auto tracking-wide">
+                    {{DESCRIPTION_SHORT}}
+                </p>
+                <div class="flex justify-center">
+                    <a href="#menu" class="group flex items-center justify-center w-16 h-16 rounded-full border border-lux-border hover:border-lux-gold transition-colors duration-500 text-white hover:text-lux-gold">
+                        <i data-lucide="chevron-down" class="w-6 h-6 group-hover:translate-y-1 transition-transform duration-300"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section class="py-32 bg-lux-dark relative" id="menu">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 relative z-10">
+            <div class="flex flex-col md:flex-row justify-between items-end mb-20 fade-in border-b border-lux-border pb-6">
+                <div>
+                    <span class="text-lux-gold tracking-[0.3em] uppercase text-sm mb-3 block">Menu & Dining</span>
+                    <h2 class="text-4xl font-bold text-white tracking-wider uppercase">メニュー・空間</h2>
+                </div>
+                <div class="hidden md:block">
+                    <p class="text-lux-muted font-light tracking-wide">至極のダイニング体験をご提供します</p>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-px bg-lux-border">
+                <!-- サービス1 -->
+                <div class="bg-lux-dark p-12 lg:p-16 hover:bg-lux-panel transition-colors duration-500 fade-in group">
+                    <i data-lucide="utensils-crossed" class="w-10 h-10 text-lux-gold mb-8 opacity-70 group-hover:opacity-100 transition-opacity"></i>
+                    <h3 class="text-2xl font-bold text-white mb-4 tracking-wider">{{SERVICE_1_TITLE}}</h3>
+                    <p class="text-lux-muted leading-relaxed font-light">{{SERVICE_1_DESC}}</p>
+                </div>
+                
+                <!-- サービス2 -->
+                <div class="bg-lux-dark p-12 lg:p-16 hover:bg-lux-panel transition-colors duration-500 fade-in delay-100 group">
+                    <i data-lucide="glass-water" class="w-10 h-10 text-lux-gold mb-8 opacity-70 group-hover:opacity-100 transition-opacity"></i>
+                    <h3 class="text-2xl font-bold text-white mb-4 tracking-wider">{{SERVICE_2_TITLE}}</h3>
+                    <p class="text-lux-muted leading-relaxed font-light">{{SERVICE_2_DESC}}</p>
+                </div>
+                
+                <!-- サービス3 -->
+                <div class="bg-lux-dark p-12 lg:p-16 hover:bg-lux-panel transition-colors duration-500 fade-in group">
+                    <i data-lucide="beef" class="w-10 h-10 text-lux-gold mb-8 opacity-70 group-hover:opacity-100 transition-opacity"></i>
+                    <h3 class="text-2xl font-bold text-white mb-4 tracking-wider">{{SERVICE_3_TITLE}}</h3>
+                    <p class="text-lux-muted leading-relaxed font-light">{{SERVICE_3_DESC}}</p>
+                </div>
+                
+                <!-- サービス4 -->
+                <div class="bg-lux-dark p-12 lg:p-16 hover:bg-lux-panel transition-colors duration-500 fade-in delay-100 group">
+                    <i data-lucide="gem" class="w-10 h-10 text-lux-gold mb-8 opacity-70 group-hover:opacity-100 transition-opacity"></i>
+                    <h3 class="text-2xl font-bold text-white mb-4 tracking-wider">{{SERVICE_4_TITLE}}</h3>
+                    <p class="text-lux-muted leading-relaxed font-light">{{SERVICE_4_DESC}}</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="py-32 bg-lux-panel" id="features">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 justify-center">
+            <div class="text-center mb-20 fade-in">
+                <span class="text-lux-gold tracking-[0.3em] uppercase text-sm mb-3 block">Our Concept</span>
+                <h2 class="text-3xl font-bold text-white tracking-widest uppercase">当店のこだわり</h2>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-12 lg:gap-20">
+                <!-- 特徴1 -->
+                <div class="text-center fade-in group">
+                    <div class="w-24 h-24 mx-auto border border-lux-border rounded-full flex items-center justify-center mb-8 group-hover:border-lux-gold transition-colors duration-500">
+                        <i data-lucide="star" class="w-8 h-8 text-lux-gold opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-all"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-5 tracking-wider">{{FEATURE_1_TITLE}}</h3>
+                    <p class="text-lux-muted font-light leading-relaxed">{{FEATURE_1_DESC}}</p>
+                </div>
+                
+                <!-- 特徴2 -->
+                <div class="text-center fade-in delay-100 group">
+                    <div class="w-24 h-24 mx-auto border border-lux-border rounded-full flex items-center justify-center mb-8 group-hover:border-lux-gold transition-colors duration-500">
+                        <i data-lucide="flame" class="w-8 h-8 text-lux-gold opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-all"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-5 tracking-wider">{{FEATURE_2_TITLE}}</h3>
+                    <p class="text-lux-muted font-light leading-relaxed">{{FEATURE_2_DESC}}</p>
+                </div>
+                
+                <!-- 特徴3 -->
+                <div class="text-center fade-in delay-200 group">
+                    <div class="w-24 h-24 mx-auto border border-lux-border rounded-full flex items-center justify-center mb-8 group-hover:border-lux-gold transition-colors duration-500">
+                        <i data-lucide="music" class="w-8 h-8 text-lux-gold opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-all"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-5 tracking-wider">{{FEATURE_3_TITLE}}</h3>
+                    <p class="text-lux-muted font-light leading-relaxed">{{FEATURE_3_DESC}}</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!--FORM_START-->
+    <section id="contact" class="py-32 bg-lux-dark scroll-mt-24 relative overflow-hidden">
+        <!-- Accent lines -->
+        <div class="absolute left-0 top-0 w-px h-full bg-gradient-to-b from-transparent via-lux-border to-transparent"></div>
+        <div class="absolute right-0 top-0 w-px h-full bg-gradient-to-b from-transparent via-lux-border to-transparent"></div>
+        
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 relative z-10">
+            <div class="text-center mb-16 fade-in">
+                <span class="text-lux-gold tracking-[0.3em] uppercase text-sm mb-3 block">Reservation</span>
+                <h2 class="text-3xl font-bold text-white uppercase tracking-widest">ご予約・お問い合わせ</h2>
+            </div>
+            
+            <div class="glass-panel p-10 md:p-16 fade-in border border-lux-border relative">
+                <!-- Corner accents -->
+                <div class="absolute top-0 left-0 w-4 h-4 border-t border-l border-lux-gold"></div>
+                <div class="absolute top-0 right-0 w-4 h-4 border-t border-r border-lux-gold"></div>
+                <div class="absolute bottom-0 left-0 w-4 h-4 border-b border-l border-lux-gold"></div>
+                <div class="absolute bottom-0 right-0 w-4 h-4 border-b border-r border-lux-gold"></div>
+                
+                <form action="{{FORM_ACTION_URL}}" method="POST" class="space-y-8">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div>
+                            <label for="name" class="block text-xs tracking-widest text-lux-muted mb-3 uppercase">Name <span class="text-lux-gold">*</span></label>
+                            <input type="text" id="name" name="name" required class="w-full px-0 py-3 bg-transparent border-0 border-b border-lux-border focus:border-lux-gold focus:ring-0 outline-none transition-colors text-white text-lg">
+                        </div>
+                        <div>
+                            <label for="email" class="block text-xs tracking-widest text-lux-muted mb-3 uppercase">Email <span class="text-lux-gold">*</span></label>
+                            <input type="email" id="email" name="email" required class="w-full px-0 py-3 bg-transparent border-0 border-b border-lux-border focus:border-lux-gold focus:ring-0 outline-none transition-colors text-white text-lg">
+                        </div>
+                    </div>
+                    <div>
+                        <label for="message" class="block text-xs tracking-widest text-lux-muted mb-3 uppercase">Message <span class="text-lux-gold">*</span></label>
+                        <textarea id="message" name="message" rows="4" required class="w-full px-0 py-3 bg-transparent border-0 border-b border-lux-border focus:border-lux-gold focus:ring-0 outline-none transition-colors text-white text-lg resize-none"></textarea>
+                    </div>
+                    <div class="pt-8 text-center md:text-left">
+                        <button type="submit" class="bg-white text-black hover:bg-lux-gold hover:text-white px-14 py-4 uppercase tracking-[0.2em] text-sm font-bold transition-all duration-300 w-full md:w-auto">
+                            Send Request
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+    <!--FORM_END-->
+
+    <!-- Access & Info Section -->
+    <section class="border-t border-lux-border bg-lux-dark">
+        <div class="flex flex-col lg:flex-row">
+            <div class="w-full lg:w-1/2 p-12 md:p-20 lg:p-24 flex flex-col justify-center fade-in">
+                <span class="text-lux-gold tracking-[0.3em] uppercase text-sm mb-4 block">Information</span>
+                <h2 class="text-3xl font-bold mb-16 text-white tracking-widest uppercase">店舗情報・アクセス</h2>
+                
+                <ul class="space-y-10 text-white font-light tracking-wide">
+                    <li class="flex items-start gap-6">
+                        <i data-lucide="map-pin" class="w-6 h-6 text-lux-gold mt-1 shrink-0 opacity-80"></i>
+                        <div>
+                            <span class="block text-xs text-lux-muted mb-2 uppercase tracking-[0.2em]">Address</span>
+                            <span class="text-lg leading-relaxed block max-w-sm">{{ADDRESS}}</span>
+                        </div>
+                    </li>
+                    
+                    <li class="flex items-start gap-6">
+                        <i data-lucide="clock" class="w-6 h-6 text-lux-gold mt-1 shrink-0 opacity-80"></i>
+                        <div>
+                            <span class="block text-xs text-lux-muted mb-2 uppercase tracking-[0.2em]">Hours</span>
+                            <span class="text-lg whitespace-pre-line block">{{HOURS}}</span>
+                        </div>
+                    </li>
+                    
+                    <li class="flex items-start gap-6">
+                        <i data-lucide="calendar-x" class="w-6 h-6 text-lux-gold mt-1 shrink-0 opacity-80"></i>
+                        <div>
+                            <span class="block text-xs text-lux-muted mb-2 uppercase tracking-[0.2em]">Closed</span>
+                            <span class="text-lg block">{{HOLIDAY}}</span>
+                        </div>
+                    </li>
+                    
+                    <li class="flex items-start gap-6">
+                        <i data-lucide="phone" class="w-6 h-6 text-lux-gold mt-1 shrink-0 opacity-80"></i>
+                        <div>
+                            <span class="block text-xs text-lux-muted mb-2 uppercase tracking-[0.2em]">Tel</span>
+                            <span class="text-xl font-medium block tracking-widest">{{PHONE}}</span>
+                        </div>
+                    </li>
+                    
+                    <li class="flex items-start gap-6">
+                        <i data-lucide="mail" class="w-6 h-6 text-lux-gold mt-1 shrink-0 opacity-80"></i>
+                        <div>
+                            <span class="block text-xs text-lux-muted mb-2 uppercase tracking-[0.2em]">Email</span>
+                            <span class="text-lg block tracking-wider">{{EMAIL}}</span>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            
+            <!--MAP_START-->
+            <div class="w-full lg:w-1/2 h-[500px] lg:h-auto min-h-[600px] relative fade-in">
+                <iframe src="{{MAP_EMBED_URL}}" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" class="absolute inset-0 grayscale-[80%] invert-[90%] contrast-125 hover:grayscale-0 hover:invert-0 transition-all duration-1000"></iframe>
+            </div>
+            <!--MAP_END-->
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-lux-dark border-t border-lux-border py-20 text-center">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6">
+            
+            <div class="flex items-center justify-center gap-4 mb-12">
+                <i data-lucide="wine" class="w-8 h-8 text-lux-gold"></i>
+                <h2 class="text-2xl font-bold tracking-[0.2em] text-white uppercase">{{SITE_NAME}}</h2>
+            </div>
+            
+            <!--SNS_START-->
+            <div class="flex flex-wrap justify-center gap-10 mb-16">
+                <!--SNS_INSTAGRAM_START-->
+                <a href="{{INSTAGRAM_URL}}" target="_blank" class="text-lux-muted hover:text-lux-gold transition-colors duration-300"><i data-lucide="instagram" class="w-5 h-5"></i></a>
+                <!--SNS_INSTAGRAM_END-->
+                
+                <!--SNS_YOUTUBE_START-->
+                <a href="{{YOUTUBE_URL}}" target="_blank" class="text-lux-muted hover:text-lux-gold transition-colors duration-300"><i data-lucide="youtube" class="w-5 h-5"></i></a>
+                <!--SNS_YOUTUBE_END-->
+                
+                <!--SNS_X_START-->
+                <a href="{{X_URL}}" target="_blank" class="text-lux-muted hover:text-lux-gold transition-colors duration-300">
+                    <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.008 5.961H5.078z"></path></svg>
+                </a>
+                <!--SNS_X_END-->
+                
+                <!--SNS_LINE_START-->
+                <a href="{{LINE_URL}}" target="_blank" class="text-lux-muted hover:text-lux-gold transition-colors duration-300">
+                    <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                      <path d="M21.4 10.3c0-4.3-4.3-7.8-9.6-7.8s-9.6 3.5-9.6 7.8c0 3.8 3.3 7 7.7 7.7.3.1.8.2.9.4.1.2.1.5.1.7v1.8c0 .2.1.3.3.4s.3.1.5.0c2.4-1.6 4.9-3.4 6.7-5.5 1.5-1.7 2.6-3.5 2.6-5.5zm-14.3.4c-.4 0-.7-.3-.7-.7V7.6c0-.4.3-.7.7-.7s.7.3.7.7v1.7h1.1c.4 0 .7.3.7.7s-.3.7-.7.7H7.1zm5.2 0c-.4 0-.7-.3-.7-.7V7.6c0-.4.3-.7.7-.7s.7.3.7.7v2.4c0 .4-.3.7-.7.7zm2.4 0c-.4 0-.7-.3-.7-.7V7.6c0-.4.3-.7.7-.7s.7.3.7.7v.7h1.1c.4 0 .7.3.7.7s-.3.7-.7.7h-1.8zM11.9 8.3c0-.4.3-.7.7-.7s.7.3.7.7v2.4c0 .4-.3.7-.7.7s-.7-.3-.7-.7V8.3z"></path>
+                    </svg>
+                </a>
+                <!--SNS_LINE_END-->
+                
+                <!--SNS_FACEBOOK_START-->
+                <a href="{{FACEBOOK_URL}}" target="_blank" class="text-lux-muted hover:text-lux-gold transition-colors duration-300"><i data-lucide="facebook" class="w-5 h-5"></i></a>
+                <!--SNS_FACEBOOK_END-->
+            </div>
+            <!--SNS_END-->
+            
+            <p class="text-xs tracking-[0.2em] uppercase text-lux-muted">© 2026 {{SITE_NAME}}</p>
+            <p class="text-[10px] mt-6 text-lux-border uppercase tracking-[0.3em]">Powered by OnePage-Flash</p>
+        </div>
+    </footer>
+
+    <script>
+        lucide.createIcons();
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if(target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+
+        // Header scroll effect
+        window.addEventListener('scroll', () => {
+            const header = document.querySelector('header');
+            if (window.scrollY > 50) {
+                header.classList.add('bg-lux-dark/95');
+                header.classList.remove('glass-panel');
+            } else {
+                header.classList.add('glass-panel');
+                header.classList.remove('bg-lux-dark/95');
+            }
+        });
+    </script>
+</body>
+</html>
