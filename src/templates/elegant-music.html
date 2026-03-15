@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{SITE_NAME}}</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=Zen+Kaku+Gothic+New:wght@300;400;500&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Zen Kaku Gothic New"', 'sans-serif'],
+                        serif: ['"Cormorant Garamond"', 'serif'],
+                    },
+                    colors: {
+                        elegant: {
+                            50: '#faf9f8',
+                            100: '#f4f2f0',
+                            200: '#e8e5e1',
+                            300: '#d7d2cc', // Ivory base
+                            400: '#beb7af',
+                            500: '#a39b91', // Warm gray
+                            600: '#867e74',
+                            700: '#6c645b',
+                            800: '#585149',
+                            900: '#2a2624', // Deep espresso black
+                            accent: '#c9a96e', // Classic Gold
+                            accentLight: '#dfcc9f',
+                            text: '#4a443f',
+                            textLight: '#867e74'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .gold-gradient {
+            background: linear-gradient(135deg, #dfcc9f 0%, #c9a96e 50%, #9e7f4b 100%);
+        }
+        
+        .gold-text {
+            background: linear-gradient(135deg, #dfcc9f 0%, #c9a96e 50%, #9e7f4b 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .fade-in { animation: fadeIn 1.5s ease-out forwards; opacity: 0; }
+        @keyframes fadeIn { to { opacity: 1; } }
+        
+        .slide-up { animation: slideUp 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; opacity: 0; transform: translateY(40px); }
+        @keyframes slideUp { to { opacity: 1; transform: translateY(0); } }
+        
+        .reveal { 
+            position: relative;
+            overflow: hidden;
+        }
+        .reveal::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #f4f2f0;
+            animation: reveal 1.5s cubic-bezier(0.77, 0, 0.175, 1) forwards;
+        }
+        @keyframes reveal { 
+            0% { transform: scaleX(1); transform-origin: left; } 
+            50% { transform: scaleX(1); transform-origin: right; } 
+            100% { transform: scaleX(0); transform-origin: right; } 
+        }
+        
+        .delay-100 { animation-delay: 100ms; }
+        .delay-200 { animation-delay: 200ms; }
+        .delay-300 { animation-delay: 300ms; }
+        .delay-500 { animation-delay: 500ms; }
+        .delay-700 { animation-delay: 700ms; }
+        .scroll-mt-24 { scroll-margin-top: 6rem; }
+
+        /* Subtle background texture */
+        .paper-texture {
+            background-color: #faf9f8;
+            background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23noise)' opacity='0.05'/%3E%3C/svg%3E");
+        }
+
+        .ornament {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+        }
+        .ornament::before,
+        .ornament::after {
+            content: '';
+            height: 1px;
+            width: 50px;
+            background: linear-gradient(90deg, transparent, #c9a96e, transparent);
+        }
+
+        /* Animated border button */
+        .btn-elegant {
+            position: relative;
+            display: inline-block;
+            transition: all 0.4s ease;
+        }
+        .btn-elegant::before {
+            content: '';
+            position: absolute;
+            top: -1px; left: -1px; right: -1px; bottom: -1px;
+            border: 1px solid #c9a96e;
+            transition: all 0.4s ease;
+            transform: scale(1.05);
+            opacity: 0;
+        }
+        .btn-elegant:hover::before {
+            transform: scale(1);
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="font-sans text-elegant-text paper-texture antialiased selection:bg-elegant-accent selection:text-white font-light">
+
+    <!-- Header -->
+    <header class="fixed w-full top-0 bg-elegant-50/90 backdrop-blur-md z-50 transition-all duration-500 border-b border-elegant-200 shadow-[0_4px_30px_rgba(0,0,0,0.02)]">
+        <div class="max-w-7xl mx-auto px-6 h-20 md:h-24 flex items-center justify-between">
+            <div class="text-2xl md:text-3xl font-serif text-elegant-900 tracking-widest flex items-center gap-3">
+                <i data-lucide="music" class="w-6 h-6 text-elegant-accent"></i>
+                {{SITE_NAME}}
+            </div>
+            
+            <div class="hidden md:flex items-center gap-10">
+                <a href="tel:{{PHONE}}" class="text-elegant-600 hover:text-elegant-accent transition-colors font-serif italic text-lg tracking-wide flex items-center gap-2">
+                    <i data-lucide="phone" class="w-4 h-4 text-elegant-accent opacity-70"></i>
+                    {{PHONE}}
+                </a>
+                <a href="#contact" class="px-8 py-3 bg-elegant-900 text-white font-serif tracking-widest text-sm hover:bg-elegant-800 transition-colors uppercase btn-elegant">
+                    無料体験レッスン
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="relative pt-24 min-h-[90vh] flex items-center justify-center overflow-hidden">
+        
+        <div class="max-w-7xl mx-auto px-6 w-full relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-0 items-center h-full">
+            
+            <!-- Content Area (Left/Top) -->
+            <div class="lg:col-span-5 relative z-20 slide-up delay-100 flex flex-col justify-center h-full pt-10 lg:pt-0 lg:pr-10 text-center lg:text-left order-2 lg:order-1">
+                
+                <div class="mb-4 inline-block font-serif italic text-elegant-accent text-lg tracking-widest fade-in delay-300">
+                    Music Academy
+                </div>
+                
+                <h1 class="text-4xl md:text-5xl lg:text-7xl font-serif text-elegant-900 leading-[1.15] mb-8 tracking-wide fade-in delay-500">
+                    <span class="block mb-2">{{CATCHPHRASE}}</span>
+                </h1>
+                
+                <div class="w-20 h-[1px] bg-elegant-accent mb-8 mx-auto lg:mx-0 fade-in delay-700"></div>
+                
+                <p class="text-base md:text-lg text-elegant-600 mb-10 leading-loose max-w-md mx-auto lg:mx-0 fade-in delay-700 font-light">
+                    {{DESCRIPTION_SHORT}}
+                </p>
+                
+                <div class="flex flex-col sm:flex-row gap-6 justify-center lg:justify-start fade-in delay-700">
+                    <a href="#contact" class="px-10 py-4 bg-elegant-900 text-white font-serif tracking-widest text-sm hover:bg-elegant-800 transition-colors uppercase text-center btn-elegant">
+                        無料体験に申し込む
+                    </a>
+                    <a href="#about" class="px-10 py-4 border border-elegant-300 text-elegant-700 font-serif tracking-widest text-sm hover:border-elegant-accent hover:text-elegant-accent transition-colors uppercase text-center">
+                        教室について
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Image Area (Right/Bottom) -->
+            <div class="lg:col-span-7 relative h-[60vh] lg:h-[85vh] w-full order-1 lg:order-2">
+                <div class="absolute inset-0 right-0 lg:-right-40 top-0 lg:-top-24 bottom-0 lg:-bottom-24 reveal">
+                    <img src="{{HERO_IMAGE_URL}}" alt="{{SITE_NAME}}" class="w-full h-full object-cover transform scale-105" style="animation: subtleZoom 30s ease-out forwards; object-position: center 30%;" />
+                    <!-- Soft overlay for elegance -->
+                    <div class="absolute inset-0 bg-gradient-to-l from-transparent via-transparent to-elegant-50 lg:bg-gradient-to-r lg:from-elegant-50 lg:via-elegant-50/20 lg:to-transparent"></div>
+                </div>
+                
+                <!-- Decorative elements -->
+                <div class="absolute top-10 right-10 w-32 h-32 border border-elegant-accent/30 rounded-full fade-in delay-700 hidden lg:block"></div>
+                <div class="absolute -bottom-10 left-20 w-48 h-48 border border-elegant-accent/20 rounded-full fade-in delay-700 hidden lg:block"></div>
+            </div>
+            
+        </div>
+        
+        <!-- Scroll indicator -->
+        <div class="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3 fade-in delay-700 z-20">
+            <span class="font-serif italic text-sm text-elegant-500 tracking-widest">Scroll</span>
+            <div class="w-[1px] h-12 bg-elegant-accent bg-opacity-30 relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-full h-1/2 gold-gradient" style="animation: scrollLine 2s infinite;"></div>
+            </div>
+        </div>
+        <style>
+            @keyframes subtleZoom { from { transform: scale(1); } to { transform: scale(1.08); } }
+            @keyframes scrollLine { 0% { transform: translateY(-100%); } 100% { transform: translateY(200%); } }
+        </style>
+    </section>
+
+    <!-- Philosophy Section -->
+    <section class="py-24 bg-white relative z-10" id="about">
+        <div class="max-w-4xl mx-auto px-6 text-center">
+            <div class="ornament mb-8 fade-up text-elegant-accent">
+                <i data-lucide="music-4" class="w-5 h-5"></i>
+            </div>
+            <h2 class="text-3xl md:text-5xl font-serif text-elegant-900 tracking-wide mb-10 fade-up">音楽の喜びを、日常に</h2>
+            <p class="text-elegant-600 leading-loose md:leading-[2.5] text-base md:text-lg slide-up delay-100 font-light">
+                音楽は心に余白を生み出し、日々の生活に彩りを添えてくれます。<br class="hidden md:block">
+                私たちは技術の習得だけでなく、音楽を通して表現する喜びや、<br class="hidden md:block">
+                美しい音色と向き合う静かな時間を提供したいと考えています。<br class="hidden md:block">
+                初心者の方から経験者の方まで、一人ひとりのペースに寄り添う<br class="hidden md:block">
+                丁寧なパーソナルレッスンで、あなたの音楽ライフをサポートいたします。
+            </p>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section class="py-24 bg-elegant-50 relative border-y border-elegant-200" id="services">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center mb-20 fade-up">
+                <h2 class="text-4xl md:text-5xl font-serif text-elegant-900 tracking-wide mb-4">Lessons & Services</h2>
+                <div class="w-12 h-[1px] bg-elegant-accent mx-auto"></div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-16 lg:px-20">
+                <!-- サービス1 -->
+                <div class="fade-up group flex flex-col items-center text-center">
+                    <div class="w-20 h-20 rounded-full border border-elegant-300 bg-white flex items-center justify-center mb-6 group-hover:border-elegant-accent transition-colors duration-500 shadow-sm relative">
+                        <div class="absolute inset-2 rounded-full border border-elegant-100 group-hover:border-elegant-accentLight/50 transition-colors duration-500"></div>
+                        <i data-lucide="mic-2" class="w-8 h-8 text-elegant-500 group-hover:text-elegant-accent transition-colors duration-500"></i>
+                    </div>
+                    <h3 class="text-2xl font-serif text-elegant-900 mb-4 tracking-wide">{{SERVICE_1_TITLE}}</h3>
+                    <p class="text-elegant-600 font-light leading-relaxed max-w-sm">{{SERVICE_1_DESC}}</p>
+                </div>
+                
+                <!-- サービス2 -->
+                <div class="fade-up delay-100 group flex flex-col items-center text-center">
+                    <div class="w-20 h-20 rounded-full border border-elegant-300 bg-white flex items-center justify-center mb-6 group-hover:border-elegant-accent transition-colors duration-500 shadow-sm relative">
+                        <div class="absolute inset-2 rounded-full border border-elegant-100 group-hover:border-elegant-accentLight/50 transition-colors duration-500"></div>
+                        <i data-lucide="headphones" class="w-8 h-8 text-elegant-500 group-hover:text-elegant-accent transition-colors duration-500"></i>
+                    </div>
+                    <h3 class="text-2xl font-serif text-elegant-900 mb-4 tracking-wide">{{SERVICE_2_TITLE}}</h3>
+                    <p class="text-elegant-600 font-light leading-relaxed max-w-sm">{{SERVICE_2_DESC}}</p>
+                </div>
+                
+                <!-- サービス3 -->
+                <div class="fade-up group flex flex-col items-center text-center">
+                    <div class="w-20 h-20 rounded-full border border-elegant-300 bg-white flex items-center justify-center mb-6 group-hover:border-elegant-accent transition-colors duration-500 shadow-sm relative">
+                        <div class="absolute inset-2 rounded-full border border-elegant-100 group-hover:border-elegant-accentLight/50 transition-colors duration-500"></div>
+                        <i data-lucide="book-open" class="w-8 h-8 text-elegant-500 group-hover:text-elegant-accent transition-colors duration-500"></i>
+                    </div>
+                    <h3 class="text-2xl font-serif text-elegant-900 mb-4 tracking-wide">{{SERVICE_3_TITLE}}</h3>
+                    <p class="text-elegant-600 font-light leading-relaxed max-w-sm">{{SERVICE_3_DESC}}</p>
+                </div>
+                
+                <!-- サービス4 -->
+                <div class="fade-up delay-100 group flex flex-col items-center text-center">
+                    <div class="w-20 h-20 rounded-full border border-elegant-300 bg-white flex items-center justify-center mb-6 group-hover:border-elegant-accent transition-colors duration-500 shadow-sm relative">
+                        <div class="absolute inset-2 rounded-full border border-elegant-100 group-hover:border-elegant-accentLight/50 transition-colors duration-500"></div>
+                        <i data-lucide="music-3" class="w-8 h-8 text-elegant-500 group-hover:text-elegant-accent transition-colors duration-500"></i>
+                    </div>
+                    <h3 class="text-2xl font-serif text-elegant-900 mb-4 tracking-wide">{{SERVICE_4_TITLE}}</h3>
+                    <p class="text-elegant-600 font-light leading-relaxed max-w-sm">{{SERVICE_4_DESC}}</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="py-24 bg-elegant-900 text-white relative z-10" id="features">
+        <div class="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-10 pointer-events-none"></div>
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
+                
+                <div class="lg:col-span-4 fade-up">
+                    <span class="font-serif italic text-elegant-accent text-xl tracking-widest mb-4 block">Features</span>
+                    <h2 class="text-3xl md:text-5xl font-serif text-white tracking-wide mb-8 leading-tight">私たちが<br>選ばれる理由</h2>
+                    <p class="text-elegant-300 leading-loose font-light mb-8">
+                        上質な空間と確かな指導力で、あなたの音楽体験をより豊かに。心地よく通える環境を整えてお待ちしております。
+                    </p>
+                    <a href="#contact" class="inline-block px-8 py-3 border border-elegant-accent text-elegant-accent font-serif tracking-widest text-sm hover:bg-elegant-accent hover:text-white transition-colors uppercase">
+                        お問い合わせ
+                    </a>
+                </div>
+                
+                <div class="lg:col-span-8">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <!-- 特徴1 -->
+                        <div class="slide-up relative bg-elegant-800/50 p-8 border border-elegant-700/50 hover:bg-elegant-800 transition-colors duration-500 backdrop-blur-sm group">
+                            <div class="w-12 h-12 rounded-full bg-elegant-700/30 flex items-center justify-center mb-6 text-elegant-accent group-hover:bg-elegant-accent group-hover:text-white transition-colors duration-500">
+                                <i data-lucide="star" class="w-6 h-6"></i>
+                            </div>
+                            <h3 class="text-xl font-serif text-white mb-4 tracking-wide">{{FEATURE_1_TITLE}}</h3>
+                            <p class="text-elegant-300 font-light text-sm leading-relaxed">{{FEATURE_1_DESC}}</p>
+                        </div>
+                        
+                        <!-- 特徴2 -->
+                        <div class="slide-up delay-100 relative bg-elegant-800/50 p-8 border border-elegant-700/50 hover:bg-elegant-800 transition-colors duration-500 backdrop-blur-sm group sm:mt-8">
+                            <div class="w-12 h-12 rounded-full bg-elegant-700/30 flex items-center justify-center mb-6 text-elegant-accent group-hover:bg-elegant-accent group-hover:text-white transition-colors duration-500">
+                                <i data-lucide="users" class="w-6 h-6"></i>
+                            </div>
+                            <h3 class="text-xl font-serif text-white mb-4 tracking-wide">{{FEATURE_2_TITLE}}</h3>
+                            <p class="text-elegant-300 font-light text-sm leading-relaxed">{{FEATURE_2_DESC}}</p>
+                        </div>
+                        
+                        <!-- 特徴3 -->
+                        <div class="slide-up delay-200 relative bg-elegant-800/50 p-8 border border-elegant-700/50 hover:bg-elegant-800 transition-colors duration-500 backdrop-blur-sm group sm:-mt-8">
+                            <div class="w-12 h-12 rounded-full bg-elegant-700/30 flex items-center justify-center mb-6 text-elegant-accent group-hover:bg-elegant-accent group-hover:text-white transition-colors duration-500">
+                                <i data-lucide="coffee" class="w-6 h-6"></i>
+                            </div>
+                            <h3 class="text-xl font-serif text-white mb-4 tracking-wide">{{FEATURE_3_TITLE}}</h3>
+                            <p class="text-elegant-300 font-light text-sm leading-relaxed">{{FEATURE_3_DESC}}</p>
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+    </section>
+
+    <!--FORM_START-->
+    <section class="py-24 bg-white relative scroll-mt-20" id="contact">
+        <div class="max-w-3xl mx-auto px-6 relative z-10">
+            <div class="text-center mb-16 fade-up">
+                <div class="ornament mb-4 text-elegant-accent">
+                    <i data-lucide="mail" class="w-4 h-4"></i>
+                </div>
+                <h2 class="text-4xl font-serif text-elegant-900 tracking-wide mb-4">Contact Us</h2>
+                <p class="text-elegant-600 font-light">無料体験レッスン・お問い合わせはこちらから</p>
+            </div>
+            
+            <div class="bg-elegant-50 p-10 md:p-14 border border-elegant-200 slide-up shadow-sm">
+                <form action="{{FORM_ACTION_URL}}" method="POST" class="space-y-8">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div class="relative">
+                            <input type="text" id="name" name="name" required class="w-full bg-transparent border-b border-elegant-300 px-0 py-3 text-elegant-900 focus:border-elegant-accent focus:ring-0 outline-none transition-colors peer placeholder-transparent" placeholder="お名前">
+                            <label for="name" class="absolute left-0 top-3 text-elegant-400 text-sm font-light transition-all peer-focus:-top-4 peer-focus:text-xs peer-focus:text-elegant-accent peer-valid:-top-4 peer-valid:text-xs">お名前 <span class="text-elegant-accent">*</span></label>
+                        </div>
+                        <div class="relative">
+                            <input type="email" id="email" name="email" required class="w-full bg-transparent border-b border-elegant-300 px-0 py-3 text-elegant-900 focus:border-elegant-accent focus:ring-0 outline-none transition-colors peer placeholder-transparent" placeholder="メールアドレス">
+                            <label for="email" class="absolute left-0 top-3 text-elegant-400 text-sm font-light transition-all peer-focus:-top-4 peer-focus:text-xs peer-focus:text-elegant-accent peer-valid:-top-4 peer-valid:text-xs">メールアドレス <span class="text-elegant-accent">*</span></label>
+                        </div>
+                    </div>
+                    <div class="relative pt-4">
+                        <textarea id="message" name="message" rows="4" required class="w-full bg-transparent border-b border-elegant-300 px-0 py-3 text-elegant-900 focus:border-elegant-accent focus:ring-0 outline-none transition-colors resize-none peer placeholder-transparent" placeholder="お問い合わせ内容"></textarea>
+                        <label for="message" class="absolute left-0 top-7 text-elegant-400 text-sm font-light transition-all peer-focus:top-0 peer-focus:text-xs peer-focus:text-elegant-accent peer-valid:top-0 peer-valid:text-xs">お問い合わせ内容 <span class="text-elegant-accent">*</span></label>
+                    </div>
+                    <div class="text-center pt-8">
+                        <button type="submit" class="px-12 py-4 bg-elegant-900 text-white font-serif tracking-widest text-sm hover:bg-elegant-accent transition-colors uppercase w-full md:w-auto">
+                            送信する
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+    <!--FORM_END-->
+
+    <!-- Access Section -->
+    <section class="bg-elegant-50 border-t border-elegant-200">
+        <div class="flex flex-col lg:flex-row">
+            <!--MAP_START-->
+            <div class="w-full lg:w-1/2 h-[400px] lg:h-auto relative fade-in order-1">
+                <iframe src="{{MAP_EMBED_URL}}" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" class="absolute inset-0 grayscale opacity-80 hover:grayscale-0 hover:opacity-100 transition-all duration-700"></iframe>
+            </div>
+            <!--MAP_END-->
+            
+            <div class="w-full lg:w-1/2 p-12 md:p-20 flex flex-col justify-center slide-in-right order-2">
+                <h2 class="text-3xl font-serif text-elegant-900 tracking-widest uppercase mb-12 flex items-center gap-4">
+                    Studio Access
+                    <div class="flex-grow h-[1px] bg-elegant-200"></div>
+                </h2>
+                
+                <ul class="space-y-8 text-elegant-700 font-light">
+                    <li class="flex items-start gap-6">
+                        <div class="mt-1">
+                            <span class="block text-xs font-serif italic text-elegant-accent mb-1">Address</span>
+                            <span class="leading-relaxed text-sm lg:text-base text-elegant-900">{{ADDRESS}}</span>
+                        </div>
+                    </li>
+                    <li class="flex items-start gap-6">
+                        <div class="mt-1">
+                            <span class="block text-xs font-serif italic text-elegant-accent mb-1">Hours</span>
+                            <span class="whitespace-pre-line leading-relaxed text-sm lg:text-base text-elegant-900">{{HOURS}}</span>
+                        </div>
+                    </li>
+                    <li class="flex items-start gap-6">
+                        <div class="mt-1">
+                            <span class="block text-xs font-serif italic text-elegant-accent mb-1">Closed</span>
+                            <span class="leading-relaxed text-sm lg:text-base text-elegant-900">{{HOLIDAY}}</span>
+                        </div>
+                    </li>
+                    <li class="pt-6 border-t border-elegant-200">
+                        <div class="mb-2">
+                            <span class="font-serif text-3xl font-light text-elegant-900 tracking-wide">{{PHONE}}</span>
+                        </div>
+                        <span class="text-sm font-light text-elegant-500">{{EMAIL}}</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-elegant-900 text-elegant-300 py-16">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="flex flex-col items-center mb-12">
+                <div class="w-12 h-12 border border-elegant-700 rounded-full flex items-center justify-center mb-6">
+                    <i data-lucide="music" class="w-5 h-5 text-elegant-accent"></i>
+                </div>
+                <h2 class="text-2xl font-serif text-white tracking-widest uppercase mb-4">{{SITE_NAME}}</h2>
+                <p class="text-sm text-elegant-400 font-light max-w-md text-center">{{DESCRIPTION_SHORT}}</p>
+            </div>
+            
+            <!--SNS_START-->
+            <div class="flex justify-center gap-8 mb-16 border-b border-elegant-800 pb-12">
+                <!--SNS_INSTAGRAM_START-->
+                <a href="{{INSTAGRAM_URL}}" target="_blank" class="text-elegant-500 hover:text-white hover:scale-110 transition-all"><i data-lucide="instagram" class="w-5 h-5"></i></a>
+                <!--SNS_INSTAGRAM_END-->
+                
+                <!--SNS_YOUTUBE_START-->
+                <a href="{{YOUTUBE_URL}}" target="_blank" class="text-elegant-500 hover:text-white hover:scale-110 transition-all"><i data-lucide="youtube" class="w-5 h-5"></i></a>
+                <!--SNS_YOUTUBE_END-->
+                
+                <!--SNS_X_START-->
+                <a href="{{X_URL}}" target="_blank" class="text-elegant-500 hover:text-white hover:scale-110 transition-all">
+                    <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.008 5.961H5.078z"></path></svg>
+                </a>
+                <!--SNS_X_END-->
+                
+                <!--SNS_LINE_START-->
+                <a href="{{LINE_URL}}" target="_blank" class="text-elegant-500 hover:text-white hover:scale-110 transition-all">
+                    <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                      <path d="M21.4 10.3c0-4.3-4.3-7.8-9.6-7.8s-9.6 3.5-9.6 7.8c0 3.8 3.3 7 7.7 7.7.3.1.8.2.9.4.1.2.1.5.1.7v1.8c0 .2.1.3.3.4s.3.1.5.0c2.4-1.6 4.9-3.4 6.7-5.5 1.5-1.7 2.6-3.5 2.6-5.5zm-14.3.4c-.4 0-.7-.3-.7-.7V7.6c0-.4.3-.7.7-.7s.7.3.7.7v1.7h1.1c.4 0 .7.3.7.7s-.3.7-.7.7H7.1zm5.2 0c-.4 0-.7-.3-.7-.7V7.6c0-.4.3-.7.7-.7s.7.3.7.7v2.4c0 .4-.3.7-.7.7zm2.4 0c-.4 0-.7-.3-.7-.7V7.6c0-.4.3-.7.7-.7s.7.3.7.7v.7h1.1c.4 0 .7.3.7.7s-.3.7-.7.7h-1.8zM11.9 8.3c0-.4.3-.7.7-.7s.7.3.7.7v2.4c0 .4-.3.7-.7.7s-.7-.3-.7-.7V8.3z"></path>
+                    </svg>
+                </a>
+                <!--SNS_LINE_END-->
+                
+                <!--SNS_FACEBOOK_START-->
+                <a href="{{FACEBOOK_URL}}" target="_blank" class="text-elegant-500 hover:text-white hover:scale-110 transition-all"><i data-lucide="facebook" class="w-5 h-5"></i></a>
+                <!--SNS_FACEBOOK_END-->
+            </div>
+            <!--SNS_END-->
+            
+            <div class="flex flex-col md:flex-row justify-between items-center text-center gap-4 text-xs font-serif tracking-widest text-elegant-500">
+                <p>&copy; 2026 {{SITE_NAME}} ALL RIGHTS RESERVED.</p>
+                <p class="uppercase">Powered by OnePage-Flash</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        lucide.createIcons();
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if(target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+
+        window.addEventListener('scroll', () => {
+            const header = document.querySelector('header');
+            if (window.scrollY > 50) {
+                header.classList.add('bg-elegant-50/95', 'shadow-sm');
+                header.classList.remove('bg-elegant-50/90');
+            } else {
+                header.classList.add('bg-elegant-50/90');
+                header.classList.remove('bg-elegant-50/95', 'shadow-sm');
+            }
+        });
+        
+        // Add scroll animation observer
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.animationPlayState = 'running';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

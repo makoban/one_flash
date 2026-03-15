@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{SITE_NAME}}</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Teko:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Noto Sans JP"', 'sans-serif'],
+                        display: ['"Teko"', 'sans-serif'],
+                    },
+                    colors: {
+                        metal: {
+                            50: '#f6f7f8',
+                            100: '#e5e7e9',
+                            200: '#d5d7da',
+                            300: '#b8bcc2',
+                            400: '#959aa3',
+                            500: '#757b85', // Metallic Gray
+                            600: '#5c626b',
+                            700: '#484d54',
+                            800: '#34383d',
+                            900: '#23262a', // Dark Steel
+                            950: '#141618', // Almost Black
+                            accent: '#f59e0b', // Amber/Orange warning color
+                            accentHover: '#d97706',
+                            text: '#e5e7e9',
+                            textDark: '#141618'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .diamond-plate {
+            background-color: #23262a;
+            background-image: linear-gradient(335deg, rgba(255,255,255,0.05) 23px, transparent 23px),
+                              linear-gradient(155deg, rgba(255,255,255,0.05) 23px, transparent 23px),
+                              linear-gradient(335deg, rgba(255,255,255,0.05) 23px, transparent 23px),
+                              linear-gradient(155deg, rgba(255,255,255,0.05) 23px, transparent 23px);
+            background-size: 58px 58px;
+            background-position: 0px 2px, 4px 35px, 29px 31px, 34px 6px;
+        }
+
+        .brushed-metal {
+            background: linear-gradient(90deg, 
+                #484d54 0%, 
+                #5c626b 20%, 
+                #757b85 40%, 
+                #5c626b 60%, 
+                #484d54 80%, 
+                #34383d 100%);
+        }
+
+        .fade-in { animation: fadeIn 0.8s ease-out forwards; opacity: 0; }
+        @keyframes fadeIn { to { opacity: 1; } }
+        
+        .slide-in-right { animation: slideInRight 0.8s cubic-bezier(0.25, 1, 0.5, 1) forwards; opacity: 0; transform: translateX(50px); }
+        @keyframes slideInRight { to { opacity: 1; transform: translateX(0); } }
+        
+        .slide-up { animation: slideUp 0.8s cubic-bezier(0.25, 1, 0.5, 1) forwards; opacity: 0; transform: translateY(40px); }
+        @keyframes slideUp { to { opacity: 1; transform: translateY(0); } }
+        
+        .delay-100 { animation-delay: 100ms; }
+        .delay-200 { animation-delay: 200ms; }
+        .delay-300 { animation-delay: 300ms; }
+        .scroll-mt-24 { scroll-margin-top: 6rem; }
+
+        .slant-edge {
+            clip-path: polygon(0 0, 100% 0, 100% 100%, 0 calc(100% - 4vw));
+        }
+
+        .slant-edge-top {
+            clip-path: polygon(0 4vw, 100% 0, 100% 100%, 0 100%);
+        }
+
+        .text-outline {
+            -webkit-text-stroke: 1px rgba(255,255,255,0.2);
+            color: transparent;
+        }
+    </style>
+</head>
+<body class="font-sans text-metal-text bg-metal-950 antialiased selection:bg-metal-accent selection:text-white">
+
+    <!-- Header -->
+    <header class="fixed w-full top-0 bg-metal-950/95 backdrop-blur-md z-50 border-b-2 border-metal-800 transition-all duration-300">
+        <!-- Orange accent line -->
+        <div class="h-1 w-full bg-metal-accent"></div>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 md:h-20 flex items-center justify-between">
+            <div class="text-3xl md:text-4xl font-display font-medium text-white tracking-widest uppercase flex items-center gap-3">
+                <i data-lucide="wrench" class="w-6 h-6 text-metal-accent" stroke-width="2.5"></i>
+                {{SITE_NAME}}
+            </div>
+            
+            <div class="hidden md:flex items-center gap-8">
+                <a href="tel:{{PHONE}}" class="text-metal-300 hover:text-metal-accent transition-colors font-display text-2xl tracking-wider flex items-center gap-2">
+                    <i data-lucide="smartphone" class="w-5 h-5 text-metal-accent"></i>
+                    {{PHONE}}
+                </a>
+                <a href="#contact" class="bg-metal-accent hover:bg-metal-accentHover text-metal-950 font-display font-semibold text-2xl px-8 py-1.5 uppercase tracking-wider transform -skew-x-12 transition-all">
+                    <span class="inline-block transform skew-x-12">RESERVE NOW</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="relative pt-20 pb-0 h-auto min-h-[90vh] flex items-center bg-metal-900 overflow-hidden slant-edge">
+        <!-- Background Image & Overlay -->
+        <div class="absolute inset-0 z-0 overflow-hidden">
+            <div class="w-full h-full transform scale-105" style="animation: slowZoom 20s ease-out forwards;">
+                <img src="{{HERO_IMAGE_URL}}" alt="{{SITE_NAME}}" class="w-full h-full object-cover opacity-50 contrast-125 grayscale-[40%]" />
+            </div>
+            <!-- Vignette & Gradient -->
+            <div class="absolute inset-0 bg-gradient-to-r from-metal-950 via-metal-950/80 to-transparent"></div>
+            <div class="absolute inset-0 bg-gradient-to-b from-metal-950/50 via-transparent to-metal-950"></div>
+            <!-- Texture overlay -->
+            <div class="absolute inset-0 diamond-plate opacity-10 mix-blend-overlay"></div>
+        </div>
+        
+        <style>
+            @keyframes slowZoom { from { transform: scale(1); } to { transform: scale(1.1); } }
+        </style>
+        
+        <!-- Background Text -->
+        <div class="absolute top-1/4 -right-10 text-[15rem] leading-none font-display font-bold text-outline uppercase select-none z-0 transform -rotate-90 origin-right opacity-30">
+            GARAGE
+        </div>
+        
+        <!-- Content -->
+        <div class="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 py-20 flex flex-col md:flex-row items-center">
+            <div class="w-full md:w-2/3 lg:w-3/5">
+                <div class="slide-in-right">
+                    <div class="inline-flex items-center gap-3 bg-red-600/20 border border-red-500/50 px-3 py-1 mb-6">
+                        <div class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></div>
+                        <span class="font-display font-medium text-red-500 text-xl tracking-widest uppercase">Professional Service</span>
+                    </div>
+                </div>
+                
+                <h1 class="slide-in-right delay-100 text-5xl md:text-7xl lg:text-8xl font-display font-semibold text-white leading-[0.9] mb-6 tracking-wide uppercase">
+                    {{CATCHPHRASE}}
+                </h1>
+                
+                <div class="slide-in-right delay-200 w-24 h-1.5 bg-metal-accent mb-8"></div>
+                
+                <p class="slide-in-right delay-300 text-base md:text-xl text-metal-300 font-sans leading-relaxed mb-10 max-w-lg border-l-2 border-metal-700 pl-4">
+                    {{DESCRIPTION_SHORT}}
+                </p>
+                
+                <div class="slide-up delay-400 flex flex-col sm:flex-row gap-4">
+                    <a href="#contact" class="bg-metal-accent hover:bg-metal-accentHover text-metal-950 font-display font-semibold text-3xl px-10 py-3 uppercase tracking-wider transform -skew-x-12 transition-all text-center inline-block group">
+                        <span class="inline-block transform skew-x-12 flex items-center justify-center gap-2">
+                            ご予約・お見積り <i data-lucide="chevrons-right" class="w-6 h-6 group-hover:translate-x-1 transition-transform"></i>
+                        </span>
+                    </a>
+                    <a href="#services" class="bg-transparent border-2 border-metal-500 hover:border-white text-white font-display font-medium text-3xl px-10 py-3 uppercase tracking-wider transform -skew-x-12 transition-all text-center inline-block">
+                        <span class="inline-block transform skew-x-12">サービス詳細</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Hazard stripes at the bottom -->
+        <div class="absolute bottom-0 left-0 w-full h-8 flex z-20 opacity-50">
+            <div class="w-full h-full" style="background: repeating-linear-gradient(45deg, #f59e0b, #f59e0b 20px, #141618 20px, #141618 40px);"></div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section class="py-24 bg-metal-900 border-b border-metal-800 relative z-10 diamond-plate" id="services">
+        <!-- Brushed metal overlay for readability -->
+        <div class="absolute inset-0 bg-metal-900/90 z-0"></div>
+        
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 relative z-10">
+            <div class="text-center mb-16 fade-up">
+                <span class="font-display text-metal-accent text-3xl tracking-widest uppercase mb-2 block">Our Services</span>
+                <h2 class="text-4xl md:text-5xl font-sans font-black text-white uppercase tracking-tight">サービス内容</h2>
+                <div class="w-16 h-1 bg-metal-600 mx-auto mt-6"></div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- サービス1 -->
+                <div class="fade-up relative bg-metal-950 border border-metal-800 p-8 group hover:border-metal-500 transition-colors">
+                    <div class="absolute top-0 right-0 w-16 h-16 overflow-hidden">
+                        <div class="w-24 h-8 bg-metal-800 transform rotate-45 translate-x-4 -translate-y-2 text-center text-[10px] font-display leading-[8px] pt-1 text-metal-500 group-hover:bg-metal-accent group-hover:text-metal-950 transition-colors">01</div>
+                    </div>
+                    <div class="flex items-start gap-6">
+                        <div class="w-14 h-14 bg-metal-800 flex items-center justify-center shrink-0 border border-metal-700 text-metal-400 group-hover:text-metal-accent transition-colors">
+                            <i data-lucide="settings" class="w-8 h-8"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl md:text-2xl font-bold text-white mb-3">{{SERVICE_1_TITLE}}</h3>
+                            <p class="text-metal-400 font-sans text-sm leading-relaxed">{{SERVICE_1_DESC}}</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- サービス2 -->
+                <div class="fade-up delay-100 relative bg-metal-950 border border-metal-800 p-8 group hover:border-metal-500 transition-colors">
+                    <div class="absolute top-0 right-0 w-16 h-16 overflow-hidden">
+                        <div class="w-24 h-8 bg-metal-800 transform rotate-45 translate-x-4 -translate-y-2 text-center text-[10px] font-display leading-[8px] pt-1 text-metal-500 group-hover:bg-metal-accent group-hover:text-metal-950 transition-colors">02</div>
+                    </div>
+                    <div class="flex items-start gap-6">
+                        <div class="w-14 h-14 bg-metal-800 flex items-center justify-center shrink-0 border border-metal-700 text-metal-400 group-hover:text-metal-accent transition-colors">
+                            <i data-lucide="pen-tool" class="w-8 h-8"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl md:text-2xl font-bold text-white mb-3">{{SERVICE_2_TITLE}}</h3>
+                            <p class="text-metal-400 font-sans text-sm leading-relaxed">{{SERVICE_2_DESC}}</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- サービス3 -->
+                <div class="fade-up relative bg-metal-950 border border-metal-800 p-8 group hover:border-metal-500 transition-colors">
+                    <div class="absolute top-0 right-0 w-16 h-16 overflow-hidden">
+                        <div class="w-24 h-8 bg-metal-800 transform rotate-45 translate-x-4 -translate-y-2 text-center text-[10px] font-display leading-[8px] pt-1 text-metal-500 group-hover:bg-metal-accent group-hover:text-metal-950 transition-colors">03</div>
+                    </div>
+                    <div class="flex items-start gap-6">
+                        <div class="w-14 h-14 bg-metal-800 flex items-center justify-center shrink-0 border border-metal-700 text-metal-400 group-hover:text-metal-accent transition-colors">
+                            <i data-lucide="car" class="w-8 h-8"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl md:text-2xl font-bold text-white mb-3">{{SERVICE_3_TITLE}}</h3>
+                            <p class="text-metal-400 font-sans text-sm leading-relaxed">{{SERVICE_3_DESC}}</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- サービス4 -->
+                <div class="fade-up delay-100 relative bg-metal-950 border border-metal-800 p-8 group hover:border-metal-500 transition-colors">
+                    <div class="absolute top-0 right-0 w-16 h-16 overflow-hidden">
+                        <div class="w-24 h-8 bg-metal-800 transform rotate-45 translate-x-4 -translate-y-2 text-center text-[10px] font-display leading-[8px] pt-1 text-metal-500 group-hover:bg-metal-accent group-hover:text-metal-950 transition-colors">04</div>
+                    </div>
+                    <div class="flex items-start gap-6">
+                        <div class="w-14 h-14 bg-metal-800 flex items-center justify-center shrink-0 border border-metal-700 text-metal-400 group-hover:text-metal-accent transition-colors">
+                            <i data-lucide="tool" class="w-8 h-8"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl md:text-2xl font-bold text-white mb-3">{{SERVICE_4_TITLE}}</h3>
+                            <p class="text-metal-400 font-sans text-sm leading-relaxed">{{SERVICE_4_DESC}}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="py-24 bg-metal-950 relative overflow-hidden text-center z-10" id="features">
+        <div class="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-metal-600 to-transparent"></div>
+        <div class="max-w-6xl mx-auto px-4 sm:px-6">
+            
+            <div class="mb-20 fade-up">
+                <span class="font-display text-metal-500 text-3xl tracking-widest uppercase mb-2 block">Why Choose Garage</span>
+                <h2 class="text-3xl md:text-4xl font-sans font-black text-white uppercase tracking-tight">当店の強み</h2>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-y-16 gap-x-8 relative">
+                <!-- Decorative connecting line for desktop -->
+                <div class="hidden md:block absolute top-[40px] left-0 w-full h-[2px] bg-metal-800 z-0"></div>
+                
+                <!-- 特徴1 -->
+                <div class="fade-up relative z-10 group">
+                    <div class="w-20 h-20 mx-auto bg-metal-950 border-[3px] border-metal-800 flex items-center justify-center mb-6 transform rotate-45 group-hover:border-metal-accent transition-colors">
+                        <i data-lucide="shield" class="w-8 h-8 text-white transform -rotate-45 group-hover:text-metal-accent transition-colors"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-4">{{FEATURE_1_TITLE}}</h3>
+                    <p class="text-metal-400 font-sans text-sm leading-relaxed">{{FEATURE_1_DESC}}</p>
+                </div>
+                
+                <!-- 特徴2 -->
+                <div class="fade-up delay-100 relative z-10 group">
+                    <div class="w-20 h-20 mx-auto bg-metal-950 border-[3px] border-metal-800 flex items-center justify-center mb-6 transform rotate-45 group-hover:border-metal-accent transition-colors">
+                        <i data-lucide="zap" class="w-8 h-8 text-white transform -rotate-45 group-hover:text-metal-accent transition-colors"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-4">{{FEATURE_2_TITLE}}</h3>
+                    <p class="text-metal-400 font-sans text-sm leading-relaxed">{{FEATURE_2_DESC}}</p>
+                </div>
+                
+                <!-- 特徴3 -->
+                <div class="fade-up delay-200 relative z-10 group">
+                    <div class="w-20 h-20 mx-auto bg-metal-950 border-[3px] border-metal-800 flex items-center justify-center mb-6 transform rotate-45 group-hover:border-metal-accent transition-colors">
+                        <i data-lucide="award" class="w-8 h-8 text-white transform -rotate-45 group-hover:text-metal-accent transition-colors"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-4">{{FEATURE_3_TITLE}}</h3>
+                    <p class="text-metal-400 font-sans text-sm leading-relaxed">{{FEATURE_3_DESC}}</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!--FORM_START-->
+    <section class="py-24 bg-metal-900 border-t border-metal-800 relative z-10 slant-edge-top scroll-mt-20 pt-32" id="contact">
+        <!-- Grunge texture overlay -->
+        <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPgo8cmVjdCB3aWR0aD0iNCIgaGVpZ2h0PSI0IiBmaWxsPSIjMjMyNjJhIj48L3JlY3Q+CjxyZWN0IHdpZHRoPSIxIiBoZWlnaHQ9IjEiIGZpbGw9IiMzNDM4M2QiPjwvcmVjdD4KPC9zdmc+')] opacity-50 z-0"></div>
+        
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 relative z-10">
+            <div class="text-center mb-12 fade-up">
+                <span class="font-display text-metal-accent text-3xl tracking-widest uppercase mb-1 block">Contact</span>
+                <h2 class="text-3xl md:text-4xl font-sans font-black text-white uppercase tracking-tight">ご予約・お問い合わせ</h2>
+            </div>
+            
+            <div class="brushed-metal p-1 border-y-2 border-metal-600 shadow-2xl fade-up delay-100">
+                <div class="bg-metal-950 p-8 md:p-12">
+                    <form action="{{FORM_ACTION_URL}}" method="POST" class="space-y-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label for="name" class="block text-sm font-bold text-metal-400 uppercase tracking-widest mb-2 flex items-center gap-2">
+                                    <i data-lucide="user" class="w-4 h-4 text-metal-600"></i> Name <span class="text-metal-accent">*</span>
+                                </label>
+                                <input type="text" id="name" name="name" required class="w-full bg-metal-900 border border-metal-700 px-4 py-3 text-white focus:border-metal-accent focus:ring-1 focus:ring-metal-accent outline-none transition-colors rounded-none">
+                            </div>
+                            <div>
+                                <label for="email" class="block text-sm font-bold text-metal-400 uppercase tracking-widest mb-2 flex items-center gap-2">
+                                    <i data-lucide="mail" class="w-4 h-4 text-metal-600"></i> Email <span class="text-metal-accent">*</span>
+                                </label>
+                                <input type="email" id="email" name="email" required class="w-full bg-metal-900 border border-metal-700 px-4 py-3 text-white focus:border-metal-accent focus:ring-1 focus:ring-metal-accent outline-none transition-colors rounded-none">
+                            </div>
+                        </div>
+                        <div>
+                            <label for="message" class="block text-sm font-bold text-metal-400 uppercase tracking-widest mb-2 flex items-center gap-2">
+                                <i data-lucide="message-square" class="w-4 h-4 text-metal-600"></i> Inquiry Details <span class="text-metal-accent">*</span>
+                            </label>
+                            <textarea id="message" name="message" rows="5" required class="w-full bg-metal-900 border border-metal-700 px-4 py-3 text-white focus:border-metal-accent focus:ring-1 focus:ring-metal-accent outline-none transition-colors rounded-none resize-none"></textarea>
+                        </div>
+                        <div class="pt-6">
+                            <button type="submit" class="bg-metal-accent hover:bg-metal-accentHover text-metal-950 font-display font-semibold text-3xl px-12 py-3 uppercase tracking-wider transform -skew-x-12 transition-all w-full md:w-auto mx-auto block">
+                                <span class="inline-block transform skew-x-12 flex items-center justify-center gap-2">
+                                    SEND MESSAGE <i data-lucide="arrow-right" class="w-5 h-5"></i>
+                                </span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!--FORM_END-->
+
+    <!-- Access Section -->
+    <section class="border-t-[8px] border-metal-800 bg-metal-950 diamond-plate relative z-10">
+        <div class="absolute inset-0 bg-metal-950/80 z-0"></div>
+        <div class="flex flex-col lg:flex-row relative z-10 max-w-7xl mx-auto">
+            <div class="w-full lg:w-1/2 p-10 md:p-16 flex flex-col justify-center fade-in order-2 lg:order-1 border-r border-metal-800 bg-metal-950/90 backdrop-blur-sm">
+                
+                <h2 class="font-display font-medium text-4xl text-white tracking-widest uppercase mb-10 flex items-center gap-3">
+                    <div class="w-2 h-8 bg-metal-accent"></div> LOCATION
+                </h2>
+                
+                <ul class="space-y-6 text-metal-300 font-sans">
+                    <li class="pb-4 border-b border-metal-800">
+                        <span class="block text-metal-500 font-display text-xl uppercase tracking-widest mb-1">Address</span>
+                        <span class="text-base text-white font-medium">{{ADDRESS}}</span>
+                    </li>
+                    <li class="pb-4 border-b border-metal-800">
+                        <span class="block text-metal-500 font-display text-xl uppercase tracking-widest mb-1">Business Hours</span>
+                        <span class="whitespace-pre-line text-base text-white font-medium">{{HOURS}}</span>
+                    </li>
+                    <li class="pb-4 border-b border-metal-800">
+                        <span class="block text-metal-500 font-display text-xl uppercase tracking-widest mb-1">Closed</span>
+                        <span class="text-base text-white font-medium">{{HOLIDAY}}</span>
+                    </li>
+                    <li class="pt-4 flex items-end gap-6 justify-between flex-wrap">
+                        <div>
+                            <span class="block text-metal-500 font-display text-xl uppercase tracking-widest mb-1">Contact</span>
+                            <span class="font-display text-4xl font-bold text-metal-accent block leading-none">{{PHONE}}</span>
+                        </div>
+                        <span class="text-sm font-sans text-metal-400">{{EMAIL}}</span>
+                    </li>
+                </ul>
+            </div>
+            
+            <!--MAP_START-->
+            <div class="w-full lg:w-1/2 h-[400px] lg:h-auto relative fade-in delay-100 order-1 lg:order-2 border-b lg:border-b-0 border-metal-800">
+                <iframe src="{{MAP_EMBED_URL}}" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" class="absolute inset-0 grayscale contrast-125 hover:grayscale-0 transition-all duration-1000"></iframe>
+            </div>
+            <!--MAP_END-->
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-black py-16 text-center border-t border-metal-800 relative z-10">
+        
+        <div class="max-w-7xl mx-auto px-4 sm:px-6">
+            <h2 class="text-3xl font-display font-medium text-white tracking-widest uppercase mb-10 flex flex-col items-center gap-2">
+                <i data-lucide="wrench" class="w-8 h-8 text-metal-600 mb-2"></i>
+                {{SITE_NAME}}
+            </h2>
+            
+            <!--SNS_START-->
+            <div class="flex justify-center gap-6 mb-12">
+                <!--SNS_INSTAGRAM_START-->
+                <a href="{{INSTAGRAM_URL}}" target="_blank" class="w-12 h-12 border-2 border-metal-800 bg-metal-950 flex items-center justify-center text-metal-400 hover:text-white hover:border-metal-400 transform hover:scale-110 transition-all font-display text-2xl"><i data-lucide="instagram" class="w-5 h-5"></i></a>
+                <!--SNS_INSTAGRAM_END-->
+                
+                <!--SNS_YOUTUBE_START-->
+                <a href="{{YOUTUBE_URL}}" target="_blank" class="w-12 h-12 border-2 border-metal-800 bg-metal-950 flex items-center justify-center text-metal-400 hover:text-white hover:border-red-600 hover:bg-red-600 transform hover:scale-110 transition-all font-display text-2xl"><i data-lucide="youtube" class="w-5 h-5"></i></a>
+                <!--SNS_YOUTUBE_END-->
+                
+                <!--SNS_X_START-->
+                <a href="{{X_URL}}" target="_blank" class="w-12 h-12 border-2 border-metal-800 bg-metal-950 flex items-center justify-center text-metal-400 hover:text-metal-950 hover:border-white hover:bg-white transform hover:scale-110 transition-all font-display text-2xl">
+                    <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.008 5.961H5.078z"></path></svg>
+                </a>
+                <!--SNS_X_END-->
+                
+                <!--SNS_LINE_START-->
+                <a href="{{LINE_URL}}" target="_blank" class="w-12 h-12 border-2 border-metal-800 bg-metal-950 flex items-center justify-center text-metal-400 hover:text-white hover:border-[#06C755] hover:bg-[#06C755] transform hover:scale-110 transition-all font-display text-2xl">
+                    <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                      <path d="M21.4 10.3c0-4.3-4.3-7.8-9.6-7.8s-9.6 3.5-9.6 7.8c0 3.8 3.3 7 7.7 7.7.3.1.8.2.9.4.1.2.1.5.1.7v1.8c0 .2.1.3.3.4s.3.1.5.0c2.4-1.6 4.9-3.4 6.7-5.5 1.5-1.7 2.6-3.5 2.6-5.5zm-14.3.4c-.4 0-.7-.3-.7-.7V7.6c0-.4.3-.7.7-.7s.7.3.7.7v1.7h1.1c.4 0 .7.3.7.7s-.3.7-.7.7H7.1zm5.2 0c-.4 0-.7-.3-.7-.7V7.6c0-.4.3-.7.7-.7s.7.3.7.7v2.4c0 .4-.3.7-.7.7zm2.4 0c-.4 0-.7-.3-.7-.7V7.6c0-.4.3-.7.7-.7s.7.3.7.7v.7h1.1c.4 0 .7.3.7.7s-.3.7-.7.7h-1.8zM11.9 8.3c0-.4.3-.7.7-.7s.7.3.7.7v2.4c0 .4-.3.7-.7.7s-.7-.3-.7-.7V8.3z"></path>
+                    </svg>
+                </a>
+                <!--SNS_LINE_END-->
+                
+                <!--SNS_FACEBOOK_START-->
+                <a href="{{FACEBOOK_URL}}" target="_blank" class="w-12 h-12 border-2 border-metal-800 bg-metal-950 flex items-center justify-center text-metal-400 hover:text-white hover:border-[#1877F2] hover:bg-[#1877F2] transform hover:scale-110 transition-all font-display text-2xl"><i data-lucide="facebook" class="w-5 h-5"></i></a>
+                <!--SNS_FACEBOOK_END-->
+            </div>
+            <!--SNS_END-->
+            
+            <p class="text-sm font-display tracking-widest text-metal-600 uppercase">© 2026 {{SITE_NAME}}</p>
+            <p class="text-[10px] mt-2 text-metal-800 font-bold tracking-widest font-sans">POWERED BY ONEPAGE-FLASH</p>
+        </div>
+    </footer>
+
+    <script>
+        lucide.createIcons();
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if(target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+
+        window.addEventListener('scroll', () => {
+            const header = document.querySelector('header');
+            if (window.scrollY > 50) {
+                header.classList.add('bg-metal-950/95', 'shadow-lg');
+                header.classList.remove('bg-metal-950/80');
+            } else {
+                header.classList.add('bg-metal-950/80');
+                header.classList.remove('bg-metal-950/95', 'shadow-lg');
+            }
+        });
+        
+        // Add scroll animation observer
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.animationPlayState = 'running';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

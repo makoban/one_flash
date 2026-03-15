@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{SITE_NAME}}</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;500;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"M PLUS Rounded 1c"', 'sans-serif'],
+                        display: ['"Nunito"', 'sans-serif'],
+                    },
+                    colors: {
+                        pastel: {
+                            bg: '#fdfbfa',       // Warm off-white
+                            yellow: '#fde68a',   // Cheerful yellow
+                            yellowHover: '#fde047',
+                            pink: '#fbcfe8',     // Soft pink
+                            pinkHover: '#f9a8d4',
+                            blue: '#bfdbfe',     // Sky blue
+                            blueHover: '#93c5fd',
+                            green: '#bbf7d0',    // Mint green
+                            greenHover: '#86efac',
+                            purple: '#e9d5ff',   // Lavender
+                            text: '#475569',     // Slate text
+                            textDark: '#334155', // Darker slate
+                            textLight: '#94a3b8',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .fade-in { animation: fadeIn 1s ease-out forwards; opacity: 0; }
+        @keyframes fadeIn { to { opacity: 1; } }
+        
+        .bounce-in { animation: bounceIn 1s cubic-bezier(0.68, -0.55, 0.26, 1.55) forwards; opacity: 0; transform: scale(0.8); }
+        @keyframes bounceIn { to { opacity: 1; transform: scale(1); } }
+        
+        .slide-up { animation: slideUp 0.8s ease-out forwards; opacity: 0; transform: translateY(30px); }
+        @keyframes slideUp { to { opacity: 1; transform: translateY(0); } }
+        
+        .float { animation: float 6s ease-in-out infinite; }
+        @keyframes float { 
+            0% { transform: translateY(0px) rotate(0deg); } 
+            50% { transform: translateY(-15px) rotate(3deg); } 
+            100% { transform: translateY(0px) rotate(0deg); } 
+        }
+
+        .float-delayed { animation: float 7s ease-in-out infinite 1s; }
+        .float-fast { animation: float 4s ease-in-out infinite 0.5s; }
+        
+        .delay-100 { animation-delay: 100ms; }
+        .delay-200 { animation-delay: 200ms; }
+        .delay-300 { animation-delay: 300ms; }
+        .scroll-mt-24 { scroll-margin-top: 6rem; }
+
+        .cloud-divider {
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 1200 120' preserveAspectRatio='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0,120 C150,120 200,80 300,80 C400,80 450,120 600,120 C750,120 800,80 900,80 C1000,80 1050,120 1200,120 L1200,0 L0,0 Z' fill='%23fdfbfa'/%3E%3C/svg%3E");
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center bottom;
+            height: 100px;
+            width: 100%;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            z-index: 10;
+        }
+        
+        .cloud-divider-top {
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 1200 120' preserveAspectRatio='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0,0 C150,0 200,40 300,40 C400,40 450,0 600,0 C750,0 800,40 900,40 C1000,40 1050,0 1200,0 L1200,120 L0,120 Z' fill='%23fdfbfa'/%3E%3C/svg%3E");
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center top;
+            height: 100px;
+            width: 100%;
+            position: absolute;
+            top: -1px;
+            left: 0;
+            z-index: 10;
+        }
+
+        .dot-pattern {
+            background-image: radial-gradient(#e2e8f0 2px, transparent 2px);
+            background-size: 20px 20px;
+        }
+
+        .blob-shape {
+            border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+        }
+    </style>
+</head>
+<body class="font-sans text-pastel-text bg-pastel-bg antialiased selection:bg-pastel-yellow selection:text-pastel-textDark overflow-x-hidden">
+
+    <!-- Header -->
+    <header class="fixed w-full top-0 bg-white/90 backdrop-blur-md z-50 shadow-[0_4px_20px_-10px_rgba(0,0,0,0.05)] transition-all duration-300 border-b-[3px] border-pastel-yellow">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 h-20 md:h-24 flex items-center justify-between">
+            <div class="text-xl md:text-2xl font-bold text-pastel-textDark tracking-wide flex items-center gap-3">
+                <div class="w-10 h-10 bg-pastel-pink rounded-2xl flex items-center justify-center -rotate-3 hover:rotate-6 transition-transform blob-shape">
+                    <i data-lucide="smile" class="w-6 h-6 text-white" stroke-width="3"></i>
+                </div>
+                {{SITE_NAME}}
+            </div>
+            
+            <div class="hidden md:flex items-center gap-6">
+                <a href="tel:{{PHONE}}" class="text-pastel-text hover:text-pastel-textDark transition-colors font-display font-bold tracking-wider flex items-center gap-2 text-lg">
+                    <div class="w-8 h-8 rounded-full bg-pastel-blue/30 flex items-center justify-center">
+                        <i data-lucide="phone" class="w-4 h-4 text-blue-500"></i>
+                    </div>
+                    {{PHONE}}
+                </a>
+                <a href="#contact" class="px-8 py-3.5 font-bold tracking-wider text-pastel-textDark bg-pastel-yellow hover:bg-pastel-yellowHover transition-all rounded-full shadow-[0_4px_15px_-3px_rgba(253,230,138,0.7)] hover:shadow-[0_6px_20px_-3px_rgba(253,224,71,0.8)] hover:-translate-y-1 transform border-2 border-transparent hover:border-white">
+                    お問い合わせ
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="relative pt-24 min-h-[90vh] flex items-center dot-pattern bg-white/50 overflow-hidden">
+        <!-- Floating Elements -->
+        <div class="absolute top-1/4 left-10 w-32 h-32 bg-pastel-blue/40 rounded-full blur-2xl z-0"></div>
+        <div class="absolute bottom-1/4 right-10 w-48 h-48 bg-pastel-pink/40 rounded-full blur-2xl z-0"></div>
+        
+        <!-- Shapes -->
+        <div class="absolute top-32 right-1/4 text-pastel-yellow float z-10 opacity-60">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        </div>
+        <div class="absolute bottom-40 left-1/4 w-12 h-12 rounded-full border-4 border-pastel-green float-delayed z-10 opacity-50"></div>
+        <div class="absolute top-1/2 right-10 w-10 h-10 bg-pastel-blue/50 rounded-lg transform rotate-45 float-fast z-10 opacity-60"></div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 w-full relative z-20 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center pb-20 pt-10">
+            
+            <!-- Content -->
+            <div class="lg:col-span-6 slide-up order-2 lg:order-1 relative text-center lg:text-left">
+                <div class="inline-flex items-center gap-2 px-4 py-2 bg-white border-2 border-pastel-pink rounded-full mb-8 shadow-sm transform -rotate-2 hover:rotate-0 transition-transform cursor-default">
+                    <span class="text-xl">✨</span>
+                    <span class="text-sm font-bold text-pastel-textDark tracking-wider">Enjoy Everyday!</span>
+                </div>
+                
+                <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-pastel-textDark leading-[1.3] mb-8 tracking-tight drop-shadow-sm font-sans">
+                    <span class="relative inline-block">
+                        {{CATCHPHRASE}}
+                        <svg class="absolute w-full h-4 -bottom-1 left-0 text-pastel-yellow -z-10" viewBox="0 0 100 20" preserveAspectRatio="none">
+                            <path d="M0 10 Q 50 20 100 10" fill="transparent" stroke="currentColor" stroke-width="8" stroke-linecap="round"/>
+                        </svg>
+                    </span>
+                </h1>
+                
+                <p class="text-base md:text-lg text-pastel-text mb-10 font-medium leading-loose max-w-lg mx-auto lg:mx-0 bg-white/60 p-4 rounded-2xl backdrop-blur-sm border border-white">
+                    {{DESCRIPTION_SHORT}}
+                </p>
+                
+                <div class="flex flex-col sm:flex-row gap-4 items-center justify-center lg:justify-start">
+                    <a href="#contact" class="px-8 py-4 font-bold tracking-widest text- pastel-textDark bg-pastel-yellow hover:bg-pastel-yellowHover transition-all rounded-full shadow-[0_4px_15px_-3px_rgba(253,230,138,0.7)] hover:shadow-[0_8px_25px_-5px_rgba(253,224,71,0.8)] hover:-translate-y-1 transform border-2 border-white text-base w-full sm:w-auto flex justify-center items-center gap-2 group text-gray-800">
+                        無料見学・ご相談 <i data-lucide="arrow-right" class="w-5 h-5 group-hover:translate-x-1 transition-transform"></i>
+                    </a>
+                    <a href="#features" class="px-8 py-4 font-bold tracking-widest text-pastel-textDark bg-white hover:bg-gray-50 transition-all rounded-full shadow-sm border-2 border-pastel-blue text-base w-full sm:w-auto text-center hover:-translate-y-1 transform">
+                        私たちの特徴
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Image Area -->
+            <div class="lg:col-span-6 bounce-in order-1 lg:order-2 relative text-center">
+                <!-- Decorative blobs behind image -->
+                <div class="absolute inset-0 bg-pastel-yellow/60 blob-shape transform rotate-45 scale-105 z-0 blur-sm"></div>
+                <div class="absolute inset-0 bg-pastel-blue blob-shape transform -rotate-12 scale-100 z-0"></div>
+                
+                <div class="relative z-10 blob-shape overflow-hidden border-8 border-white shadow-xl mx-auto max-w-[500px] aspect-square">
+                    <img src="{{HERO_IMAGE_URL}}" alt="{{SITE_NAME}}" class="w-full h-full object-cover transform hover:scale-105 transition-transform duration-700" />
+                </div>
+                
+                <!-- Floating badge 1 -->
+                <div class="absolute -right-4 md:-right-8 top-10 bg-white px-5 py-3 rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.08)] border-2 border-pastel-pink z-20 float rotate-6 hidden sm:block">
+                    <div class="flex items-center gap-2">
+                        <span class="text-2xl">🧸</span>
+                        <div class="font-bold text-pastel-textDark text-sm">安心・安全</div>
+                    </div>
+                </div>
+                
+                <!-- Floating badge 2 -->
+                <div class="absolute -left-4 md:-left-8 bottom-10 bg-white px-5 py-3 rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.08)] border-2 border-pastel-green z-20 float-delayed -rotate-6 hidden sm:block">
+                    <div class="flex items-center gap-2">
+                        <span class="text-2xl">🎨</span>
+                        <div class="font-bold text-pastel-textDark text-sm">楽しい学び</div>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+        
+        <!-- Cloud Divider -->
+        <div class="cloud-divider"></div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="py-24 bg-pastel-bg relative z-20" id="features">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6">
+            <div class="text-center mb-16 slide-up">
+                <div class="inline-flex justify-center items-center gap-2 mb-4">
+                    <i data-lucide="star" class="w-6 h-6 text-pastel-yellow fill-pastel-yellow"></i>
+                    <i data-lucide="star" class="w-8 h-8 text-pastel-yellowHover fill-pastel-yellowHover -mt-4"></i>
+                    <i data-lucide="star" class="w-6 h-6 text-pastel-yellow fill-pastel-yellow"></i>
+                </div>
+                <h2 class="text-3xl md:text-4xl font-bold text-pastel-textDark tracking-tight mb-4">私たちが大切にしていること</h2>
+                <p class="text-pastel-text font-medium">笑顔あふれる毎日を作るための3つの約束</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 px-4">
+                <!-- 特徴1 -->
+                <div class="slide-up relative mt-12 md:mt-0">
+                    <div class="bg-white rounded-[2rem] p-8 shadow-[0_8px_30px_rgba(0,0,0,0.04)] hover:shadow-[0_15px_40px_rgba(0,0,0,0.08)] transition-all duration-300 border-2 border-pastel-blue/20 hover:border-pastel-blue hover:-translate-y-2 h-full z-10 relative">
+                        <!-- Icon Circle -->
+                        <div class="absolute -top-10 left-1/2 -translate-x-1/2 w-20 h-20 rounded-full bg-pastel-blue border-4 border-white shadow-md flex items-center justify-center">
+                            <i data-lucide="heart" class="w-10 h-10 text-white fill-white/20"></i>
+                        </div>
+                        
+                        <div class="pt-10 text-center">
+                            <h3 class="text-xl font-bold text-pastel-textDark mb-4">{{FEATURE_1_TITLE}}</h3>
+                            <p class="text-pastel-text font-medium leading-relaxed">{{FEATURE_1_DESC}}</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 特徴2 -->
+                <div class="slide-up delay-100 relative mt-12 md:mt-0">
+                    <div class="bg-white rounded-[2rem] p-8 shadow-[0_8px_30px_rgba(0,0,0,0.04)] hover:shadow-[0_15px_40px_rgba(0,0,0,0.08)] transition-all duration-300 border-2 border-pastel-pink/20 hover:border-pastel-pink hover:-translate-y-2 h-full z-10 relative">
+                        <!-- Icon Circle -->
+                        <div class="absolute -top-10 left-1/2 -translate-x-1/2 w-20 h-20 rounded-full bg-pastel-pink border-4 border-white shadow-md flex items-center justify-center">
+                            <i data-lucide="sun" class="w-10 h-10 text-white fill-white/20"></i>
+                        </div>
+                        
+                        <div class="pt-10 text-center">
+                            <h3 class="text-xl font-bold text-pastel-textDark mb-4">{{FEATURE_2_TITLE}}</h3>
+                            <p class="text-pastel-text font-medium leading-relaxed">{{FEATURE_2_DESC}}</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 特徴3 -->
+                <div class="slide-up delay-200 relative mt-12 md:mt-0">
+                    <div class="bg-white rounded-[2rem] p-8 shadow-[0_8px_30px_rgba(0,0,0,0.04)] hover:shadow-[0_15px_40px_rgba(0,0,0,0.08)] transition-all duration-300 border-2 border-pastel-green/20 hover:border-pastel-green hover:-translate-y-2 h-full z-10 relative">
+                        <!-- Icon Circle -->
+                        <div class="absolute -top-10 left-1/2 -translate-x-1/2 w-20 h-20 rounded-full bg-pastel-green border-4 border-white shadow-md flex items-center justify-center">
+                            <i data-lucide="shield" class="w-10 h-10 text-white fill-white/20"></i>
+                        </div>
+                        
+                        <div class="pt-10 text-center">
+                            <h3 class="text-xl font-bold text-pastel-textDark mb-4">{{FEATURE_3_TITLE}}</h3>
+                            <p class="text-pastel-text font-medium leading-relaxed">{{FEATURE_3_DESC}}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section class="py-24 relative bg-pastel-yellow/20" id="services">
+        <div class="cloud-divider-top transform rotate-180"></div>
+        <div class="cloud-divider"></div>
+        
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 relative z-20 py-10">
+            <div class="text-center mb-16 slide-up">
+                <span class="inline-block px-4 py-1 rounded-full bg-white font-bold text-pastel-textDark border-2 border-pastel-yellow mb-4 shadow-sm transform -rotate-2">
+                    Our Services
+                </span>
+                <h2 class="text-3xl md:text-4xl font-bold text-pastel-textDark tracking-tight">提供しているサービス</h2>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
+                <!-- サービス1 -->
+                <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-sm hover:shadow-md transition-shadow border-[3px] border-transparent hover:border-pastel-blue bounce-in group flex flex-col sm:flex-row gap-6 items-center sm:items-start text-center sm:text-left">
+                    <div class="w-16 h-16 rounded-2xl bg-pastel-blue/20 text-pastel-blue flex items-center justify-center shrink-0 shrink-0 transform group-hover:rotate-12 transition-transform blob-shape">
+                        <span class="font-display font-black text-2xl">1</span>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold mb-3 text-pastel-textDark">{{SERVICE_1_TITLE}}</h3>
+                        <p class="text-pastel-text font-medium leading-relaxed">{{SERVICE_1_DESC}}</p>
+                    </div>
+                </div>
+                
+                <!-- サービス2 -->
+                <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-sm hover:shadow-md transition-shadow border-[3px] border-transparent hover:border-pastel-pink bounce-in delay-100 group flex flex-col sm:flex-row gap-6 items-center sm:items-start text-center sm:text-left">
+                    <div class="w-16 h-16 rounded-2xl bg-pastel-pink/20 text-pastel-pink flex items-center justify-center shrink-0 shrink-0 transform group-hover:-rotate-12 transition-transform blob-shape">
+                        <span class="font-display font-black text-2xl">2</span>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold mb-3 text-pastel-textDark">{{SERVICE_2_TITLE}}</h3>
+                        <p class="text-pastel-text font-medium leading-relaxed">{{SERVICE_2_DESC}}</p>
+                    </div>
+                </div>
+                
+                <!-- サービス3 -->
+                <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-sm hover:shadow-md transition-shadow border-[3px] border-transparent hover:border-pastel-green bounce-in group flex flex-col sm:flex-row gap-6 items-center sm:items-start text-center sm:text-left">
+                    <div class="w-16 h-16 rounded-2xl bg-pastel-green/20 text-pastel-green flex items-center justify-center shrink-0 shrink-0 transform group-hover:rotate-12 transition-transform blob-shape">
+                        <span class="font-display font-black text-2xl">3</span>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold mb-3 text-pastel-textDark">{{SERVICE_3_TITLE}}</h3>
+                        <p class="text-pastel-text font-medium leading-relaxed">{{SERVICE_3_DESC}}</p>
+                    </div>
+                </div>
+                
+                <!-- サービス4 -->
+                <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-sm hover:shadow-md transition-shadow border-[3px] border-transparent hover:border-pastel-purple bounce-in delay-100 group flex flex-col sm:flex-row gap-6 items-center sm:items-start text-center sm:text-left">
+                    <div class="w-16 h-16 rounded-2xl bg-pastel-purple/20 text-pastel-purple flex items-center justify-center shrink-0 shrink-0 transform group-hover:-rotate-12 transition-transform blob-shape">
+                        <span class="font-display font-black text-2xl">4</span>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold mb-3 text-pastel-textDark">{{SERVICE_4_TITLE}}</h3>
+                        <p class="text-pastel-text font-medium leading-relaxed">{{SERVICE_4_DESC}}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!--FORM_START-->
+    <section class="py-24 bg-pastel-bg relative scroll-mt-20" id="contact">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 relative z-10">
+            <div class="bg-white rounded-[2rem] shadow-[0_10px_40px_-15px_rgba(0,0,0,0.05)] border-[3px] border-pastel-yellow overflow-hidden slide-up relative">
+                <!-- Decorative Elements -->
+                <div class="absolute top-4 left-4 w-4 h-4 rounded-full bg-pastel-pink"></div>
+                <div class="absolute top-4 right-4 w-4 h-4 rounded-full bg-pastel-blue"></div>
+                <div class="absolute bottom-4 left-4 w-4 h-4 rounded-full bg-pastel-green"></div>
+                <div class="absolute bottom-4 right-4 w-4 h-4 rounded-full bg-pastel-purple"></div>
+                
+                <div class="text-center pt-12 pb-6 px-4">
+                    <div class="w-16 h-16 bg-pastel-yellow/20 rounded-full flex items-center justify-center mx-auto mb-4 text-pastel-yellowHover">
+                        <i data-lucide="mail-heart" class="w-8 h-8"></i>
+                    </div>
+                    <h2 class="text-3xl font-bold tracking-tight font-sans text-pastel-textDark mb-2">お問い合わせ・見学予約</h2>
+                    <p class="text-pastel-text font-medium">お気軽にご連絡ください</p>
+                </div>
+                
+                <div class="p-8 md:p-12 pt-4">
+                    <form action="{{FORM_ACTION_URL}}" method="POST" class="space-y-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label for="name" class="block text-sm font-bold text-pastel-textDark mb-2 ml-2">お名前 <span class="text-red-400 text-xs bg-red-50 px-2 py-0.5 rounded-full ml-1">必須</span></label>
+                                <input type="text" id="name" name="name" required class="w-full bg-pastel-bg border-2 border-gray-100 rounded-2xl px-5 py-4 text-pastel-textDark focus:border-pastel-yellow focus:ring-0 outline-none transition-colors font-medium hover:border-gray-200">
+                            </div>
+                            <div>
+                                <label for="email" class="block text-sm font-bold text-pastel-textDark mb-2 ml-2">メールアドレス <span class="text-red-400 text-xs bg-red-50 px-2 py-0.5 rounded-full ml-1">必須</span></label>
+                                <input type="email" id="email" name="email" required class="w-full bg-pastel-bg border-2 border-gray-100 rounded-2xl px-5 py-4 text-pastel-textDark focus:border-pastel-yellow focus:ring-0 outline-none transition-colors font-medium hover:border-gray-200">
+                            </div>
+                        </div>
+                        <div>
+                            <label for="message" class="block text-sm font-bold text-pastel-textDark mb-2 ml-2">お問い合わせ内容 <span class="text-red-400 text-xs bg-red-50 px-2 py-0.5 rounded-full ml-1">必須</span></label>
+                            <textarea id="message" name="message" rows="5" required class="w-full bg-pastel-bg border-2 border-gray-100 rounded-2xl px-5 py-4 text-pastel-textDark focus:border-pastel-yellow focus:ring-0 outline-none transition-colors font-medium resize-none hover:border-gray-200"></textarea>
+                        </div>
+                        <div class="text-center pt-6">
+                            <button type="submit" class="font-bold tracking-widest text-pastel-textDark bg-pastel-yellow hover:bg-pastel-yellowHover transition-colors px-16 py-5 rounded-full shadow-[0_4px_15px_-3px_rgba(253,230,138,0.7)] hover:shadow-[0_8px_20px_-3px_rgba(253,224,71,0.8)] hover:-translate-y-1 transform border-2 border-white w-full md:w-auto flex justify-center items-center gap-2 mx-auto text-lg">
+                                送信する <i data-lucide="send" class="w-5 h-5 -mt-1 transform rotate-12"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!--FORM_END-->
+
+    <!-- Access Section -->
+    <section class="bg-pastel-blue/10 border-t-4 border-white dot-pattern">
+        <div class="flex flex-col lg:flex-row max-w-7xl mx-auto">
+            <div class="w-full lg:w-1/2 p-10 md:p-16 flex flex-col justify-center slide-up order-2 lg:order-1 bg-white/60 backdrop-blur-sm shadow-xl rounded-xl lg:rounded-none lg:rounded-r-3xl my-8 lg:my-0 border-y-4 border-r-4 border-white">
+                <span class="inline-block px-4 py-1 rounded-full bg-pastel-blue text-white font-bold text-xs uppercase mb-4 shadow-sm w-max transform rotate-2">Location</span>
+                <h2 class="text-3xl font-sans font-bold text-pastel-textDark tracking-tight mb-10">施設案内</h2>
+                
+                <ul class="space-y-6 text-pastel-textDark font-medium">
+                    <li class="flex items-start gap-4 bg-white p-4 rounded-2xl shadow-sm border border-pastel-blue/20">
+                        <div class="w-10 h-10 rounded-full bg-pastel-blue/20 flex items-center justify-center shrink-0 text-pastel-blue">
+                            <i data-lucide="map-pin" class="w-5 h-5"></i>
+                        </div>
+                        <div class="pt-0.5">
+                            <span class="block text-[10px] font-bold text-pastel-blue uppercase mb-1">Address</span>
+                            <span class="leading-relaxed block">{{ADDRESS}}</span>
+                        </div>
+                    </li>
+                    <li class="flex items-start gap-4 bg-white p-4 rounded-2xl shadow-sm border border-pastel-pink/20">
+                        <div class="w-10 h-10 rounded-full bg-pastel-pink/20 flex items-center justify-center shrink-0 text-pastel-pink">
+                            <i data-lucide="clock" class="w-5 h-5"></i>
+                        </div>
+                        <div class="pt-0.5">
+                            <span class="block text-[10px] font-bold text-pastel-pink uppercase mb-1">Hours</span>
+                            <span class="whitespace-pre-line leading-relaxed block">{{HOURS}}</span>
+                        </div>
+                    </li>
+                    <li class="flex items-start gap-4 bg-white p-4 rounded-2xl shadow-sm border border-pastel-green/20">
+                        <div class="w-10 h-10 rounded-full bg-pastel-green/20 flex items-center justify-center shrink-0 text-pastel-green mt-1">
+                            <i data-lucide="phone" class="w-4 h-4"></i>
+                        </div>
+                        <div>
+                            <span class="block font-display font-black text-2xl text-pastel-textDark mb-0.5">{{PHONE}}</span>
+                            <span class="text-xs font-sans text-pastel-text">{{EMAIL}}</span>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            
+            <!--MAP_START-->
+            <div class="w-full lg:w-1/2 h-[400px] lg:h-auto relative fade-in delay-100 order-1 lg:order-2 p-4 lg:p-8">
+                <div class="w-full h-full rounded-3xl overflow-hidden border-8 border-white shadow-lg relative transform rotate-1 hover:rotate-0 transition-transform duration-500 z-10">
+                    <iframe src="{{MAP_EMBED_URL}}" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" class="absolute inset-0"></iframe>
+                </div>
+            </div>
+            <!--MAP_END-->
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-white pt-20 pb-10 text-pastel-textDark border-t-[8px] border-pastel-yellow relative overflow-hidden">
+        <!-- Footer Decors -->
+        <div class="absolute top-10 left-10 w-20 h-20 bg-pastel-pink/30 rounded-full blur-xl"></div>
+        <div class="absolute bottom-10 right-10 w-32 h-32 bg-pastel-blue/20 rounded-full blur-2xl"></div>
+        
+        <div class="max-w-7xl mx-auto px-6 relative z-10">
+            <div class="flex flex-col md:flex-row justify-between items-center md:items-start gap-10 border-b-2 border-pastel-bg pb-12 mb-8">
+                
+                <div class="text-center md:text-left">
+                    <h2 class="text-2xl font-bold text-pastel-textDark tracking-wide mb-4 flex items-center justify-center md:justify-start gap-2">
+                        <div class="w-8 h-8 bg-pastel-yellow rounded-full flex items-center justify-center">
+                            <i data-lucide="smile" class="w-5 h-5 text-white" stroke-width="2.5"></i>
+                        </div>
+                        {{SITE_NAME}}
+                    </h2>
+                    <p class="text-sm text-pastel-text font-medium">{{DESCRIPTION_SHORT}}</p>
+                </div>
+                
+                <!--SNS_START-->
+                <div class="flex gap-4">
+                    <!--SNS_INSTAGRAM_START-->
+                    <a href="{{INSTAGRAM_URL}}" target="_blank" class="w-12 h-12 rounded-full border-2 border-pastel-pink/30 bg-white shadow-sm flex items-center justify-center text-pastel-text hover:text-white hover:bg-pastel-pink hover:border-pastel-pink transition-all transform hover:-translate-y-1"><i data-lucide="instagram" class="w-5 h-5"></i></a>
+                    <!--SNS_INSTAGRAM_END-->
+                    
+                    <!--SNS_YOUTUBE_START-->
+                    <a href="{{YOUTUBE_URL}}" target="_blank" class="w-12 h-12 rounded-full border-2 border-red-100 bg-white shadow-sm flex items-center justify-center text-pastel-text hover:text-white hover:bg-red-400 hover:border-red-400 transition-all transform hover:-translate-y-1"><i data-lucide="youtube" class="w-5 h-5"></i></a>
+                    <!--SNS_YOUTUBE_END-->
+                    
+                    <!--SNS_X_START-->
+                    <a href="{{X_URL}}" target="_blank" class="w-12 h-12 rounded-full border-2 border-gray-100 bg-white shadow-sm flex items-center justify-center text-pastel-text hover:text-white hover:bg-gray-800 hover:border-gray-800 transition-all transform hover:-translate-y-1">
+                        <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.008 5.961H5.078z"></path></svg>
+                    </a>
+                    <!--SNS_X_END-->
+                    
+                    <!--SNS_LINE_START-->
+                    <a href="{{LINE_URL}}" target="_blank" class="w-12 h-12 rounded-full border-2 border-green-100 bg-white shadow-sm flex items-center justify-center text-pastel-text hover:text-white hover:bg-[#06C755] hover:border-[#06C755] transition-all transform hover:-translate-y-1">
+                        <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                          <path d="M21.4 10.3c0-4.3-4.3-7.8-9.6-7.8s-9.6 3.5-9.6 7.8c0 3.8 3.3 7 7.7 7.7.3.1.8.2.9.4.1.2.1.5.1.7v1.8c0 .2.1.3.3.4s.3.1.5.0c2.4-1.6 4.9-3.4 6.7-5.5 1.5-1.7 2.6-3.5 2.6-5.5zm-14.3.4c-.4 0-.7-.3-.7-.7V7.6c0-.4.3-.7.7-.7s.7.3.7.7v1.7h1.1c.4 0 .7.3.7.7s-.3.7-.7.7H7.1zm5.2 0c-.4 0-.7-.3-.7-.7V7.6c0-.4.3-.7.7-.7s.7.3.7.7v2.4c0 .4-.3.7-.7.7zm2.4 0c-.4 0-.7-.3-.7-.7V7.6c0-.4.3-.7.7-.7s.7.3.7.7v.7h1.1c.4 0 .7.3.7.7s-.3.7-.7.7h-1.8zM11.9 8.3c0-.4.3-.7.7-.7s.7.3.7.7v2.4c0 .4-.3.7-.7.7s-.7-.3-.7-.7V8.3z"></path>
+                        </svg>
+                    </a>
+                    <!--SNS_LINE_END-->
+                    
+                    <!--SNS_FACEBOOK_START-->
+                    <a href="{{FACEBOOK_URL}}" target="_blank" class="w-12 h-12 rounded-full border-2 border-blue-100 bg-white shadow-sm flex items-center justify-center text-pastel-text hover:text-white hover:bg-[#1877F2] hover:border-[#1877F2] transition-all transform hover:-translate-y-1"><i data-lucide="facebook" class="w-5 h-5"></i></a>
+                    <!--SNS_FACEBOOK_END-->
+                </div>
+                <!--SNS_END-->
+            </div>
+            
+            <div class="flex flex-col md:flex-row justify-between items-center text-center md:text-left gap-3">
+                <p class="text-xs font-bold font-display tracking-widest uppercase text-pastel-textLight">© 2026 {{SITE_NAME}}</p>
+                <p class="text-[10px] text-pastel-blue font-bold tracking-widest uppercase">Powered by OnePage-Flash</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        lucide.createIcons();
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if(target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+
+        window.addEventListener('scroll', () => {
+            const header = document.querySelector('header');
+            if (window.scrollY > 20) {
+                header.classList.add('py-0');
+            } else {
+                header.classList.remove('py-0');
+            }
+        });
+        
+        // Add scroll animation observer
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.animationPlayState = 'running';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

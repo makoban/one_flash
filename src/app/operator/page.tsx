@@ -23,6 +23,18 @@ const THEMES = [
   { id: "blueprint", name: "ブループリント", desc: "工務店・リフォーム", color: "bg-slate-100 text-slate-800" },
   { id: "free-wave", name: "フリーウェーブ", desc: "フリーランス・写真家", color: "bg-purple-100 text-purple-800" },
   { id: "executive", name: "エグゼクティブ", desc: "コンサル・経営者", color: "bg-gray-900 text-amber-300" },
+  { id: "gentle-green", name: "ジェントルグリーン", desc: "ペットサロン・動物病院", color: "bg-green-100 text-green-800" },
+  { id: "botanical-bloom", name: "ボタニカルブルーム", desc: "花屋・フラワーアレンジ", color: "bg-emerald-100 text-emerald-800" },
+  { id: "power-red", name: "パワーレッド", desc: "ジム・パーソナルトレーニング", color: "bg-red-100 text-red-800" },
+  { id: "wa-traditional", name: "和トラディショナル", desc: "着物・和食・和風サロン", color: "bg-amber-100 text-amber-900" },
+  { id: "tech-neon", name: "テックネオン", desc: "IT・Web制作・テック系", color: "bg-gray-900 text-cyan-400" },
+  { id: "realestate-white", name: "リアルエステート", desc: "不動産・賃貸・建築", color: "bg-teal-100 text-teal-800" },
+  { id: "pastel-kids", name: "パステルキッズ", desc: "保育園・幼稚園・託児所", color: "bg-fuchsia-100 text-fuchsia-800" },
+  { id: "metal-garage", name: "メタルガレージ", desc: "自動車整備・カーショップ", color: "bg-zinc-200 text-zinc-800" },
+  { id: "elegant-music", name: "エレガントミュージック", desc: "音楽教室・ピアノスクール", color: "bg-violet-100 text-violet-800" },
+  { id: "earth-farm", name: "アースファーム", desc: "農業・直売所・オーガニック", color: "bg-lime-100 text-lime-800" },
+  { id: "calm-purple", name: "カームパープル", desc: "葬儀・寺院・メモリアル", color: "bg-purple-100 text-purple-900" },
+  { id: "dynamic-sports", name: "ダイナミックスポーツ", desc: "スポーツ・道場・格闘技", color: "bg-orange-100 text-orange-800" },
 ];
 
 interface FormData {

@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="ja" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{SITE_NAME}}</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Inter:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Inter"', 'sans-serif'],
+                        mono: ['"Share Tech Mono"', 'monospace'],
+                    },
+                    colors: {
+                        neon: {
+                            blue: '#00f3ff',     // Cyan neon
+                            purple: '#bc13fe',   // Purple neon
+                            pink: '#ff003c',     // Red/Pink neon
+                            bg: '#050505',       // Deep black background
+                            panel: '#0a0a0c',    // Slightly lighter panel background
+                            border: '#1a1a24',   // Dark border color
+                            text: '#e2e8f0',     // Light slate text
+                            muted: '#64748b'     // Muted text
+                        }
+                    },
+                    boxShadow: {
+                        'neon-blue': '0 0 5px theme("colors.neon.blue"), 0 0 20px rgba(0, 243, 255, 0.4)',
+                        'neon-purple': '0 0 5px theme("colors.neon.purple"), 0 0 20px rgba(188, 19, 254, 0.4)',
+                        'neon-pink': '0 0 10px theme("colors.neon.pink"), 0 0 30px rgba(255, 0, 60, 0.4)',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .glitch-effect {
+            position: relative;
+        }
+        .glitch-effect::before,
+        .glitch-effect::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #050505;
+        }
+        .glitch-effect::before {
+            left: 2px;
+            text-shadow: -1px 0 #ff003c;
+            clip: rect(24px, 550px, 90px, 0);
+            animation: glitch-anim-2 3s infinite linear alternate-reverse;
+        }
+        .glitch-effect::after {
+            left: -2px;
+            text-shadow: -1px 0 #00f3ff;
+            clip: rect(85px, 550px, 140px, 0);
+            animation: glitch-anim 2.5s infinite linear alternate-reverse;
+        }
+
+        @keyframes glitch-anim {
+            0% { clip: rect(18px, 9999px, 86px, 0); }
+            5% { clip: rect(61px, 9999px, 6px, 0); }
+            10% { clip: rect(25px, 9999px, 99px, 0); }
+            15% { clip: rect(31px, 9999px, 17px, 0); }
+            20% { clip: rect(51px, 9999px, 64px, 0); }
+            25% { clip: rect(11px, 9999px, 34px, 0); }
+            30% { clip: rect(100px, 9999px, 50px, 0); }
+            35% { clip: rect(4px, 9999px, 12px, 0); }
+            40% { clip: rect(83px, 9999px, 75px, 0); }
+            45% { clip: rect(66px, 9999px, 41px, 0); }
+            50% { clip: rect(19px, 9999px, 15px, 0); }
+            55% { clip: rect(93px, 9999px, 28px, 0); }
+            60% { clip: rect(2px, 9999px, 81px, 0); }
+            65% { clip: rect(72px, 9999px, 96px, 0); }
+            70% { clip: rect(55px, 9999px, 59px, 0); }
+            75% { clip: rect(43px, 9999px, 3px, 0); }
+            80% { clip: rect(38px, 9999px, 47px, 0); }
+            85% { clip: rect(14px, 9999px, 88px, 0); }
+            90% { clip: rect(89px, 9999px, 22px, 0); }
+            95% { clip: rect(27px, 9999px, 71px, 0); }
+            100% { clip: rect(78px, 9999px, 10px, 0); }
+        }
+        
+        @keyframes glitch-anim-2 {
+            0% { clip: rect(65px, 9999px, 100px, 0); }
+            5% { clip: rect(52px, 9999px, 74px, 0); }
+            10% { clip: rect(79px, 9999px, 85px, 0); }
+            15% { clip: rect(75px, 9999px, 5px, 0); }
+            20% { clip: rect(67px, 9999px, 61px, 0); }
+            25% { clip: rect(14px, 9999px, 79px, 0); }
+            30% { clip: rect(1px, 9999px, 66px, 0); }
+            35% { clip: rect(86px, 9999px, 30px, 0); }
+            40% { clip: rect(23px, 9999px, 98px, 0); }
+            45% { clip: rect(85px, 9999px, 72px, 0); }
+            50% { clip: rect(71px, 9999px, 75px, 0); }
+            55% { clip: rect(2px, 9999px, 48px, 0); }
+            60% { clip: rect(30px, 9999px, 16px, 0); }
+            65% { clip: rect(59px, 9999px, 50px, 0); }
+            70% { clip: rect(41px, 9999px, 62px, 0); }
+            75% { clip: rect(2px, 9999px, 82px, 0); }
+            80% { clip: rect(47px, 9999px, 73px, 0); }
+            85% { clip: rect(3px, 9999px, 27px, 0); }
+            90% { clip: rect(26px, 9999px, 55px, 0); }
+            95% { clip: rect(42px, 9999px, 97px, 0); }
+            100% { clip: rect(38px, 9999px, 49px, 0); }
+        }
+
+        .cyber-grid {
+            background-size: 40px 40px;
+            background-image: 
+                linear-gradient(to right, rgba(0, 243, 255, 0.05) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(0, 243, 255, 0.05) 1px, transparent 1px);
+            mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent);
+            -webkit-mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent);
+        }
+
+        .fade-in { animation: fadeIn 1s ease-out forwards; opacity: 0; }
+        @keyframes fadeIn { to { opacity: 1; } }
+        
+        .fade-up { animation: fadeUp 0.8s ease-out forwards; opacity: 0; transform: translateY(20px); }
+        @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
+        
+        .delay-100 { animation-delay: 100ms; }
+        .delay-200 { animation-delay: 200ms; }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #050505; }
+        ::-webkit-scrollbar-thumb { background: #1a1a24; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #00f3ff; }
+        
+        .scroll-mt-24 { scroll-margin-top: 6rem; }
+        
+        .cyber-panel {
+            background: linear-gradient(135deg, rgba(10,10,12,0.95) 0%, rgba(5,5,5,0.95) 100%);
+            border: 1px solid rgba(0, 243, 255, 0.1);
+            position: relative;
+        }
+        
+        .cyber-panel::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0;
+            width: 10px; height: 10px;
+            border-top: 1px solid theme('colors.neon.blue');
+            border-left: 1px solid theme('colors.neon.blue');
+        }
+        
+        .cyber-panel::after {
+            content: '';
+            position: absolute;
+            bottom: 0; right: 0;
+            width: 10px; height: 10px;
+            border-bottom: 1px solid theme('colors.neon.blue');
+            border-right: 1px solid theme('colors.neon.blue');
+        }
+    </style>
+</head>
+<body class="font-sans text-neon-text bg-neon-bg antialiased selection:bg-neon-blue selection:text-black">
+
+    <div class="fixed inset-0 cyber-grid z-[-1] pointer-events-none"></div>
+
+    <!-- Header -->
+    <header class="fixed w-full top-0 bg-neon-bg/80 backdrop-blur-md z-50 border-b border-neon-blue/20 transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 md:h-20 flex items-center justify-between">
+            <div class="text-xl md:text-2xl font-mono font-bold text-white uppercase tracking-wider flex items-center gap-2 relative group cursor-pointer">
+                <i data-lucide="cpu" class="w-6 h-6 text-neon-blue group-hover:animate-pulse"></i>
+                <span class="glitch-effect" data-text="{{SITE_NAME}}">{{SITE_NAME}}</span>
+                <span class="absolute -bottom-1 left-0 w-0 h-[2px] bg-neon-blue transition-all duration-300 group-hover:w-full"></span>
+            </div>
+            
+            <div class="hidden md:flex items-center gap-8">
+                <a href="tel:{{PHONE}}" class="text-neon-muted hover:text-neon-blue transition-colors font-mono tracking-widest text-sm flex items-center gap-2">
+                    <span class="text-neon-blue/50">SYS.TEL_</span> {{PHONE}}
+                </a>
+                <a href="#contact" class="font-mono text-neon-bg bg-neon-blue px-6 py-2 uppercase tracking-widest font-bold text-sm shadow-neon-blue hover:bg-white transition-colors relative overflow-hidden group">
+                    <span class="relative z-10">INITIATE_CONTACT</span>
+                    <div class="absolute inset-0 bg-white transform scale-x-0 origin-left group-hover:scale-x-100 transition-transform duration-300 ease-out z-0"></div>
+                </a>
+            </div>
+        </div>
+        <!-- Progress bar style line at bottom of header -->
+        <div class="h-px w-full bg-gradient-to-r from-neon-blue via-neon-purple to-neon-pink"></div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="relative pt-20 h-[90vh] min-h-[600px] flex items-center justify-center overflow-hidden">
+        <!-- Background Image -->
+        <div class="absolute inset-0 z-0">
+            <img src="{{HERO_IMAGE_URL}}" alt="{{SITE_NAME}}" class="w-full h-full object-cover opacity-30 mix-blend-screen fade-in filter contrast-125 grayscale-[30%] blur-[2px]" />
+            <div class="absolute inset-0 bg-gradient-to-b from-transparent via-neon-bg/80 to-neon-bg"></div>
+            <!-- Glow effects -->
+            <div class="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-neon-blue/10 rounded-full blur-[100px] pointer-events-none"></div>
+            <div class="absolute bottom-1/4 right-1/4 w-[600px] h-[600px] bg-neon-purple/10 rounded-full blur-[120px] pointer-events-none"></div>
+        </div>
+        
+        <!-- Content -->
+        <div class="relative z-10 w-full max-w-5xl mx-auto px-4 sm:px-6 text-center">
+            
+            <div class="fade-up inline-flex items-center gap-2 px-3 py-1 bg-neon-blue/10 border border-neon-blue/30 rounded-sm mb-8 font-mono text-xs text-neon-blue uppercase tracking-widest backdrop-blur-sm">
+                <div class="w-2 h-2 rounded-full bg-neon-blue animate-pulse"></div>
+                SYSTEM_ONLINE // V.2.0.26
+            </div>
+            
+            <h1 class="text-4xl md:text-6xl lg:text-7xl font-black text-white leading-[1.1] mb-8 tracking-tight font-sans fade-up delay-100 uppercase">
+                {{CATCHPHRASE}}
+            </h1>
+            
+            <p class="text-base md:text-xl text-neon-muted font-mono leading-relaxed max-w-2xl mx-auto mb-12 fade-up delay-200 border-l-2 border-neon-purple pl-4 text-left">
+                > RUNNING DIAGNOSTICS...<br>
+                > {{DESCRIPTION_SHORT}}<br>
+                > <span class="animate-pulse">_</span>
+            </p>
+            
+            <div class="flex flex-col sm:flex-row gap-6 justify-center fade-up delay-300">
+                <a href="#services" class="font-mono text-white border border-neon-blue px-8 py-4 uppercase tracking-widest text-sm hover:bg-neon-blue/10 hover:shadow-neon-blue transition-all backdrop-blur-sm flex items-center justify-center gap-2 group">
+                    <i data-lucide="terminal" class="w-4 h-4 text-neon-blue group-hover:animate-pulse"></i>
+                    EXECUTE_SERVICES
+                </a>
+                <a href="#contact" class="font-mono text-neon-bg bg-neon-blue px-8 py-4 uppercase tracking-widest font-bold text-sm shadow-neon-blue hover:bg-white transition-all flex items-center justify-center gap-2">
+                    CONNECT_PROXY
+                </a>
+            </div>
+            
+        </div>
+        
+        <!-- Scroll indicator -->
+        <div class="absolute bottom-10 left-1/2 transform -translate-x-1/2 flex flex-col items-center gap-2 fade-in" style="animation-delay: 1s;">
+            <span class="font-mono text-[10px] text-neon-muted tracking-widest">SCROLL</span>
+            <div class="w-px h-12 bg-gradient-to-b from-neon-blue to-transparent"></div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section class="py-24 relative z-10" id="services">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6">
+            <div class="mb-16 fade-up flex flex-col md:flex-row md:items-end justify-between border-b border-neon-border pb-6">
+                <div>
+                    <span class="font-mono text-neon-blue text-xs tracking-widest mb-2 block">// CORE_MODULES</span>
+                    <h2 class="text-3xl md:text-4xl font-bold text-white uppercase tracking-wider font-sans">サービス構成</h2>
+                </div>
+                <div class="mt-4 md:mt-0 font-mono text-neon-muted text-sm hidden md:block">
+                    [LOADING 4 PROTOCOLS...]
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
+                <!-- サービス1 -->
+                <div class="cyber-panel p-8 md:p-10 fade-up group hover:shadow-[0_0_15px_rgba(0,243,255,0.1)] transition-all duration-300">
+                    <div class="flex items-start gap-6">
+                        <div class="w-14 h-14 shrink-0 bg-neon-blue/10 border border-neon-blue/30 flex items-center justify-center text-neon-blue group-hover:bg-neon-blue group-hover:text-neon-bg transition-colors duration-300">
+                            <i data-lucide="code" class="w-6 h-6"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-white mb-3 tracking-wide">{{SERVICE_1_TITLE}}</h3>
+                            <p class="text-neon-muted font-sans font-light leading-relaxed">{{SERVICE_1_DESC}}</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- サービス2 -->
+                <div class="cyber-panel p-8 md:p-10 fade-up delay-100 group hover:shadow-[0_0_15px_rgba(188,19,254,0.1)] transition-all duration-300">
+                    <div class="flex items-start gap-6">
+                        <div class="w-14 h-14 shrink-0 bg-neon-purple/10 border border-neon-purple/30 flex items-center justify-center text-neon-purple group-hover:bg-neon-purple group-hover:text-neon-bg transition-colors duration-300">
+                            <i data-lucide="layers" class="w-6 h-6"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-white mb-3 tracking-wide">{{SERVICE_2_TITLE}}</h3>
+                            <p class="text-neon-muted font-sans font-light leading-relaxed">{{SERVICE_2_DESC}}</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- サービス3 -->
+                <div class="cyber-panel p-8 md:p-10 fade-up group hover:shadow-[0_0_15px_rgba(188,19,254,0.1)] transition-all duration-300">
+                    <div class="flex items-start gap-6">
+                        <div class="w-14 h-14 shrink-0 bg-neon-purple/10 border border-neon-purple/30 flex items-center justify-center text-neon-purple group-hover:bg-neon-purple group-hover:text-neon-bg transition-colors duration-300">
+                            <i data-lucide="database" class="w-6 h-6"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-white mb-3 tracking-wide">{{SERVICE_3_TITLE}}</h3>
+                            <p class="text-neon-muted font-sans font-light leading-relaxed">{{SERVICE_3_DESC}}</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- サービス4 -->
+                <div class="cyber-panel p-8 md:p-10 fade-up delay-100 group hover:shadow-[0_0_15px_rgba(0,243,255,0.1)] transition-all duration-300">
+                    <div class="flex items-start gap-6">
+                        <div class="w-14 h-14 shrink-0 bg-neon-blue/10 border border-neon-blue/30 flex items-center justify-center text-neon-blue group-hover:bg-neon-blue group-hover:text-neon-bg transition-colors duration-300">
+                            <i data-lucide="shield-check" class="w-6 h-6"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-white mb-3 tracking-wide">{{SERVICE_4_TITLE}}</h3>
+                            <p class="text-neon-muted font-sans font-light leading-relaxed">{{SERVICE_4_DESC}}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="py-24 relative z-10 bg-neon-panel border-y border-neon-border" id="features">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6">
+            <div class="text-center mb-16 fade-up">
+                <span class="font-mono text-neon-purple text-xs tracking-widest mb-2 block">// ADVANTAGES</span>
+                <h2 class="text-3xl md:text-4xl font-bold text-white uppercase tracking-wider font-sans">選ばれる理由</h2>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- 特徴1 -->
+                <div class="fade-up group text-center px-4 relative">
+                    <!-- Tech accent line -->
+                    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-[2px] bg-neon-blue group-hover:w-full transition-all duration-300"></div>
+                    
+                    <div class="md:text-6xl text-4xl font-mono text-neon-border font-bold absolute top-10 left-1/2 -translate-x-1/2 z-0 group-hover:text-neon-blue/10 transition-colors">01</div>
+                    <div class="relative z-10 pt-10">
+                        <h3 class="text-xl font-bold text-white mb-4 tracking-wide">{{FEATURE_1_TITLE}}</h3>
+                        <p class="text-neon-muted font-sans font-light leading-relaxed">{{FEATURE_1_DESC}}</p>
+                    </div>
+                </div>
+                
+                <!-- 特徴2 -->
+                <div class="fade-up delay-100 group text-center px-4 relative">
+                    <!-- Tech accent line -->
+                    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-[2px] bg-neon-purple group-hover:w-full transition-all duration-300"></div>
+                    
+                    <div class="md:text-6xl text-4xl font-mono text-neon-border font-bold absolute top-10 left-1/2 -translate-x-1/2 z-0 group-hover:text-neon-purple/10 transition-colors">02</div>
+                    <div class="relative z-10 pt-10">
+                        <h3 class="text-xl font-bold text-white mb-4 tracking-wide">{{FEATURE_2_TITLE}}</h3>
+                        <p class="text-neon-muted font-sans font-light leading-relaxed">{{FEATURE_2_DESC}}</p>
+                    </div>
+                </div>
+                
+                <!-- 特徴3 -->
+                <div class="fade-up delay-200 group text-center px-4 relative">
+                    <!-- Tech accent line -->
+                    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-[2px] bg-neon-pink group-hover:w-full transition-all duration-300"></div>
+                    
+                    <div class="md:text-6xl text-4xl font-mono text-neon-border font-bold absolute top-10 left-1/2 -translate-x-1/2 z-0 group-hover:text-neon-pink/10 transition-colors">03</div>
+                    <div class="relative z-10 pt-10">
+                        <h3 class="text-xl font-bold text-white mb-4 tracking-wide">{{FEATURE_3_TITLE}}</h3>
+                        <p class="text-neon-muted font-sans font-light leading-relaxed">{{FEATURE_3_DESC}}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!--FORM_START-->
+    <section id="contact" class="py-24 relative scroll-mt-20">
+        <!-- Glow effect -->
+        <div class="absolute top-1/2 left-1/2 w-[600px] h-[600px] bg-neon-blue/5 rounded-full blur-[100px] -translate-x-1/2 -translate-y-1/2 pointer-events-none"></div>
+        
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 relative z-10">
+            <div class="mb-12 border-l-4 border-neon-blue pl-6 fade-up">
+                <span class="font-mono text-neon-blue text-xs tracking-widest mb-1 block">SYS.INPUT.REQ</span>
+                <h2 class="text-3xl font-bold text-white uppercase tracking-wider font-sans mb-2">コンタクトフォーム</h2>
+                <p class="text-neon-muted font-mono text-sm">Fill parameters to initialize connection.</p>
+            </div>
+            
+            <div class="border border-neon-border bg-neon-bg/50 backdrop-blur-sm p-8 md:p-12 fade-up delay-100 relative">
+                <!-- Terminal decorative header -->
+                <div class="absolute top-0 left-0 w-full h-8 bg-neon-border flex items-center px-4 gap-2">
+                    <div class="w-2 h-2 rounded-full bg-red-500"></div>
+                    <div class="w-2 h-2 rounded-full bg-yellow-500"></div>
+                    <div class="w-2 h-2 rounded-full bg-green-500"></div>
+                    <span class="font-mono text-[10px] text-gray-500 ml-2">bash - 80x24</span>
+                </div>
+                
+                <form action="{{FORM_ACTION_URL}}" method="POST" class="space-y-6 mt-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="relative group">
+                            <label for="name" class="block text-xs font-mono text-neon-blue mb-2">str Name <span class="text-neon-pink">*</span></label>
+                            <input type="text" id="name" name="name" required class="w-full bg-neon-panel border border-neon-border px-4 py-3 text-white focus:border-neon-blue focus:ring-1 focus:ring-neon-blue outline-none transition-colors font-mono text-sm placeholder-gray-700" placeholder="Enter string...">
+                        </div>
+                        <div class="relative group">
+                            <label for="email" class="block text-xs font-mono text-neon-purple mb-2">str Email <span class="text-neon-pink">*</span></label>
+                            <input type="email" id="email" name="email" required class="w-full bg-neon-panel border border-neon-border px-4 py-3 text-white focus:border-neon-purple focus:ring-1 focus:ring-neon-purple outline-none transition-colors font-mono text-sm placeholder-gray-700" placeholder="Enter string...">
+                        </div>
+                    </div>
+                    <div class="relative group">
+                        <label for="message" class="block text-xs font-mono text-white mb-2">text Payload <span class="text-neon-pink">*</span></label>
+                        <textarea id="message" name="message" rows="5" required class="w-full bg-neon-panel border border-neon-border px-4 py-3 text-white focus:border-white focus:ring-1 focus:ring-white outline-none transition-colors font-mono text-sm placeholder-gray-700 resize-none" placeholder="Enter payload data..."></textarea>
+                    </div>
+                    <div class="pt-6 flex justify-end">
+                        <button type="submit" class="font-mono text-neon-bg bg-neon-blue px-10 py-3 uppercase tracking-widest font-bold text-sm shadow-neon-blue hover:bg-white transition-all flex items-center gap-2">
+                            <i data-lucide="terminal-square" class="w-4 h-4"></i> EXECUTE
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+    <!--FORM_END-->
+
+    <!-- Access Section -->
+    <section class="border-t border-neon-border bg-neon-panel">
+        <div class="grid grid-cols-1 lg:grid-cols-2">
+            <div class="p-10 md:p-16 lg:p-24 flex flex-col justify-center fade-in order-2 lg:order-1 relative">
+                
+                <h2 class="font-mono text-neon-blue text-xs tracking-widest mb-8 uppercase flex items-center gap-2">
+                    <i data-lucide="map" class="w-4 h-4"></i> SYS.LOCATION_DATA
+                </h2>
+                
+                <ul class="space-y-8 text-neon-muted font-sans text-sm tracking-wide">
+                    <li class="pb-4 border-b border-neon-border/50">
+                        <span class="block text-white font-mono text-[10px] uppercase mb-2 opacity-50">ADDRESS_VEC</span>
+                        <span class="text-white text-base">{{ADDRESS}}</span>
+                    </li>
+                    <li class="pb-4 border-b border-neon-border/50">
+                        <span class="block text-white font-mono text-[10px] uppercase mb-2 opacity-50">UPTIME</span>
+                        <span class="whitespace-pre-line text-white text-base">{{HOURS}}</span>
+                    </li>
+                    <li class="pb-4 border-b border-neon-border/50">
+                        <span class="block text-white font-mono text-[10px] uppercase mb-2 opacity-50">DOWNTIME</span>
+                        <span class="text-white text-base">{{HOLIDAY}}</span>
+                    </li>
+                    <li class="pt-4">
+                        <span class="block text-white font-mono text-[10px] uppercase mb-2 opacity-50">COMMLINK</span>
+                        <span class="font-mono text-3xl font-bold text-white block mb-2">{{PHONE}}</span>
+                        <span class="text-neon-blue font-mono text-xs">{{EMAIL}}</span>
+                    </li>
+                </ul>
+            </div>
+            
+            <!--MAP_START-->
+            <div class="h-[400px] lg:h-auto w-full relative fade-in delay-100 order-1 lg:order-2 border-l border-neon-border">
+                <!-- Apply heavy filtering to make map look like a blueprint/radar -->
+                <iframe src="{{MAP_EMBED_URL}}" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" class="absolute inset-0 grayscale contrast-150 invert hover:invert-0 transition-all duration-[2000ms]"></iframe>
+                <div class="absolute inset-0 bg-neon-blue/20 mix-blend-color pointer-events-none"></div>
+                <div class="absolute inset-0 cyber-grid opacity-30 pointer-events-none"></div>
+            </div>
+            <!--MAP_END-->
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-black py-16 border-t border-neon-blue/20 relative">
+        <div class="h-px w-full absolute top-0 bg-gradient-to-r from-transparent via-neon-blue to-transparent opacity-50"></div>
+        
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 relative z-10 flex flex-col md:flex-row justify-between items-center gap-8 border-b border-neon-border pb-12 mb-8">
+            
+            <div class="text-2xl font-mono font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                <i data-lucide="cpu" class="w-6 h-6 text-neon-blue"></i>
+                <span class="glitch-effect" data-text="{{SITE_NAME}}">{{SITE_NAME}}</span>
+            </div>
+            
+            <!--SNS_START-->
+            <div class="flex gap-4">
+                <!--SNS_INSTAGRAM_START-->
+                <a href="{{INSTAGRAM_URL}}" target="_blank" class="w-10 h-10 border border-neon-border bg-neon-bg flex items-center justify-center text-neon-muted hover:text-neon-pink hover:border-neon-pink transition-all font-mono text-xs shadow-none hover:shadow-neon-pink"><i data-lucide="instagram" class="w-4 h-4"></i></a>
+                <!--SNS_INSTAGRAM_END-->
+                
+                <!--SNS_YOUTUBE_START-->
+                <a href="{{YOUTUBE_URL}}" target="_blank" class="w-10 h-10 border border-neon-border bg-neon-bg flex items-center justify-center text-neon-muted hover:text-red-500 hover:border-red-500 transition-all font-mono text-xs shadow-none hover:shadow-[0_0_10px_rgba(239,68,68,0.5)]"><i data-lucide="youtube" class="w-4 h-4"></i></a>
+                <!--SNS_YOUTUBE_END-->
+                
+                <!--SNS_X_START-->
+                <a href="{{X_URL}}" target="_blank" class="w-10 h-10 border border-neon-border bg-neon-bg flex items-center justify-center text-neon-muted hover:text-white hover:border-white transition-all font-mono text-xs shadow-none hover:shadow-[0_0_10px_rgba(255,255,255,0.3)]">
+                    <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.008 5.961H5.078z"></path></svg>
+                </a>
+                <!--SNS_X_END-->
+                
+                <!--SNS_LINE_START-->
+                <a href="{{LINE_URL}}" target="_blank" class="w-10 h-10 border border-neon-border bg-neon-bg flex items-center justify-center text-neon-muted hover:text-[#06C755] hover:border-[#06C755] transition-all font-mono text-xs shadow-none hover:shadow-[0_0_10px_rgba(6,199,85,0.5)]">
+                    <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                      <path d="M21.4 10.3c0-4.3-4.3-7.8-9.6-7.8s-9.6 3.5-9.6 7.8c0 3.8 3.3 7 7.7 7.7.3.1.8.2.9.4.1.2.1.5.1.7v1.8c0 .2.1.3.3.4s.3.1.5.0c2.4-1.6 4.9-3.4 6.7-5.5 1.5-1.7 2.6-3.5 2.6-5.5zm-14.3.4c-.4 0-.7-.3-.7-.7V7.6c0-.4.3-.7.7-.7s.7.3.7.7v1.7h1.1c.4 0 .7.3.7.7s-.3.7-.7.7H7.1zm5.2 0c-.4 0-.7-.3-.7-.7V7.6c0-.4.3-.7.7-.7s.7.3.7.7v2.4c0 .4-.3.7-.7.7zm2.4 0c-.4 0-.7-.3-.7-.7V7.6c0-.4.3-.7.7-.7s.7.3.7.7v.7h1.1c.4 0 .7.3.7.7s-.3.7-.7.7h-1.8zM11.9 8.3c0-.4.3-.7.7-.7s.7.3.7.7v2.4c0 .4-.3.7-.7.7s-.7-.3-.7-.7V8.3z"></path>
+                    </svg>
+                </a>
+                <!--SNS_LINE_END-->
+                
+                <!--SNS_FACEBOOK_START-->
+                <a href="{{FACEBOOK_URL}}" target="_blank" class="w-10 h-10 border border-neon-border bg-neon-bg flex items-center justify-center text-neon-muted hover:text-[#1877F2] hover:border-[#1877F2] transition-all font-mono text-xs shadow-none hover:shadow-[0_0_10px_rgba(24,119,242,0.5)]"><i data-lucide="facebook" class="w-4 h-4"></i></a>
+                <!--SNS_FACEBOOK_END-->
+            </div>
+            <!--SNS_END-->
+        </div>
+        
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col md:flex-row justify-between items-center gap-4 text-center md:text-left">
+            <p class="text-[11px] font-mono text-neon-muted uppercase">© 2026 {{SITE_NAME}} // ALL RIGHTS RESERVED.</p>
+            <p class="text-[9px] font-mono text-neon-blue uppercase">Powered by OnePage-Flash</p>
+        </div>
+    </footer>
+
+    <script>
+        lucide.createIcons();
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if(target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+
+        window.addEventListener('scroll', () => {
+            const header = document.querySelector('header');
+            if (window.scrollY > 50) {
+                header.classList.add('bg-neon-bg/95', 'shadow-[0_4px_30px_rgba(0,0,0,0.5)]');
+                header.classList.remove('bg-neon-bg/80');
+            } else {
+                header.classList.add('bg-neon-bg/80');
+                header.classList.remove('bg-neon-bg/95', 'shadow-[0_4px_30px_rgba(0,0,0,0.5)]');
+            }
+        });
+        
+        // Add scroll animation observer
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.animationPlayState = 'running';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

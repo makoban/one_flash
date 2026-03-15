@@ -71,6 +71,18 @@ const DEFAULT_HERO_IMAGES: Record<string, string> = {
   "blueprint": "/images/blueprint-hero.png",
   "free-wave": "/images/free-wave-hero.png",
   "executive": "/images/executive-hero.png",
+  "gentle-green": "/images/gentle-green-hero.png",
+  "botanical-bloom": "/images/botanical-bloom-hero.png",
+  "power-red": "/images/power-red-hero.png",
+  "wa-traditional": "/images/wa-traditional-hero.png",
+  "tech-neon": "/images/tech-neon-hero.png",
+  "realestate-white": "/images/realestate-white-hero.png",
+  "pastel-kids": "/images/pastel-kids-hero.png",
+  "metal-garage": "/images/metal-garage-hero.png",
+  "elegant-music": "/images/elegant-music-hero.png",
+  "earth-farm": "/images/earth-farm-hero.png",
+  "calm-purple": "/images/calm-purple-hero.png",
+  "dynamic-sports": "/images/dynamic-sports-hero.png",
 };
 
 // ---------------------------------------------------------------------------
