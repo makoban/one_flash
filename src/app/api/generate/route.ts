@@ -28,15 +28,13 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       return NextResponse.json({ error: "formData is required" }, { status: 400 });
     }
 
-    // email / subdomain を含む全フィールドの存在チェック
+    // フィールドの存在チェック（email/subdomainはadminモードでは空の場合がある）
     const requiredFields: (keyof SiteFormData)[] = [
       "siteName",
       "catchphrase",
       "description",
       "contactInfo",
       "colorTheme",
-      "email",
-      "subdomain",
     ];
     for (const field of requiredFields) {
       if (!formData[field]) {

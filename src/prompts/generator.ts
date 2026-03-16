@@ -710,6 +710,14 @@ ${theme.heroStyle}
 - 01, 02, 03 を大きく薄く表示（opacity: 0.06、font-size: clamp(80px,15vw,200px)）
 - position: absolute で対応するカード・セクション背景に重ねる
 
+### 縦書きテキスト（writing-mode: vertical-rl）の制約（必須）
+- 縦書きテキストはキャッチコピーなど短いテキスト（15文字以内）にのみ使用すること。説明文のような長文を縦書きにしてはいけない
+- 縦書きテキストのfont-sizeは max-height: 65vh で収まるサイズにすること。目安: text-2xl md:text-3xl lg:text-4xl + tracking-[0.2em] なら15文字程度が収まる
+- letter-spacingは 0.2em 以下にすること（0.3em以上だとすぐはみ出す）
+- 長文の説明文は必ず横書き（通常レイアウト）で配置すること
+- モバイル（md未満）では縦書きを使わず、横書きに切り替えること（hidden md:block / md:hidden で出し分け）
+- overflow: hidden で切り捨てるのは禁止（テキストが読めなくなるため）
+
 ### ホワイトスペース
 - ヘッダーは fixed top-0、backdrop-blur-md、bg-white/80（ダークテーマはbg-black/80）、z-50、サイト名 + CTA（small）
 - ヒーローはヘッダー分の上パディングを確保（pt-24 程度）

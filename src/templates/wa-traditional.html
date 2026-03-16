@@ -42,7 +42,7 @@
         .fade-in { animation: fadeIn 2s ease-out forwards; opacity: 0; }
         @keyframes fadeIn { to { opacity: 1; } }
         
-        .fade-up { animation: fadeUp 1.5s ease-out forwards; opacity: 0; transform: translateY(40px); }
+        .fade-up { animation: fadeUp 1.2s ease-out forwards; opacity: 0; transform: translateY(10px); }
         @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
         
         .delay-100 { animation-delay: 200ms; }
@@ -53,7 +53,7 @@
         .vertical-text {
             writing-mode: vertical-rl;
             text-orientation: upright;
-            letter-spacing: 0.3em;
+            letter-spacing: 0.15em;
         }
 
         .washi-bg {
@@ -117,31 +117,44 @@
         <div class="kasumi top-1/2 right-0 w-1/2 fade-in delay-200"></div>
         <div class="kasumi bottom-1/4 left-1/4 w-1/4 fade-in delay-300"></div>
         
-        <!-- Content -->
-        <div class="relative z-10 w-full max-w-7xl mx-auto px-6 flex justify-end md:justify-center">
-            
-            <div class="flex flex-row-reverse items-start gap-12 fade-up md:absolute md:right-1/4 md:top-1/2 md:-translate-y-1/2 mt-20 md:mt-0">
-                
+        <!-- Content (absolute inset to stay within hero bounds) -->
+        <div class="absolute inset-0 z-10 flex items-center justify-center pt-16 md:pt-20 pb-12 px-6 overflow-hidden">
+
+            <!-- Desktop -->
+            <div class="hidden md:flex items-center gap-8 lg:gap-12 fade-up max-h-full">
+
+                <!-- Description (horizontal, left side) -->
+                <div class="flex flex-col items-end gap-6 max-w-xs">
+                    <p class="text-sm text-wa-200 font-serif font-light leading-[2.2] tracking-widest text-right">
+                        {{DESCRIPTION_SHORT}}
+                    </p>
+                    <div class="w-10 h-10 border-2 border-wa-vermilion rounded-sm flex items-center justify-center">
+                        <span class="text-wa-vermilion font-serif text-base tracking-tighter">真</span>
+                    </div>
+                </div>
+
+                <!-- Divider -->
+                <div class="w-px self-stretch bg-wa-gold/30"></div>
+
                 <!-- Catchphrase (Vertical) -->
-                <h1 class="vertical-text text-3xl md:text-5xl lg:text-6xl font-serif text-white leading-loose tracking-[0.3em] drop-shadow-2xl">
+                <h1 class="vertical-text text-2xl lg:text-3xl font-serif text-white drop-shadow-2xl" style="max-height: calc(90vh - 8rem);">
                     {{CATCHPHRASE}}
                 </h1>
-                
-                <!-- Description (Vertical) -->
-                <div class="vertical-text text-sm md:text-lg text-wa-200 font-sans font-light leading-10 tracking-[0.2em] transform translate-y-12">
-                    {{DESCRIPTION_SHORT}}
-                </div>
-                
-                <!-- Stamp -->
-                <div class="w-12 h-12 border-2 border-wa-vermilion rounded-sm flex items-center justify-center mt-auto mb-12">
-                    <span class="text-wa-vermilion font-serif text-xl tracking-tighter">真</span>
-                </div>
             </div>
-            
-            <a href="#contact" class="md:hidden absolute bottom-12 left-6 px-8 py-3 font-serif tracking-widest text-wa-900 bg-wa-gold hover:bg-wa-50 transition-colors">
-                ご予約・お問合せ
-            </a>
-            
+
+            <!-- Mobile -->
+            <div class="md:hidden fade-up text-center max-w-sm">
+                <h1 class="text-xl font-serif text-white leading-loose tracking-[0.1em] drop-shadow-2xl mb-4">
+                    {{CATCHPHRASE}}
+                </h1>
+                <p class="text-xs text-wa-200 font-sans font-light leading-relaxed tracking-wider mb-6">
+                    {{DESCRIPTION_SHORT}}
+                </p>
+                <a href="#contact" class="inline-block px-6 py-2.5 text-sm font-serif tracking-widest text-wa-900 bg-wa-gold hover:bg-wa-50 transition-colors">
+                    ご予約・お問合せ
+                </a>
+            </div>
+
         </div>
         
         <div class="absolute bottom-0 left-0 w-full h-12 bg-gradient-to-t from-wa-50 to-transparent z-20"></div>

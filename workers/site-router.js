@@ -12,7 +12,7 @@
  */
 
 export default {
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
     const url = new URL(request.url);
     const hostname = url.hostname;
     const siteDomain = env.SITE_DOMAIN || "oneflash.net";
@@ -39,14 +39,14 @@ export default {
     // --- パスベースルーティング（デモ用: /s/{slug}） ---
     const pathMatch = url.pathname.match(/^\/s\/([a-z0-9][a-z0-9-]+[a-z0-9])\/?$/);
     if (pathMatch) {
-      return serveSite(pathMatch[1], env, siteDomain);
+      return serveSite(pathMatch[1], env, siteDomain, ctx);
     }
 
     // --- サブドメインルーティング（本番用） ---
     if (hostname.endsWith(`.${siteDomain}`)) {
       const subdomain = hostname.replace(`.${siteDomain}`, "");
       if (subdomain && subdomain !== "www") {
-        return serveSite(subdomain, env, siteDomain);
+        return serveSite(subdomain, env, siteDomain, ctx);
       }
     }
 
@@ -67,7 +67,7 @@ async function sha256(text) {
 // ---------------------------------------------------------------------------
 // サイト配信
 // ---------------------------------------------------------------------------
-async function serveSite(slug, env, siteDomain) {
+async function serveSite(slug, env, siteDomain, ctx) {
   try {
     const object = await env.SITES_BUCKET.get(`${slug}/index.html`);
     if (!object) {
@@ -80,7 +80,8 @@ async function serveSite(slug, env, siteDomain) {
       status: 200,
       headers: {
         "Content-Type": "text/html; charset=utf-8",
-        "Cache-Control": "public, max-age=3600",
+        "Cache-Control": "public, max-age=600, s-maxage=600",
+        "CDN-Cache-Control": "max-age=600",
       },
     });
   } catch (error) {
