@@ -139,6 +139,12 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     for (const site of sites) {
       result.checked++;
 
+      // --- サンプル/デモサイト: cron対象外（公開継続） ---
+      if (site.payment_source === "sample") {
+        result.skipped++;
+        continue;
+      }
+
       // --- ココナラ顧客: expires_at ベースで判定 ---
       if (site.payment_source === "coconala") {
         try {
