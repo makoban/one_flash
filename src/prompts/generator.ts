@@ -396,7 +396,7 @@ STEP1で推定した業種に対応するルールを以下から選択し、そ
 ------------------------------------------------------------
 セクション構成（この順番で生成）:
   1. ヘッダー（院名 + 電話番号を目立つ位置に配置）
-  2. ヒーロー（min-height: 80vh。安心感・清潔感を前面に。Unsplash背景画像必須）
+  2. ヒーロー（min-height: 80vh。安心感・清潔感を前面に。画像は使わずCSS装飾のみ）
   3. 治療案内・メニュー（2〜3カードグリッド）
   4. 当院の特徴（3ポイントカード）
   5. お問い合わせフォーム
@@ -418,7 +418,7 @@ STEP1で推定した業種に対応するルールを以下から選択し、そ
 ------------------------------------------------------------
 セクション構成（この順番で生成）:
   1. ヘッダー（予約CTAを最優先。tel:リンクまたは予約ボタン）
-  2. ヒーロー（詩的な表現・余白を多めに取る。Unsplash背景画像必須）
+  2. ヒーロー（詩的な表現・余白を多めに取る。画像は使わずCSS装飾のみ）
   3. メニュー・施術内容（2〜4カードグリッド）
   4. こだわり・強み（3ポイントカード）
   5. お問い合わせフォーム
@@ -440,7 +440,7 @@ STEP1で推定した業種に対応するルールを以下から選択し、そ
 ------------------------------------------------------------
 セクション構成（4セクション完結・この順番で生成）:
   1. ヘッダー（店名 + 営業時間 + 電話番号を1行に並べる）
-  2. ヒーロー（min-height: 90vh。温かみと食欲をそそる雰囲気。Unsplash背景画像必須）
+  2. ヒーロー（min-height: 90vh。温かみと食欲をそそる雰囲気。画像は使わずCSS装飾のみ）
   3. メニュー・特徴（3カードグリッド）
   4. お問い合わせフォーム
   5. 店舗情報（営業時間・定休日・住所・電話番号・Googleマップ埋め込み）
@@ -605,28 +605,31 @@ tailwind.config に以下を設定すること:
 - アイコンはSTEP2で指定した業種の推奨アイコンリストから選ぶ
 - 1つのカードに2個以上のアイコンを配置しないこと
 
-### ヒーロー画像（必須: 1枚のみ）
-ヒーローセクションに業種に合ったUnsplash画像を1枚配置すること。
-以下のルールで <img> タグを使用する:
-- URLフォーマット: https://images.unsplash.com/photo-{ID}?w=1200&h=600&fit=crop&q=80
-- 業種別の推奨画像ID:
-  - MEDICAL: photo-1519494026892-80bbd2d6fd0d（施術・リラクゼーション）
-  - BEAUTY: photo-1560066984-138dadb4c035（ネイル・美容）
-  - FOOD: photo-1517248135467-4c7edcad34c4（レストラン・ダイニング）
-  - LEGAL: photo-1589829545856-d10d557cf95f（オフィス・書類）
-  - SCHOOL: photo-1524178232363-1fb2b075b655（教室・学習）
-  - CONSTRUCTION: photo-1504307651254-35680f356dfd（建設・工事現場）
-  - GENERAL: photo-1497366216548-37526070297c（ビジネス・ワーク）
-- 配置方法: ヒーローセクション背景として使用。position: absolute, inset: 0, object-fit: cover, z-index: 0
-- 画像の上にオーバーレイを重ねる: position: absolute, inset: 0, 背景色のgradientオーバーレイ（opacity: 0.7〜0.85）でテキストの可読性を確保
-- テキストは z-index: 10 で画像の上に配置
-- alt属性にサイト名を設定
-- loading="lazy" を設定
+### 画像は一切使わない（最重要）
+このサービスは画像なしで洗練されたデザインを実現する方針です。以下を厳守:
+- <img> タグは一切使用禁止（ヒーロー・本文・装飾すべて）
+- Unsplash, Pexels, その他外部画像URL完全禁止
+- base64エンコード画像の埋め込み禁止
+- インラインSVGで画像的な表現をするのも禁止（Lucideアイコンとロゴ的マーク程度は可）
+- 背景画像(background-image: url(...))も外部URLは禁止
 
-### 絶対禁止事項
-- base64エンコード画像の埋め込み
-- インラインSVGの画像的使用（Lucideアイコン程度は可）
-- Unsplash以外の外部画像URL
+画像の代わりに使う装飾テクニック（ヒーロー・セクション背景で必ず活用）:
+- 複層CSSグラデーション（linear-gradient + radial-gradient を重ねる）
+- ぼかし円(radial-gradient + filter: blur(60px))を複数配置して光の滲み表現
+- 業種英字の超大型タイポグラフィ装飾（clamp(120px,22vw,320px), opacity:0.04〜0.07）
+- CSSパターン: ドット(radial-gradient)、斜め線(repeating-linear-gradient)、グリッド(linear-gradient 2方向)
+- アクセント色の半透明ぼかし円を「光」として複数配置
+- Lucideアイコンを大きめに装飾として配置（opacity: 0.08〜0.15、rotate angle変化）
+- 見出しグラデーションテキスト（background-clip: text）
+- 細い装飾線・装飾フレーム（rounded-full, 細いborder, 数字/記号の装飾）
+- mix-blend-mode: overlay, screen などで深みを出す
+
+ヒーローセクションの推奨構造（画像なしで圧倒的な存在感）:
+1. 背景: 複層グラデーション（linear-gradient で基調色、radial-gradient で光の滲み2〜3箇所）
+2. 装飾: 業種英字超大型テキスト（背面、opacity 0.04〜0.06）+ 細いグリッドまたはドットパターン（opacity 0.1以下）
+3. 中央コンテンツ: 英字サブラベル → 日本語キャッチコピー（font-display, 超大型） → 短い説明文 → CTAボタン
+4. 補助装飾: アクセント色のぼかし円を左右非対称に2〜3個配置、またはCSSで描いた幾何図形（三角・円弧・斜め線）
+5. 下部: スクロールインジケーター（Lucideアイコン + アニメーション）
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 【デザイン仕様】（最重要: ここに魂を込めること）
@@ -650,16 +653,21 @@ ${theme.heroStyle}
 - ラベル（${f.label}）: 英字ラベル（"ABOUT" 等）に使用。font-weight: 500〜600、tracking-[0.2em]〜tracking-[0.3em]、text-xs〜text-sm、uppercase、アクセント色。
 - 本文（${f.body}）: 日本語本文に使用。font-weight: 300〜400の細めが洗練された印象。leading-relaxed〜leading-loose で余裕のある行間。
 
-### ヒーローセクション（サイトの顔）
+### ヒーローセクション（サイトの顔・画像なしで作る）
 - 業種別のmin-height指定（STEP2のルールを優先）
-- CSSグラデーション背景 + radial-gradientオーバーレイで光の表現（例: radial-gradient(circle at 30% 50%, rgba(255,255,255,0.08) 0%, transparent 50%)）
-- 業種英字の大型装飾テキスト（例: MEDICAL・BEAUTY・CAFE 等をfont-size: clamp(100px,20vw,280px)、opacity: 0.03〜0.05 で背景に薄く敷く）
-- 英字サブラベル（font-label、tracking-[0.3em]、text-xs、opacity-70）をキャッチコピーの上に配置
-- キャッチコピーはfont-displayで大胆に大きく（text-3xl sm:text-5xl lg:text-6xl）
-- キャッチコピーの下に1〜2行の短い説明文（font-sans、text-base、opacity-80）
-- CTAボタン: px-8 py-4 rounded-full、アクセント色背景、font-weight: 600、hover時にscale(1.05)とshadow増加（BEAUTYのみアウトラインスタイル）
-- ヒーロー下部にスクロールインジケーター（小さなアニメーション矢印またはシェブロン）
+- 背景は**画像を使わず**、以下をすべて組み合わせて奥行きと存在感を出す:
+  * 複層CSSグラデーション: 基調となるlinear-gradient(135deg, heroBg系の濃淡)
+  * 光の滲み: radial-gradient(circle at 25% 30%, アクセント色/0.18, transparent 50%)、もう1つ反対側に（circle at 75% 70%, アクセント色違い/0.12, transparent 45%）
+  * 繊細なパターン重ね: 細いグリッド（linear-gradient 2方向、1px線、opacity 0.05以下）または ドット（radial-gradient 1px, 間隔28px, opacity 0.06以下）
+- 業種英字の超大型装飾テキスト（例: MEDICAL・BEAUTY・CAFE 等をfont-size: clamp(120px,22vw,320px)、opacity: 0.04〜0.06 で背景に薄く敷く・letter-spacing: 0.1em）
+- アクセントとして、ぼかし円（position: absolute, 幅300〜500px, background: radial-gradient(circle, アクセント色 0%, transparent 70%), filter: blur(40px), opacity: 0.4〜0.6）を左右非対称に2〜3個配置
+- 英字サブラベル（font-label、tracking-[0.3em]、text-xs、opacity-70）をキャッチコピーの上に配置（先頭にLucideアイコンw-4 h-4を添える）
+- キャッチコピーはfont-displayで大胆に大きく（text-4xl sm:text-6xl lg:text-7xl）、一部にグラデーションテキストを使って洗練感を出す
+- キャッチコピーの下に1〜2行の短い説明文（font-sans、text-base〜text-lg、opacity-80、max-w-2xl）
+- CTAボタン: px-8 py-4 rounded-full、アクセント色背景、font-weight: 600、hover時にscale(1.05)とshadow増加、テキスト左にLucideアイコン（phone, arrow-right等）（BEAUTYのみアウトラインスタイル）
+- ヒーロー下部にスクロールインジケーター（chevron-downアイコン、scrollBounceアニメーション）
 - ヒーローテキストの最大幅: max-w-2xl（640px）
+- すべてのz-indexを明示: 装飾背景 z-0、パターン z-1、ぼかし円 z-2、業種英字 z-3、コンテンツ z-10
 
 ### 各セクション共通ルール
 - セクション冒頭: 英字ラベル（小さく、ラベルフォント、アクセント色）→ 日本語見出し（大きく、ディスプレイフォント）→ 装飾線（w-12 h-[3px] bg-gradient accent→accentLight）
