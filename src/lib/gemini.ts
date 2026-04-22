@@ -1,7 +1,7 @@
 /**
  * Gemini API クライアント初期化モジュール
  *
- * 使用モデル: gemini-2.0-flash（高速・低コスト）
+ * 使用モデル: gemini-2.5-flash-lite（高速・低コスト・2.0-flashは429頻発のため移行）
  * 用途:
  *   - コンテンツモデレーション (prompts/moderation.ts)
  *   - HTML/CSS生成 (prompts/generator.ts)
@@ -29,7 +29,7 @@ function getGenAI(): GoogleGenerativeAI {
 export const geminiModel: GenerativeModel = new Proxy({} as GenerativeModel, {
   get(_, prop) {
     const model = getGenAI().getGenerativeModel({
-      model: "gemini-2.0-flash",
+      model: "gemini-2.5-flash-lite",
       generationConfig: {
         temperature: 0.7,
         maxOutputTokens: 8192,
@@ -43,7 +43,7 @@ export const geminiModel: GenerativeModel = new Proxy({} as GenerativeModel, {
 export const moderationModel: GenerativeModel = new Proxy({} as GenerativeModel, {
   get(_, prop) {
     const model = getGenAI().getGenerativeModel({
-      model: "gemini-2.0-flash",
+      model: "gemini-2.5-flash-lite",
       generationConfig: {
         temperature: 0.1,
         maxOutputTokens: 256,
