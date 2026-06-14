@@ -115,6 +115,22 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 }
 
 // ---------------------------------------------------------------------------
+// Invoice からサブスクリプションIDを取り出すヘルパー
+// Stripe API 2025+ で invoice.subscription が廃止され
+// invoice.parent.subscription_details.subscription に移動したため両対応
+// ---------------------------------------------------------------------------
+
+function extractSubscriptionId(invoice: Stripe.Invoice): string | null {
+  const data = invoice as unknown as Record<string, unknown>;
+  const parent = data.parent as
+    | { subscription_details?: { subscription?: string | { id?: string } } }
+    | undefined;
+  const raw = parent?.subscription_details?.subscription ?? data.subscription;
+  if (!raw) return null;
+  return typeof raw === "string" ? raw : (raw as { id?: string }).id ?? null;
+}
+
+// ---------------------------------------------------------------------------
 // checkout.session.completed
 // サブスク決済完了 → ドラフトHTML公開 + DB登録 + メール送信
 // ---------------------------------------------------------------------------
@@ -351,10 +367,9 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription): Pro
 // ---------------------------------------------------------------------------
 
 async function handlePaymentSucceeded(invoice: Stripe.Invoice): Promise<void> {
-  // Stripe API v2026+ 対応: subscription プロパティへの安全なアクセス
+  // サブスクIDを取得（Stripe API 2025+ の新形状に対応）
+  const subId = extractSubscriptionId(invoice);
   const invoiceData = invoice as unknown as Record<string, unknown>;
-  const subRaw = invoiceData.subscription;
-  const subId = typeof subRaw === "string" ? subRaw : (subRaw as { id?: string } | null)?.id ?? null;
 
   if (!subId) return;
 
@@ -389,9 +404,8 @@ async function handlePaymentSucceeded(invoice: Stripe.Invoice): Promise<void> {
 // ---------------------------------------------------------------------------
 
 async function handlePaymentFailed(invoice: Stripe.Invoice): Promise<void> {
-  const invoiceData = invoice as unknown as Record<string, unknown>;
-  const subRaw = invoiceData.subscription;
-  const subId = typeof subRaw === "string" ? subRaw : (subRaw as { id?: string } | null)?.id ?? null;
+  // サブスクIDを取得（Stripe API 2025+ の新形状に対応）
+  const subId = extractSubscriptionId(invoice);
 
   if (!subId) return;
 
