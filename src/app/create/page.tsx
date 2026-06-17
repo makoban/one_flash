@@ -38,6 +38,13 @@ interface HistoryEntry {
   timestamp: Date;
 }
 
+interface GenerationProgress {
+  attempt: number;
+  maxAttempts: number;
+  retrying: boolean;
+  message: string | null;
+}
+
 // ---------------------------------------------------------------------------
 // 生成中に順に表示するメッセージ
 // ---------------------------------------------------------------------------
@@ -51,6 +58,8 @@ const GENERATING_MESSAGES = [
 ];
 
 const MESSAGE_INTERVAL_MS = 2000;
+const MAX_GENERATE_REQUEST_ATTEMPTS = 3;
+const GENERATE_RETRY_DELAYS_MS = [2500, 7000];
 
 // ---------------------------------------------------------------------------
 // 再生成の最大回数（プロトタイプ用）
@@ -83,6 +92,12 @@ function CreatePage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isRegenerating, setIsRegenerating] = useState(false);
   const [regenerationsLeft, setRegenerationsLeft] = useState(MAX_REGENERATIONS);
+  const [generationProgress, setGenerationProgress] = useState<GenerationProgress>({
+    attempt: 1,
+    maxAttempts: MAX_GENERATE_REQUEST_ATTEMPTS,
+    retrying: false,
+    message: null,
+  });
 
   // 履歴管理
   const [history, setHistory] = useState<HistoryEntry[]>([]);
@@ -103,10 +118,16 @@ function CreatePage() {
     setFormData(data);
     setIsSubmitting(true);
     setPageState("generating");
+    setGenerationProgress({
+      attempt: 1,
+      maxAttempts: MAX_GENERATE_REQUEST_ATTEMPTS,
+      retrying: false,
+      message: null,
+    });
 
     trackEvent("generate_start");
     try {
-      const preview = await generateAndScreenshot(data);
+      const preview = await generateAndScreenshot(data, undefined, setGenerationProgress);
       trackEvent("generate_complete");
       setPreviewData(preview);
       const entry: HistoryEntry = {
@@ -297,16 +318,37 @@ function CreatePage() {
       {error && (
         <div className="max-w-2xl mx-auto mb-6 p-4 bg-red-50 border border-red-200 rounded-xl">
           <p className="text-sm text-red-600">{error}</p>
+          {pageState === "form" && formData && (
+            <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-xs text-red-500">
+                入力内容は保持されています。修正せずに同じ内容で再試行できます。
+              </p>
+              <button
+                type="button"
+                onClick={() => { void handleFormSubmit(formData); }}
+                disabled={isSubmitting}
+                className="shrink-0 rounded-lg bg-red-600 px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                同じ内容で再試行する
+              </button>
+            </div>
+          )}
         </div>
       )}
 
       {/* 状態別コンテンツ */}
       {pageState === "form" && (
-        <CardStepForm onSubmit={handleFormSubmit} isSubmitting={isSubmitting} onFirstInteraction={trackFormStart} isAdmin={adminMode} />
+        <CardStepForm
+          onSubmit={handleFormSubmit}
+          isSubmitting={isSubmitting}
+          onFirstInteraction={trackFormStart}
+          isAdmin={adminMode}
+          initialData={formData}
+        />
       )}
 
       {pageState === "generating" && (
-        <GeneratingView />
+        <GeneratingView progress={generationProgress} />
       )}
 
       {pageState === "preview" && previewData && formData && (
@@ -400,17 +442,51 @@ function CreatePage() {
 // API: HTML生成 + スクリーンショット取得
 // ---------------------------------------------------------------------------
 
-async function generateAndScreenshot(data: SiteFormData, instruction?: string): Promise<PreviewData> {
+async function generateAndScreenshot(
+  data: SiteFormData,
+  instruction?: string,
+  onProgress?: (progress: GenerationProgress) => void
+): Promise<PreviewData> {
   // Step 1: HTML生成
-  const generateResponse = await fetch("/api/generate", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ formData: data, instruction }),
-  });
+  let generateResponse: Response | null = null;
+  let generateErrorData: { error?: string; retryable?: boolean } = {};
 
-  if (!generateResponse.ok) {
-    const errorData = (await generateResponse.json()) as { error?: string };
-    throw new Error(errorData.error ?? "HTML生成に失敗しました");
+  for (let attempt = 1; attempt <= MAX_GENERATE_REQUEST_ATTEMPTS; attempt++) {
+    onProgress?.({
+      attempt,
+      maxAttempts: MAX_GENERATE_REQUEST_ATTEMPTS,
+      retrying: attempt > 1,
+      message:
+        attempt > 1
+          ? "AI生成サービスが混み合っているため、自動で再試行しています。"
+          : null,
+    });
+
+    generateResponse = await fetch("/api/generate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ formData: data, instruction }),
+    });
+
+    if (generateResponse.ok) {
+      break;
+    }
+
+    generateErrorData = await readErrorResponse(generateResponse);
+    const shouldRetry = isRetryableGenerateError(generateResponse.status, generateErrorData);
+    if (!shouldRetry || attempt === MAX_GENERATE_REQUEST_ATTEMPTS) {
+      break;
+    }
+
+    const delay = GENERATE_RETRY_DELAYS_MS[attempt - 1] ?? 7000;
+    await sleep(delay);
+  }
+
+  if (!generateResponse?.ok) {
+    throw new Error(
+      generateErrorData.error ??
+        "AI生成サービスが混み合っています。入力内容は保持されていますので、少し時間を置いて再試行してください。"
+    );
   }
 
   const { html, warnings } = (await generateResponse.json()) as { html: string; warnings?: string[] };
@@ -435,17 +511,43 @@ async function generateAndScreenshot(data: SiteFormData, instruction?: string): 
   return { pcImage, mobileImage, html, warnings: warnings ?? [] };
 }
 
+async function readErrorResponse(response: Response): Promise<{ error?: string; retryable?: boolean }> {
+  try {
+    return (await response.json()) as { error?: string; retryable?: boolean };
+  } catch {
+    return {};
+  }
+}
+
+function isRetryableGenerateError(
+  status: number,
+  errorData: { error?: string; retryable?: boolean }
+): boolean {
+  if (errorData.retryable) return true;
+  if ([429, 500, 502, 503, 504].includes(status)) {
+    const message = errorData.error ?? "";
+    if (/missing gemini|api key/i.test(message)) return false;
+    return true;
+  }
+  return /high demand|service unavailable|overloaded|temporarily|googlegenerativeai/i.test(
+    errorData.error ?? ""
+  );
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 // ---------------------------------------------------------------------------
 // 生成中ビュー
 // ---------------------------------------------------------------------------
 
-function GeneratingView() {
+function GeneratingView({ progress }: { progress: GenerationProgress }) {
   const [messageIndex, setMessageIndex] = useState(0);
-  const [done, setDone] = useState(false);
+  const done = messageIndex >= GENERATING_MESSAGES.length - 1;
 
   useEffect(() => {
     if (messageIndex >= GENERATING_MESSAGES.length - 1) {
-      setDone(true);
       return;
     }
 
@@ -493,6 +595,11 @@ function GeneratingView() {
         <p className="mt-2 text-sm text-gray-400">
           AIがあなたのホームページを作成しています
         </p>
+        {progress.retrying && (
+          <p className="mt-3 text-sm font-medium text-indigo-600">
+            {progress.message}（{progress.attempt}/{progress.maxAttempts}回目）
+          </p>
+        )}
       </div>
 
       {/* ステップインジケーター */}
@@ -530,4 +637,3 @@ function GeneratingView() {
     </div>
   );
 }
-

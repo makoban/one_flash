@@ -65,6 +65,7 @@ interface CardStepFormProps {
   isSubmitting: boolean;
   onFirstInteraction?: () => void;
   isAdmin?: boolean;
+  initialData?: SiteFormData | null;
 }
 
 type FormErrors = Partial<Record<keyof SiteFormData, string>>;
@@ -83,14 +84,24 @@ const INITIAL_FORM_DATA: SiteFormData = {
   subdomain: "",
 };
 
+function getInitialFormData(initialData?: SiteFormData | null): SiteFormData {
+  return { ...INITIAL_FORM_DATA, ...(initialData ?? {}) };
+}
+
 // ---------------------------------------------------------------------------
 // メインコンポーネント
 // ---------------------------------------------------------------------------
 
-export default function CardStepForm({ onSubmit, isSubmitting, onFirstInteraction, isAdmin = false }: CardStepFormProps) {
+export default function CardStepForm({
+  onSubmit,
+  isSubmitting,
+  onFirstInteraction,
+  isAdmin = false,
+  initialData = null,
+}: CardStepFormProps) {
   const totalSteps = isAdmin ? 5 : TOTAL_STEPS;
-  const [currentStep, setCurrentStep] = useState(1);
-  const [formData, setFormData] = useState<SiteFormData>(INITIAL_FORM_DATA);
+  const [currentStep, setCurrentStep] = useState(() => (initialData ? totalSteps : 1));
+  const [formData, setFormData] = useState<SiteFormData>(() => getInitialFormData(initialData));
   const [errors, setErrors] = useState<FormErrors>({});
   const [moderating, setModerating] = useState(false);
   const [moderationError, setModerationError] = useState<string | null>(null);

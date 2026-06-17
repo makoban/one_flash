@@ -19,6 +19,42 @@ import type { SiteFormData } from "@/lib/gemini";
 // Puppeteer を使用する screenshot API と同様に Node.js ランタイムを指定
 export const runtime = "nodejs";
 
+const GEMINI_RETRY_DELAYS_MS = [1200, 3200, 6500];
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function getErrorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
+}
+
+function isRetryableGeminiError(error: unknown): boolean {
+  const message = getErrorMessage(error);
+  if (/missing gemini|api key/i.test(message)) return false;
+  return /503|502|504|429|high demand|service unavailable|overloaded|temporarily|timeout|fetch failed|googlegenerativeai/i.test(
+    message
+  );
+}
+
+async function withGeminiRetry<T>(label: string, operation: () => Promise<T>): Promise<T> {
+  let lastError: unknown;
+  for (let attempt = 1; attempt <= GEMINI_RETRY_DELAYS_MS.length + 1; attempt++) {
+    try {
+      return await operation();
+    } catch (error) {
+      lastError = error;
+      const retryable = isRetryableGeminiError(error);
+      console.warn(`[generate] ${label} attempt ${attempt} failed:`, error);
+      if (!retryable || attempt > GEMINI_RETRY_DELAYS_MS.length) {
+        break;
+      }
+      await sleep(GEMINI_RETRY_DELAYS_MS[attempt - 1]);
+    }
+  }
+  throw lastError;
+}
+
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     const body = (await request.json()) as { formData: SiteFormData; instruction?: string };
@@ -53,8 +89,11 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     );
 
     const [moderationResult, feasibilityResult] = await Promise.all([
-      moderationModel.generateContent(moderationPrompt),
-      moderationModel.generateContent(feasibilityPrompt),
+      withGeminiRetry("moderation", () => moderationModel.generateContent(moderationPrompt)),
+      withGeminiRetry("feasibility", () => moderationModel.generateContent(feasibilityPrompt)).catch((error) => {
+        console.warn("[generate] Feasibility check failed after retries, continuing:", error);
+        return null;
+      }),
     ]);
 
     const moderationText = moderationResult.response.text();
@@ -62,14 +101,16 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     console.log("[generate] Moderation result:", moderation);
 
     let warnings: string[] = [];
-    try {
-      const feasibility = parseFeasibilityResponse(feasibilityResult.response.text());
-      warnings = feasibility.warnings;
-      if (warnings.length > 0) {
-        console.log("[generate] Feasibility warnings:", warnings);
+    if (feasibilityResult) {
+      try {
+        const feasibility = parseFeasibilityResponse(feasibilityResult.response.text());
+        warnings = feasibility.warnings;
+        if (warnings.length > 0) {
+          console.log("[generate] Feasibility warnings:", warnings);
+        }
+      } catch (e) {
+        console.warn("[generate] Feasibility check parse error, continuing:", e);
       }
-    } catch (e) {
-      console.warn("[generate] Feasibility check parse error, continuing:", e);
     }
 
     if (!moderation.isSafe) {
@@ -108,6 +149,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
           html = buildFallbackHtml(formData);
           usedFallback = true;
           warnings.push("AI生成に一時的な問題が発生したため、シンプルなテンプレートで生成しました。修正機能で調整できます。");
+        } else if (isRetryableGeminiError(error)) {
+          await sleep(GEMINI_RETRY_DELAYS_MS[Math.min(attempt - 1, GEMINI_RETRY_DELAYS_MS.length - 1)]);
         }
       }
     }
@@ -120,11 +163,16 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ html, moderation, warnings }, { status: 200 });
   } catch (error: unknown) {
     console.error("[generate] Error:", error);
-    await notifyCustomerError("generate", "生成API致命的エラー", {
-      error: error instanceof Error ? error.message : String(error),
-    });
-    const message = error instanceof Error ? error.message : "Internal server error";
-    return NextResponse.json({ error: message }, { status: 500 });
+    const retryable = isRetryableGeminiError(error);
+    if (!retryable) {
+      await notifyCustomerError("generate", "生成API致命的エラー", {
+        error: getErrorMessage(error),
+      });
+    }
+    const message = retryable
+      ? "AI生成サービスが混み合っています。自動再試行しても完了できませんでした。入力内容は保持されていますので、少し時間を置いて再試行してください。"
+      : getErrorMessage(error);
+    return NextResponse.json({ error: message, retryable }, { status: retryable ? 503 : 500 });
   }
 }
 
