@@ -1,7 +1,10 @@
 /**
  * Gemini API クライアント初期化モジュール
  *
- * 使用モデル: gemini-2.5-flash-lite（高速・低コスト・2.0-flashは429頻発のため移行）
+ * 使用モデル:
+ *   - 生成・修正の第一候補: gemini-2.5-flash
+ *   - /api/generate のフォールバック候補: gemini-2.5-flash-lite
+ *   - モデレーションの第一候補: gemini-2.5-flash-lite
  * 用途:
  *   - コンテンツモデレーション (prompts/moderation.ts)
  *   - HTML/CSS生成 (prompts/generator.ts)
@@ -25,34 +28,70 @@ function getGenAI(): GoogleGenerativeAI {
   return _genAI;
 }
 
-/** コンテンツ生成・修正に使用するモデル */
-export const geminiModel: GenerativeModel = new Proxy({} as GenerativeModel, {
-  get(_, prop) {
-    const model = getGenAI().getGenerativeModel({
-      model: "gemini-2.5-flash-lite",
-      generationConfig: {
-        temperature: 0.7,
-        maxOutputTokens: 8192,
-      },
-    });
-    return (model as unknown as Record<string | symbol, unknown>)[prop];
-  },
-});
+export interface GeminiModelCandidate {
+  modelName: string;
+  model: GenerativeModel;
+}
 
-/** コンテンツモデレーション専用モデル（低temperature・JSON出力）*/
-export const moderationModel: GenerativeModel = new Proxy({} as GenerativeModel, {
-  get(_, prop) {
-    const model = getGenAI().getGenerativeModel({
-      model: "gemini-2.5-flash-lite",
-      generationConfig: {
-        temperature: 0.1,
-        maxOutputTokens: 256,
-        responseMimeType: "application/json",
-      },
-    });
-    return (model as unknown as Record<string | symbol, unknown>)[prop];
-  },
-});
+const GENERATION_MODEL_CONFIG = {
+  temperature: 0.7,
+  maxOutputTokens: 8192,
+};
+
+const MODERATION_MODEL_CONFIG = {
+  temperature: 0.1,
+  maxOutputTokens: 256,
+  responseMimeType: "application/json",
+};
+
+function createGeminiModel(
+  modelName: string,
+  generationConfig: Record<string, string | number>
+): GenerativeModel {
+  return new Proxy({} as GenerativeModel, {
+    get(_, prop) {
+      const model = getGenAI().getGenerativeModel({
+        model: modelName,
+        generationConfig,
+      });
+      return (model as unknown as Record<string | symbol, unknown>)[prop];
+    },
+  });
+}
+
+/** コンテンツ生成・修正に使用する第一候補モデル */
+export const geminiModel: GenerativeModel = createGeminiModel(
+  "gemini-2.5-flash",
+  GENERATION_MODEL_CONFIG
+);
+
+/** コンテンツ生成・修正に使用するフォールバックモデル */
+export const geminiFallbackModel: GenerativeModel = createGeminiModel(
+  "gemini-2.5-flash-lite",
+  GENERATION_MODEL_CONFIG
+);
+
+export const geminiGenerationModels: GeminiModelCandidate[] = [
+  { modelName: "gemini-2.5-flash", model: geminiModel },
+  { modelName: "gemini-2.5-flash-lite", model: geminiFallbackModel },
+];
+
+/** コンテンツモデレーション専用の第一候補モデル（低temperature・JSON出力）*/
+export const moderationModel: GenerativeModel = createGeminiModel(
+  "gemini-2.5-flash-lite",
+  MODERATION_MODEL_CONFIG
+);
+
+/** コンテンツモデレーション専用のフォールバックモデル */
+export const moderationFallbackModel: GenerativeModel = createGeminiModel(
+  "gemini-2.5-flash",
+  MODERATION_MODEL_CONFIG
+);
+
+export const geminiModerationModels: GeminiModelCandidate[] = [
+  { modelName: "gemini-2.5-flash-lite", model: moderationModel },
+  { modelName: "gemini-2.5-flash", model: moderationFallbackModel },
+];
 
 // ---------------------------------------------------------------------------
 // 型定義

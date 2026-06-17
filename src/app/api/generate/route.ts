@@ -9,12 +9,12 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { geminiModel, moderationModel } from "@/lib/gemini";
+import { geminiGenerationModels, geminiModerationModels } from "@/lib/gemini";
 import { buildModerationPrompt, parseModerationResponse } from "@/prompts/moderation";
 import { buildGeneratorPrompt, parseGeneratorResponse } from "@/prompts/generator";
 import { buildFeasibilityPrompt, parseFeasibilityResponse } from "@/prompts/feasibility";
 import { notifyCustomerError } from "@/lib/slack";
-import type { SiteFormData } from "@/lib/gemini";
+import type { GeminiModelCandidate, SiteFormData } from "@/lib/gemini";
 
 // Puppeteer を使用する screenshot API と同様に Node.js ランタイムを指定
 export const runtime = "nodejs";
@@ -32,20 +32,26 @@ function getErrorMessage(error: unknown): string {
 function isRetryableGeminiError(error: unknown): boolean {
   const message = getErrorMessage(error);
   if (/missing gemini|api key/i.test(message)) return false;
-  return /503|502|504|429|high demand|service unavailable|overloaded|temporarily|timeout|fetch failed|googlegenerativeai/i.test(
+  return /503|502|504|429|high demand|service unavailable|overloaded|temporarily|timeout|fetch failed|googlegenerativeai|generated html does not contain/i.test(
     message
   );
 }
 
-async function withGeminiRetry<T>(label: string, operation: () => Promise<T>): Promise<T> {
+async function withGeminiModelFallback<T>(
+  label: string,
+  candidates: GeminiModelCandidate[],
+  operation: (candidate: GeminiModelCandidate) => Promise<T>
+): Promise<{ result: T; modelName: string }> {
   let lastError: unknown;
   for (let attempt = 1; attempt <= GEMINI_RETRY_DELAYS_MS.length + 1; attempt++) {
+    const candidate = candidates[(attempt - 1) % candidates.length];
     try {
-      return await operation();
+      const result = await operation(candidate);
+      return { result, modelName: candidate.modelName };
     } catch (error) {
       lastError = error;
       const retryable = isRetryableGeminiError(error);
-      console.warn(`[generate] ${label} attempt ${attempt} failed:`, error);
+      console.warn(`[generate] ${label} attempt ${attempt} failed with ${candidate.modelName}:`, error);
       if (!retryable || attempt > GEMINI_RETRY_DELAYS_MS.length) {
         break;
       }
@@ -88,25 +94,31 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       `サイト名: ${formData.siteName}\nキャッチコピー: ${formData.catchphrase}\n説明: ${formData.description}\n連絡先: ${formData.contactInfo}`
     );
 
-    const [moderationResult, feasibilityResult] = await Promise.all([
-      withGeminiRetry("moderation", () => moderationModel.generateContent(moderationPrompt)),
-      withGeminiRetry("feasibility", () => moderationModel.generateContent(feasibilityPrompt)).catch((error) => {
+    const [moderationAttempt, feasibilityAttempt] = await Promise.all([
+      withGeminiModelFallback("moderation", geminiModerationModels, (candidate) =>
+        candidate.model.generateContent(moderationPrompt)
+      ),
+      withGeminiModelFallback("feasibility", geminiModerationModels, (candidate) =>
+        candidate.model.generateContent(feasibilityPrompt)
+      ).catch((error) => {
         console.warn("[generate] Feasibility check failed after retries, continuing:", error);
         return null;
       }),
     ]);
 
+    const moderationResult = moderationAttempt.result;
     const moderationText = moderationResult.response.text();
     const moderation = parseModerationResponse(moderationText);
-    console.log("[generate] Moderation result:", moderation);
+    console.log("[generate] Moderation result:", moderation, "model:", moderationAttempt.modelName);
 
     let warnings: string[] = [];
-    if (feasibilityResult) {
+    if (feasibilityAttempt) {
       try {
+        const feasibilityResult = feasibilityAttempt.result;
         const feasibility = parseFeasibilityResponse(feasibilityResult.response.text());
         warnings = feasibility.warnings;
         if (warnings.length > 0) {
-          console.log("[generate] Feasibility warnings:", warnings);
+          console.log("[generate] Feasibility warnings:", warnings, "model:", feasibilityAttempt.modelName);
         }
       } catch (e) {
         console.warn("[generate] Feasibility check parse error, continuing:", e);
@@ -120,7 +132,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       );
     }
 
-    // --- Step 2: HTML生成（リトライ最大3回 + フォールバック） ---
+    // --- Step 2: HTML生成（Flash優先 + Liteフォールバック + テンプレート最終フォールバック） ---
     console.log("[generate] Generating HTML...");
     let generatorPrompt = buildGeneratorPrompt(formData);
 
@@ -130,37 +142,52 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     }
 
     let html = "";
-    let usedFallback = false;
+    let usedTemplateFallback = false;
+    let generationModelName = "";
 
-    for (let attempt = 1; attempt <= 3; attempt++) {
-      try {
-        const generationResult = await geminiModel.generateContent(generatorPrompt);
-        const rawHtml = generationResult.response.text();
-        html = parseGeneratorResponse(rawHtml);
-        break;
-      } catch (error) {
-        console.warn(`[generate] Attempt ${attempt} failed:`, error);
-        if (attempt === 3) {
-          console.error("[generate] All 3 attempts failed, using fallback template");
-          await notifyCustomerError("generate", "Gemini全リトライ失敗→フォールバック使用", {
-            siteName: formData.siteName, subdomain: formData.subdomain,
-            error: error instanceof Error ? error.message : String(error),
-          });
-          html = buildFallbackHtml(formData);
-          usedFallback = true;
-          warnings.push("AI生成に一時的な問題が発生したため、シンプルなテンプレートで生成しました。修正機能で調整できます。");
-        } else if (isRetryableGeminiError(error)) {
-          await sleep(GEMINI_RETRY_DELAYS_MS[Math.min(attempt - 1, GEMINI_RETRY_DELAYS_MS.length - 1)]);
+    try {
+      const generationAttempt = await withGeminiModelFallback(
+        "generation",
+        geminiGenerationModels,
+        async (candidate) => {
+          const generationResult = await candidate.model.generateContent(generatorPrompt);
+          const rawHtml = generationResult.response.text();
+          return parseGeneratorResponse(rawHtml);
         }
-      }
+      );
+      html = generationAttempt.result;
+      generationModelName = generationAttempt.modelName;
+    } catch (error) {
+      console.error("[generate] All model attempts failed, using fallback template");
+      await notifyCustomerError("generate", "Gemini全モデル失敗→フォールバック使用", {
+        siteName: formData.siteName, subdomain: formData.subdomain,
+        error: getErrorMessage(error),
+      });
+      html = buildFallbackHtml(formData);
+      usedTemplateFallback = true;
+      warnings.push("AI生成に一時的な問題が発生したため、シンプルなテンプレートで生成しました。修正機能で調整できます。");
     }
 
     // --- Step 3: 日本語テキスト品質チェック＆修正 ---
     html = postProcessHtml(html, formData);
-    console.log(`[generate] HTML ${usedFallback ? "fallback" : "generated"}, length:`, html.length);
+    console.log(
+      `[generate] HTML ${usedTemplateFallback ? "template fallback" : "generated"}, model: ${generationModelName || "template"}, length:`,
+      html.length
+    );
 
     // html をレスポンスに含める（screenshot API に渡すため）
-    return NextResponse.json({ html, moderation, warnings }, { status: 200 });
+    return NextResponse.json(
+      {
+        html,
+        moderation,
+        warnings,
+        meta: {
+          generationModel: generationModelName || "template",
+          templateFallback: usedTemplateFallback,
+        },
+      },
+      { status: 200 }
+    );
   } catch (error: unknown) {
     console.error("[generate] Error:", error);
     const retryable = isRetryableGeminiError(error);
