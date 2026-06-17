@@ -113,9 +113,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     }
 
     // --- Step 3: 日本語テキスト品質チェック＆修正 ---
-    if (!usedFallback) {
-      html = postProcessHtml(html);
-    }
+    html = postProcessHtml(html, formData);
     console.log(`[generate] HTML ${usedFallback ? "fallback" : "generated"}, length:`, html.length);
 
     // html をレスポンスに含める（screenshot API に渡すため）
@@ -134,7 +132,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 // 日本語テキスト品質チェック＆自動修正
 // ---------------------------------------------------------------------------
 
-function postProcessHtml(html: string): string {
+function postProcessHtml(html: string, formData: SiteFormData): string {
   let result = html;
 
   // 1. lang="ja" が設定されていなければ追加
@@ -172,7 +170,101 @@ function postProcessHtml(html: string): string {
   // 6. 不正な HTML エンティティの修正（日本語テキストで発生しやすい）
   result = result.replace(/&amp;(?=#|[a-zA-Z])/g, "&");
 
+  // 7. Q4（連絡先）に予約サイトなどのURLがある場合は、AI生成結果のブレに関係なくCTAとして残す
+  result = ensureContactUrlCta(result, formData.contactInfo);
+
   return result;
+}
+
+// ---------------------------------------------------------------------------
+// 連絡先URLの確実なCTA化
+// ---------------------------------------------------------------------------
+
+const CONTACT_URL_CTA_MARKER = "<!-- OPF_CONTACT_URL_CTA -->";
+
+function ensureContactUrlCta(html: string, contactInfo: string): string {
+  const urls = extractContactUrls(contactInfo);
+  if (urls.length === 0 || html.includes(CONTACT_URL_CTA_MARKER)) {
+    return html;
+  }
+
+  const allUrlsAlreadyLinked = urls.every((url) =>
+    html.includes(`href="${url}"`) || html.includes(`href='${url}'`)
+  );
+  if (allUrlsAlreadyLinked) {
+    return html;
+  }
+
+  const isReservation = /予約|reserve|reservation|booking/i.test(contactInfo);
+  const label = isReservation ? "予約サイトはこちら" : "お問い合わせはこちら";
+  const links = urls
+    .map((url, index) => {
+      const displayLabel = urls.length === 1 ? label : `${label} ${index + 1}`;
+      return `<a href="${escapeAttribute(url)}" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;justify-content:center;gap:0.5rem;min-height:44px;padding:0.875rem 1.25rem;border-radius:9999px;background:#2563eb;color:#fff;font-weight:700;text-decoration:none;box-shadow:0 10px 24px rgba(37,99,235,0.22);">${escapeHtml(displayLabel)} <span aria-hidden="true">&#8599;</span></a>`;
+    })
+    .join("\n");
+
+  const ctaBlock = `
+${CONTACT_URL_CTA_MARKER}
+<div data-opf-contact-url-cta="true" style="margin-top:1.5rem;text-align:center;">
+${links}
+</div>`;
+
+  const contactSectionPattern = /(<section\b(?=[^>]*\bid=["'][^"']*contact[^"']*["'])[^>]*>[\s\S]*?)(<\/section>)/i;
+  if (contactSectionPattern.test(html)) {
+    return html.replace(contactSectionPattern, `$1${ctaBlock}\n$2`);
+  }
+
+  if (html.includes("</body>")) {
+    return html.replace("</body>", `${ctaBlock}\n</body>`);
+  }
+
+  return `${html}${ctaBlock}`;
+}
+
+function extractContactUrls(text: string): string[] {
+  const candidates: string[] = [];
+  const urlMatches = text.match(/https?:\/\/[^\s<>"'`]+|www\.[^\s<>"'`]+/gi) ?? [];
+  candidates.push(...urlMatches);
+
+  const bareDomainPattern = /(^|[\s（(])((?:[a-z0-9-]+\.)+(?:co\.jp|or\.jp|ne\.jp|com|net|jp|org|info|shop|site|tokyo|clinic)(?:\/[^\s<>"'`）)]*)?)/gi;
+  for (const match of text.matchAll(bareDomainPattern)) {
+    if (match[2]) candidates.push(match[2]);
+  }
+
+  const normalized = candidates
+    .map(normalizeContactUrl)
+    .filter((url): url is string => Boolean(url));
+
+  return Array.from(new Set(normalized));
+}
+
+function normalizeContactUrl(candidate: string): string | null {
+  const stripped = candidate
+    .trim()
+    .replace(/[、。，．,.;:!?！？）)\]】」』>]+$/g, "");
+  if (!stripped) return null;
+
+  const withScheme = /^https?:\/\//i.test(stripped) ? stripped : `https://${stripped}`;
+  try {
+    const url = new URL(withScheme);
+    if (url.protocol !== "http:" && url.protocol !== "https:") return null;
+    return url.toString();
+  } catch {
+    return null;
+  }
+}
+
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+function escapeAttribute(value: string): string {
+  return escapeHtml(value).replace(/'/g, "&#39;");
 }
 
 // ---------------------------------------------------------------------------

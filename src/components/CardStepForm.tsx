@@ -92,16 +92,13 @@ export default function CardStepForm({ onSubmit, isSubmitting, onFirstInteractio
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState<SiteFormData>(INITIAL_FORM_DATA);
   const [errors, setErrors] = useState<FormErrors>({});
-  // アニメーション用: ステップ変更のたびにキーを更新してフェードインを再発火
-  const [animationKey, setAnimationKey] = useState(0);
   const [moderating, setModerating] = useState(false);
   const [moderationError, setModerationError] = useState<string | null>(null);
 
   const firstInputRef = useRef<HTMLInputElement | HTMLTextAreaElement | null>(null);
 
-  // ステップ変更時にフォーカスをリセット & アニメーション再発火
+  // ステップ変更時にフォーカスをリセット
   useEffect(() => {
-    setAnimationKey((prev) => prev + 1);
     // 少し遅延させてDOMが更新された後にフォーカス
     const timer = setTimeout(() => {
       firstInputRef.current?.focus();
@@ -253,7 +250,7 @@ export default function CardStepForm({ onSubmit, isSubmitting, onFirstInteractio
 
       {/* カード本体 */}
       <div
-        key={animationKey}
+        key={currentStep}
         className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 sm:p-8"
         style={{
           animation: "fadeSlideIn 0.35s ease both",
@@ -526,7 +523,7 @@ function StepContact({ value, error, onChange, textareaRef }: StepContactProps) 
         ref={textareaRef}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        placeholder={`例: 電話: 03-1234-5678\nメール: info@example.com\n住所: 東京都渋谷区〇〇1-2-3\nInstagram: @example`}
+        placeholder={`例: 電話: 03-1234-5678\nメール: info@example.com\n予約サイト: https://example.com/reserve\n住所: 東京都渋谷区〇〇1-2-3`}
         rows={4}
         className={`w-full px-4 py-3 rounded-xl border text-sm text-gray-900 bg-white transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-none ${
           error ? "border-red-400 bg-red-50" : "border-gray-200 focus:border-indigo-400"
@@ -534,7 +531,7 @@ function StepContact({ value, error, onChange, textareaRef }: StepContactProps) 
       />
       {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
       <p className="mt-1.5 text-xs text-gray-400">
-        電話・メール・SNS・住所など、載せたい情報を自由に記入してください
+        電話・メール・予約サイトURL・SNS・住所など、載せたい情報を自由に記入してください
       </p>
     </div>
   );
