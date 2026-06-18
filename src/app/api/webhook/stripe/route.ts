@@ -25,7 +25,7 @@ import {
   query,
   insertAdEvent,
 } from "@/lib/db";
-import { getDraftHTML, deleteDraftHTML, deactivateSite, reactivateSite } from "@/lib/r2";
+import { getDraftHTML, deleteDraftHTML, deactivateSite } from "@/lib/r2";
 import { sendSiteCompletionEmail, sendPaymentFailureEmail } from "@/lib/email";
 import { notifyCustomerError } from "@/lib/slack";
 import type Stripe from "stripe";
@@ -217,10 +217,21 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session): Promis
 
       let subscriptionRecord = null;
       if (stripeSubscriptionId) {
+        const stripeSubscription = await stripe.subscriptions.retrieve(stripeSubscriptionId);
+        const subData = stripeSubscription as unknown as Record<string, unknown>;
+        const currentPeriodStart = typeof subData.current_period_start === "number"
+          ? new Date((subData.current_period_start as number) * 1000)
+          : undefined;
+        const currentPeriodEnd = typeof subData.current_period_end === "number"
+          ? new Date((subData.current_period_end as number) * 1000)
+          : undefined;
+
         subscriptionRecord = await createSubscription({
           userId: user.id,
           stripeSubscriptionId,
-          status: "active",
+          status: stripeSubscription.status,
+          currentPeriodStart,
+          currentPeriodEnd,
         });
       }
 

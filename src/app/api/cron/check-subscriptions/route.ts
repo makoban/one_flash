@@ -27,7 +27,7 @@ import {
   updateSubscriptionStatus,
   updateSiteIsActive,
 } from "@/lib/db";
-import { deactivateSite, reactivateSite, getSitePublicUrl } from "@/lib/r2";
+import { deactivateSite, reactivateSite } from "@/lib/r2";
 import { notifySlack } from "@/lib/slack";
 import { sendRenewalReminderEmail } from "@/lib/email";
 import type Stripe from "stripe";
@@ -82,8 +82,16 @@ interface BatchResult {
   deactivated: string[];
   reactivated: string[];
   statusUpdated: string[];
+  statusSyncedSilently: string[];
   errors: string[];
   skipped: number;
+}
+
+function isRoutineStripeStatusSync(from: string | null, to: string): boolean {
+  return (
+    (from === "active" && to === "trialing") ||
+    (from === "trialing" && to === "active")
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -109,6 +117,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     deactivated: [],
     reactivated: [],
     statusUpdated: [],
+    statusSyncedSilently: [],
     errors: [],
     skipped: 0,
   };
@@ -267,9 +276,12 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
             );
           }
 
-          result.statusUpdated.push(
-            `${site.subdomain}: ${site.subscription_status} -> ${stripeStatus}`
-          );
+          const statusSyncLabel = `${site.subdomain}: ${site.subscription_status} -> ${stripeStatus}`;
+          if (isRoutineStripeStatusSync(site.subscription_status, stripeStatus)) {
+            result.statusSyncedSilently.push(statusSyncLabel);
+          } else {
+            result.statusUpdated.push(statusSyncLabel);
+          }
           console.log(
             `[cron/check-subscriptions] Status synced: ${site.subdomain} ${site.subscription_status} -> ${stripeStatus}`
           );
@@ -304,6 +316,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       `[cron/check-subscriptions] Batch completed in ${elapsed}s: ` +
         `checked=${result.checked}, deactivated=${result.deactivated.length}, ` +
         `reactivated=${result.reactivated.length}, updated=${result.statusUpdated.length}, ` +
+        `silentUpdated=${result.statusSyncedSilently.length}, ` +
         `errors=${result.errors.length}, skipped=${result.skipped}`
     );
 
