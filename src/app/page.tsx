@@ -2,8 +2,7 @@
  * / ページ (LP - ランディングページ)
  *
  * OnePage-Flash のサービス紹介LP。
- * ダークテーマ・プレミアムデザイン。
- * 作品例はスクリーンショット画像で表示し、リンクで実物を見せる。
+ * チラシ調の強い価格訴求と、条件が合う人向けのシンプルHP制作導線。
  */
 
 "use client";
@@ -13,15 +12,8 @@ import Link from "next/link";
 import Image from "next/image";
 import UtmCapture from "@/components/UtmCapture";
 
-/**
- * Google Ads コンバージョンイベントを発火する。
- * グローバルタグ（AW-17822680636）は layout.tsx で設置済み。
- * window.gtag は layout.tsx のインラインスクリプトで定義されるため
- * unknown キャストでアクセスする。
- */
 function fireConversionEvent(): void {
   if (typeof window === "undefined") return;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const gtagFn = (window as unknown as Record<string, unknown>)["gtag"] as ((...args: unknown[]) => void) | undefined;
   if (typeof gtagFn === "function") {
     gtagFn("event", "conversion", {
@@ -32,11 +24,6 @@ function fireConversionEvent(): void {
   }
 }
 
-/**
- * CTA クリック時にコンバージョンを発火し、300ms 後に遷移する。
- * Next.js の Link では href="/create" の内部遷移を使いつつ、
- * gtag のタグ送信を確保するために setTimeout でわずかに遅延させる。
- */
 function handleCtaClick(e: React.MouseEvent<HTMLAnchorElement>): void {
   e.preventDefault();
   const href = (e.currentTarget as HTMLAnchorElement).href;
@@ -44,6 +31,22 @@ function handleCtaClick(e: React.MouseEvent<HTMLAnchorElement>): void {
   setTimeout(() => {
     window.location.href = href;
   }, 300);
+}
+
+function CheckIcon({ className = "h-4 w-4" }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.4} d="M5 13l4 4L19 7" />
+    </svg>
+  );
+}
+
+function ArrowIcon({ className = "h-5 w-5" }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+    </svg>
+  );
 }
 
 const WORKER_BASE = "https://sites.oneflash.net/s";
@@ -56,12 +59,55 @@ const SAMPLES = [
   { slug: "sample-shanti", label: "ヨガスタジオ", time: "6分", img: "/samples/pc-5.png" },
 ];
 
+const CONDITIONS = [
+  {
+    num: "1",
+    title: "画像無し",
+    body: "写真素材の準備や差し替えにこだわらず、文章中心のシンプルなHPで作ります。",
+  },
+  {
+    num: "2",
+    title: "1ページ超シンプル",
+    body: "会社概要、サービス、連絡先を1ページにまとめます。複雑な下層ページは作りません。",
+  },
+  {
+    num: "3",
+    title: "URLなんでもOK",
+    body: "覚えやすさや独自ドメインに強くこだわらず、発行されたURLでそのまま公開します。",
+  },
+];
+
+const PAINS = [
+  "制作会社の見積もりが高く、HPを後回しにしている",
+  "写真やデザインを決める時間がなく、いつまでも公開できない",
+  "まずは名刺代わりの1ページがあれば十分",
+  "店名や屋号で検索された時に、最低限の受け皿がほしい",
+];
+
+const FLOW = [
+  {
+    step: "1",
+    title: "6つの質問に答える",
+    body: "屋号、サービス内容、強み、連絡先などをスマホから入力します。",
+  },
+  {
+    step: "2",
+    title: "AIがページを生成",
+    body: "入力内容をもとに、文章中心の1ページHPを自動生成します。",
+  },
+  {
+    step: "3",
+    title: "プレビュー後に決済",
+    body: "内容を見てから決済。公開URLと修正リンクをメールで受け取れます。",
+  },
+];
+
 const jsonLd = {
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
   "name": "OnePage-Flash",
   "applicationCategory": "WebApplication",
-  "description": "テキストを打ち込むだけでAIが美しいホームページを自動生成するサービス。個人事業主・フリーランス・店舗オーナー向け。",
+  "description": "こだわりを抑えた1ページのホームページをAIで自動生成するサービス。初期3,980円（税込）+ 月額480円（税込・初月無料）。",
   "url": "https://oneflash.bantex.jp",
   "operatingSystem": "Web",
   "offers": {
@@ -77,78 +123,78 @@ const jsonLd = {
   },
   "featureList": [
     "AIによるホームページ自動生成",
-    "テキスト入力のみで完成",
-    "レスポンシブデザイン対応",
-    "独自サブドメイン付与",
-    "3つのデザインテーマ",
+    "画像無しのシンプル1ページ制作",
+    "プレビュー確認後の決済",
+    "サーバー・SSL込み",
+    "月2回の修正込み",
   ],
 };
 
 export default function HomePage() {
-  // スクロール計測: 各セクションが30%以上表示されたタイミングでBeacon送信
   useEffect(() => {
-    const sid = localStorage.getItem('_bx_sid') || crypto.randomUUID();
-    localStorage.setItem('_bx_sid', sid);
-    const dt = window.innerWidth < 768 ? 'mobile' : 'desktop';
-    const ref = document.referrer || '';
+    const sid = localStorage.getItem("_bx_sid") || crypto.randomUUID();
+    localStorage.setItem("_bx_sid", sid);
+    const dt = window.innerWidth < 768 ? "mobile" : "desktop";
+    const ref = document.referrer || "";
     const sent: Record<string, boolean> = {};
 
     const observer = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
         if (!entry.isIntersecting) return;
-        const secId = entry.target.getAttribute('data-section') || entry.target.id;
+        const secId = entry.target.getAttribute("data-section") || entry.target.id;
         if (!secId || sent[secId]) return;
         sent[secId] = true;
         const blob = new Blob([JSON.stringify({
-          session_id: sid, service_key: 'onepage-flash',
-          section_id: secId, device_type: dt, referrer: ref
-        })], { type: 'application/json' });
-        navigator.sendBeacon('https://bantex-ads-dashboard.onrender.com/api/track/scroll', blob);
+          session_id: sid,
+          service_key: "onepage-flash",
+          section_id: secId,
+          device_type: dt,
+          referrer: ref,
+        })], { type: "application/json" });
+        navigator.sendBeacon("https://bantex-ads-dashboard.onrender.com/api/track/scroll", blob);
       });
     }, { threshold: 0.3 });
 
-    document.querySelectorAll('section[id]').forEach((el) => observer.observe(el));
+    document.querySelectorAll("section[id]").forEach((el) => observer.observe(el));
     return () => observer.disconnect();
   }, []);
 
   return (
-    <main className="min-h-screen bg-[#0F0F1A] text-slate-100 overflow-x-hidden">
+    <main className="min-h-screen overflow-x-hidden bg-white text-zinc-950">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <UtmCapture trackPageView />
 
-      {/* LINE フローティングボタン */}
       <a
         href="https://lin.ee/5b8JT4C"
         target="_blank"
         rel="noopener noreferrer"
-        className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 flex items-center gap-1.5 bg-[#06C755] hover:bg-[#05b04c] text-white font-bold px-3 py-2 sm:px-4 sm:py-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 text-[2.8vw] sm:text-sm"
+        className="fixed bottom-4 right-4 z-50 inline-flex items-center gap-2 rounded-full bg-[#06C755] px-4 py-3 text-sm font-bold text-white shadow-xl transition hover:bg-[#05b04c] sm:bottom-6 sm:right-6"
       >
-        <svg className="w-4 h-4 sm:w-5 sm:h-5" viewBox="0 0 24 24" fill="currentColor">
+        <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
           <path d="M19.365 9.863c.349 0 .63.285.63.631 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63h2.386c.346 0 .627.285.627.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595.06-.023.136-.033.194-.033.195 0 .375.104.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63.346 0 .628.285.628.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.282.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314" />
         </svg>
         LINEで相談
       </a>
 
-      {/* ナビゲーション */}
-      <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md bg-[#0F0F1A]/80 border-b border-[#2D2D44]">
-        <div className="max-w-6xl mx-auto px-2 sm:px-6 lg:px-8 h-12 sm:h-16 flex items-center justify-between whitespace-nowrap">
-          <span className="font-black text-[3vw] sm:text-lg tracking-tight">
-            OnePage<span className="text-amber-400">-Flash</span>
+      <nav className="fixed left-0 right-0 top-0 z-50 border-b border-zinc-200 bg-white/92 backdrop-blur-md">
+        <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:h-16 sm:px-6 lg:px-8">
+          <span className="text-base font-black sm:text-lg">
+            OnePage<span className="text-orange-500">-Flash</span>
           </span>
-          <div className="flex items-center gap-1.5 sm:gap-3">
+          <div className="flex items-center gap-2 sm:gap-4">
             <Link
               href="/edit"
-              className="px-2 py-1 sm:px-4 sm:py-2 text-slate-400 text-[2.6vw] sm:text-sm font-medium hover:text-slate-200 transition-colors"
+              className="text-sm font-bold text-zinc-600 transition hover:text-zinc-950"
             >
               サイト修正
             </Link>
             <Link
               href="/create"
               onClick={handleCtaClick}
-              className="px-2.5 py-1.5 sm:px-5 sm:py-2.5 bg-amber-500 text-gray-900 text-[2.6vw] sm:text-sm font-bold rounded-md sm:rounded-lg hover:bg-amber-400 transition-all duration-300 shadow-[0_0_20px_rgba(245,158,11,0.25)] hover:shadow-[0_0_30px_rgba(245,158,11,0.4)]"
+              className="rounded-full bg-orange-500 px-4 py-2 text-sm font-black text-white shadow-lg shadow-orange-500/25 transition hover:bg-orange-600 sm:px-5"
             >
               今すぐ作成
             </Link>
@@ -156,491 +202,324 @@ export default function HomePage() {
         </div>
       </nav>
 
-      {/* ヒーローセクション */}
-      <section id="hero" className="relative overflow-hidden pt-16 sm:pt-20 pb-6 sm:pb-10">
-        {/* 背景: 暖色アンビエントグロー */}
-        <div className="absolute inset-0 bg-gradient-to-br from-indigo-900/20 via-transparent to-amber-900/10" />
-        <div className="absolute top-1/3 left-1/4 w-96 h-96 bg-amber-500/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-indigo-500/5 rounded-full blur-3xl" />
+      <section id="hero" className="bg-yellow-300 pt-14 sm:pt-16">
+        <div className="sr-only">
+          <h1>HPは、こだわりを捨てろ。こだわりないならホームページ制作は3,980円税込、月額480円税込で最短5分。</h1>
+          <p>画像無し、1ページ超シンプル、発行URLなんでもOKなら、OnePage-Flashでプレビューを見てから決済できます。</p>
+        </div>
 
-        <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 w-full">
-          <div className="flex flex-col lg:flex-row lg:items-start items-center gap-5 lg:gap-10">
-            {/* 左カラム: テキスト + CTA */}
-            <div className="flex-1 text-center lg:text-left lg:pt-4">
-              <p className="inline-block px-3 py-1 bg-amber-500/10 text-amber-400 border border-amber-500/20 text-xs font-semibold rounded-full mb-3 sm:mb-4 tracking-wider">
-                AI自動生成 · 最短10分 · 月額480円
-              </p>
+        <Link
+          href="/create"
+          onClick={handleCtaClick}
+          aria-label="OnePage-Flashでホームページをプレビューする"
+          className="block"
+        >
+          <Image
+            src="/campaign/oneflash-flyer-desktop.png"
+            alt="HPは、こだわりを捨てろ。こだわりないなら3,980円税込、最短5分、月額480円税込のOnePage-Flashチラシ"
+            width={1672}
+            height={941}
+            priority
+            className="hidden h-auto w-full md:block"
+          />
+          <Image
+            src="/campaign/oneflash-flyer-mobile.png"
+            alt="HPは、こだわりを捨てろ。スマホ向けOnePage-Flashチラシ"
+            width={941}
+            height={1672}
+            priority
+            className="block h-auto w-full md:hidden"
+          />
+        </Link>
+      </section>
 
-              <h1 className="text-2xl sm:text-3xl lg:text-[2.7rem] font-black leading-[1.25] sm:leading-[1.2] mb-3 sm:mb-4">
-                今日中に、あなたの<br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-amber-500">ホームページ</span>が<br className="hidden lg:block" />完成します。
-              </h1>
-
-              <p className="text-sm sm:text-base text-slate-300 leading-relaxed mb-2 sm:mb-3">
-                6つの質問に答えるだけ。<br className="hidden sm:block" />AIがプロ品質のHPを自動生成。<br className="hidden sm:block" />初期3,980円 + 月額480円。サーバー・SSL込み。
-              </p>
-
-              {/* トラストシグナル */}
-              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-x-3 gap-y-0.5 text-xs text-slate-400 mb-4 sm:mb-5">
-                <span className="flex items-center gap-1">
-                  <svg className="w-3.5 h-3.5 text-amber-400" fill="currentColor" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/></svg>
-                  初月無料
-                </span>
-                <span className="flex items-center gap-1">
-                  <svg className="w-3.5 h-3.5 text-amber-400" fill="currentColor" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/></svg>
-                  いつでも解約可
-                </span>
-                <span className="flex items-center gap-1">
-                  <svg className="w-3.5 h-3.5 text-amber-400" fill="currentColor" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/></svg>
-                  プレビュー後に決済
-                </span>
-              </div>
-
-              <div className="flex flex-col sm:flex-row gap-2.5 sm:gap-3 justify-center lg:justify-start">
-                <Link
-                  href="/create"
-                  onClick={handleCtaClick}
-                  className="inline-flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-400 text-gray-900 font-bold px-6 py-3 sm:px-8 sm:py-3.5 rounded-xl text-base sm:text-lg transition-all duration-300 hover:scale-105 shadow-[0_0_30px_rgba(245,158,11,0.35)] hover:shadow-[0_0_50px_rgba(245,158,11,0.55)]"
-                >
-                  無料でサイトを見てみる
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
-                </Link>
-                <Link
-                  href="/edit"
-                  className="inline-flex items-center justify-center gap-1.5 border border-slate-600 hover:border-amber-500/50 text-slate-300 hover:text-amber-400 font-medium px-6 py-3 sm:px-8 sm:py-3.5 rounded-xl text-base sm:text-lg transition-all duration-300"
-                >
-                  既存サイトを修正する
-                </Link>
-              </div>
+      <section id="conditions" className="bg-yellow-300 px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
+        <div className="mx-auto max-w-7xl">
+          <div className="mb-7 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="text-sm font-black text-red-700">この条件なら、速い。</p>
+              <h2 className="text-3xl font-black leading-tight text-zinc-950 sm:text-4xl">
+                3つのこだわりが無ければOK
+              </h2>
             </div>
+            <p className="max-w-xl text-sm font-bold leading-relaxed text-zinc-800 sm:text-base">
+              高級なフルオーダーHPではありません。まず公開するための、割り切った1ページ制作です。
+            </p>
+          </div>
 
-            {/* 右カラム: サンプルサイト画像2枚 */}
-            <div className="flex-1 w-full max-w-sm lg:max-w-md relative">
-              <div className="relative">
-                {/* PC サンプル（税理士事務所） */}
-                <a
-                  href={`${WORKER_BASE}/sample-tax`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block rounded-xl overflow-hidden border border-[#2D2D44] hover:border-amber-500/50 transition-all duration-500 shadow-2xl hover:shadow-amber-500/10 group"
-                >
-                  <Image
-                    src="/samples/pc-1.png"
-                    alt="AIが作った税理士事務所のホームページ"
-                    width={640}
-                    height={360}
-                    className="w-full h-auto object-cover group-hover:scale-[1.02] transition-transform duration-500"
-                    priority
-                  />
-                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-3">
-                    <span className="text-xs text-white/80">税理士事務所 · 8分で完成</span>
-                  </div>
-                </a>
-                {/* モバイル サンプル（美容室）— 右下にオーバーラップ */}
-                <a
-                  href={`${WORKER_BASE}/sample-bloom`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="absolute -bottom-4 -right-2 sm:-right-4 w-24 sm:w-32 rounded-lg overflow-hidden border-2 border-[#0F0F1A] shadow-xl hover:shadow-amber-500/10 transition-all duration-500 group"
-                >
-                  <Image
-                    src="/samples/pc-2.png"
-                    alt="AIが作った美容室のホームページ"
-                    width={320}
-                    height={180}
-                    className="w-full h-auto object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                </a>
-              </div>
-              {/* サンプルセクションへの誘導 */}
-              <a href="#samples" className="block text-center mt-6 text-xs text-slate-500 hover:text-amber-400 transition-colors">
-                他3業種のサンプルも見る ↓
-              </a>
-            </div>
+          <div className="mb-8 overflow-hidden rounded-lg border-2 border-zinc-950 bg-white shadow-[8px_8px_0_#18181b]">
+            <Image
+              src="/campaign/conditions-panel.png"
+              alt="3つのこだわりが無ければOK。画像無し、1ページ超シンプル、URLなんでもOKの条件説明"
+              width={1536}
+              height={1024}
+              loading="eager"
+              className="h-auto w-full"
+            />
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-3">
+            {CONDITIONS.map((item) => (
+              <article key={item.num} className="rounded-lg border-2 border-zinc-950 bg-white p-5 shadow-[6px_6px_0_#18181b]">
+                <div className="mb-4 flex items-center gap-3">
+                  <span className="flex h-12 w-12 items-center justify-center rounded-full bg-orange-500 text-2xl font-black text-white">
+                    {item.num}
+                  </span>
+                  <h3 className="text-2xl font-black text-zinc-950">{item.title}</h3>
+                </div>
+                <p className="text-sm font-bold leading-relaxed text-zinc-700">{item.body}</p>
+              </article>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* 作品例セクション — iframe で実サイト縮小表示 */}
-      <section id="samples" className="bg-[#1A1A2E] py-14 sm:py-20 md:py-28 px-2 sm:px-4">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-[4.2vw] sm:text-3xl md:text-4xl font-bold text-center mb-2 sm:mb-3 whitespace-nowrap">
-            AIが<span className="text-amber-400">実際に作った</span>サイト
-          </h2>
-          <p className="text-center text-slate-400 text-[2.7vw] sm:text-base mb-8 sm:mb-14 whitespace-nowrap">
-            全部3,980円。クリックで実物をご覧ください。
-          </p>
+      <section id="pain" className="bg-white px-4 py-12 sm:px-6 sm:py-18 lg:px-8">
+        <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[0.85fr_1.15fr] lg:items-center">
+          <div>
+            <p className="text-sm font-black text-orange-600">作り込む前に、まず出す。</p>
+            <h2 className="mt-2 text-3xl font-black leading-tight text-zinc-950 sm:text-5xl">
+              HPが無いままの機会損失を、今日で止める。
+            </h2>
+            <p className="mt-4 text-base font-bold leading-relaxed text-zinc-700">
+              写真、デザイン、独自URLに悩んで止まっているなら、まずはこだわりを削った1ページで十分です。
+            </p>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {PAINS.map((item) => (
+              <div key={item} className="flex gap-3 rounded-lg border border-zinc-200 bg-zinc-50 p-4">
+                <CheckIcon className="mt-0.5 h-5 w-5 flex-none text-red-600" />
+                <p className="text-sm font-bold leading-relaxed text-zinc-800">{item}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-            {SAMPLES.map((s) => (
+      <section id="samples" className="bg-zinc-950 px-4 py-12 text-white sm:px-6 sm:py-18 lg:px-8">
+        <div className="mx-auto max-w-7xl">
+          <div className="mb-8 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="text-sm font-black text-yellow-300">AIが実際に作ったサンプル</p>
+              <h2 className="text-3xl font-black leading-tight sm:text-4xl">
+                1ページでも、最低限の信頼は作れる。
+              </h2>
+            </div>
+            <p className="max-w-xl text-sm font-bold leading-relaxed text-zinc-300 sm:text-base">
+              業種の雰囲気に合わせたサンプルです。クリックすると実物を確認できます。
+            </p>
+          </div>
+
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {SAMPLES.map((sample) => (
               <a
-                key={s.slug}
-                href={`${WORKER_BASE}/${s.slug}`}
+                key={sample.slug}
+                href={`${WORKER_BASE}/${sample.slug}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group block rounded-xl sm:rounded-2xl overflow-hidden border border-[#2D2D44] hover:border-amber-500/50 transition-all duration-300 bg-[#1E2035]"
+                className="group overflow-hidden rounded-lg border border-zinc-700 bg-white text-zinc-950 transition hover:-translate-y-1 hover:border-yellow-300"
               >
-                {/* スクリーンショット画像 */}
-                <div className="relative w-full h-40 sm:h-48 md:h-56 overflow-hidden">
+                <div className="relative h-52 overflow-hidden bg-zinc-100">
                   <Image
-                    src={s.img}
-                    alt={`${s.label}のホームページ`}
+                    src={sample.img}
+                    alt={`AIが作った${sample.label}のホームページサンプル`}
                     width={640}
                     height={360}
-                    className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"
+                    loading="eager"
+                    className="h-full w-full object-cover object-top transition duration-500 group-hover:scale-105"
                   />
                 </div>
-                {/* ラベル */}
-                <div className="p-3 sm:p-4 flex items-center justify-between">
-                  <div className="text-center sm:text-left flex-1">
-                    <span className="text-slate-200 font-semibold text-xs sm:text-sm">{s.label}</span>
-                    <span className="ml-2 text-amber-400 text-[10px] sm:text-xs font-medium">
-                      {s.time}で完成
-                    </span>
+                <div className="flex items-center justify-between p-4">
+                  <div>
+                    <p className="font-black">{sample.label}</p>
+                    <p className="text-sm font-bold text-orange-600">{sample.time}で完成</p>
                   </div>
-                  <span className="text-slate-500 group-hover:text-amber-400 text-[10px] sm:text-xs transition-colors">
-                    実物を見る →
+                  <span className="text-sm font-black text-zinc-700 group-hover:text-orange-600">
+                    実物を見る
                   </span>
                 </div>
               </a>
             ))}
-
-            {/* 最後のカード: CTA */}
             <Link
               href="/create"
               onClick={handleCtaClick}
-              className="flex flex-col items-center justify-center rounded-xl sm:rounded-2xl border-2 border-dashed border-[#2D2D44] hover:border-amber-500/50 transition-all duration-300 p-6 sm:p-8 min-h-[200px] sm:min-h-[320px]"
+              className="flex min-h-72 flex-col justify-between rounded-lg border-2 border-dashed border-yellow-300 p-6 text-yellow-300 transition hover:bg-yellow-300 hover:text-zinc-950"
             >
-              <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-amber-500/10 flex items-center justify-center mb-3 sm:mb-4">
-                <svg className="w-6 h-6 sm:w-8 sm:h-8 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
-              </div>
-              <span className="text-amber-400 font-bold text-sm sm:text-lg">あなたのサイトを作る</span>
-              <span className="text-slate-500 text-xs sm:text-sm mt-1 sm:mt-2">10分で完成します</span>
+              <span className="text-sm font-black">あなたの業種でも</span>
+              <span className="text-3xl font-black leading-tight">まずはAIでプレビュー</span>
+              <span className="inline-flex items-center gap-2 text-base font-black">
+                作ってみる
+                <ArrowIcon />
+              </span>
             </Link>
           </div>
         </div>
       </section>
 
-      {/* お悩みセクション */}
-      <section id="pain" className="bg-[#0F0F1A] py-14 sm:py-20 md:py-28 px-2 sm:px-4">
-        <div className="max-w-4xl mx-auto">
-          <h2 className="text-[4.2vw] sm:text-3xl md:text-4xl font-bold text-center mb-3 sm:mb-4 whitespace-nowrap">
-            HPが<span className="text-amber-400">ない</span>だけで、損してませんか？
-          </h2>
-          <p className="text-center text-slate-400 text-[2.8vw] sm:text-base mb-8 sm:mb-14 whitespace-nowrap">
-            「作りたいけど高い・難しい・時間ない」——もう言い訳は不要です
-          </p>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-            {[
-              { icon: "M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z", text: "制作会社の見積もり10万円以上…\n個人事業主には高すぎる" },
-              { icon: "M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z", text: "本業が忙しすぎて\nHP制作なんて後回し" },
-              { icon: "M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z", text: "自作しようとしたけど\n結局挫折して未完成のまま" },
-              { icon: "M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z", text: "「お店の名前 + 地域名」で\n検索しても何も出てこない" },
-            ].map((item) => (
-              <div
-                key={item.text}
-                className="flex items-center sm:items-start gap-3 sm:gap-4 p-4 sm:p-5 bg-[#1E2035] rounded-xl sm:rounded-2xl border border-[#2D2D44] hover:border-red-500/30 transition-colors duration-300 text-center sm:text-left flex-col sm:flex-row"
-              >
-                <div className="flex-shrink-0 w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-red-500/10 flex items-center justify-center">
-                  <svg className="w-4 h-4 sm:w-5 sm:h-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={item.icon} />
-                  </svg>
-                </div>
-                <p className="text-slate-300 leading-relaxed whitespace-pre-line text-[2.8vw] sm:text-base">{item.text}</p>
-              </div>
-            ))}
+      <section id="steps" className="bg-white px-4 py-12 sm:px-6 sm:py-18 lg:px-8">
+        <div className="mx-auto max-w-6xl">
+          <div className="mx-auto mb-8 max-w-3xl text-center">
+            <p className="text-sm font-black text-orange-600">手順はシンプル</p>
+            <h2 className="mt-2 text-3xl font-black leading-tight text-zinc-950 sm:text-4xl">
+              スマホから入力して、プレビューを見てから決済。
+            </h2>
           </div>
 
-          <p className="text-center mt-8 sm:mt-10 text-[3vw] sm:text-lg text-slate-300 whitespace-nowrap">
-            <span className="text-amber-400 font-bold">OnePage-Flash</span> なら、すべて解決。
-          </p>
-        </div>
-      </section>
-
-      {/* 聞かれる6つの質問セクション */}
-      <section id="questions" className="bg-[#0F0F1A] py-14 sm:py-20 md:py-28 px-2 sm:px-4">
-        <div className="max-w-3xl mx-auto">
-          <h2 className="text-[4.2vw] sm:text-3xl md:text-4xl font-bold text-center mb-3 sm:mb-4 whitespace-nowrap">
-            聞かれるのは<span className="text-amber-400">たった6つ</span>
-          </h2>
-          <p className="text-center text-slate-400 text-[2.7vw] sm:text-base mb-8 sm:mb-14 whitespace-nowrap">
-            この6つに答えるだけ。あとはAIが全部やります
-          </p>
-
-          <div className="space-y-3 sm:space-y-4">
-            {[
-              {
-                num: "Q1",
-                question: "どんなお仕事をされていますか？屋号や事業名は？",
-                example: "例: 山田太郎整体院",
-                icon: "M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4",
-              },
-              {
-                num: "Q2",
-                question: "あなたのサービスの一番の強みを一言で表すと？",
-                example: "例: 10年以上の実績。つらい痛みを根本から改善します",
-                icon: "M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z",
-              },
-              {
-                num: "Q3",
-                question: "お客さんに一番伝えたいことは？（自由記述）",
-                example: "例: 当院は2010年開業。腰痛・肩こりを専門とした...",
-                icon: "M4 6h16M4 12h16M4 18h7",
-              },
-              {
-                num: "Q4",
-                question: "問い合わせの受付方法は？",
-                example: "例: 電話 03-1234-5678 / メール info@example.com",
-                icon: "M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z",
-              },
-              {
-                num: "Q5",
-                question: "サイトの雰囲気は？（3択から選ぶだけ）",
-                example: "シンプル / カラフル / ビジネス",
-                icon: "M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01",
-              },
-              {
-                num: "Q6",
-                question: "メールアドレスを教えてください",
-                example: "完成URLと修正リンクをお届けします",
-                icon: "M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z",
-              },
-            ].map((item) => (
-              <div
-                key={item.num}
-                className="flex items-start gap-3 sm:gap-4 p-3 sm:p-5 bg-[#1E2035] rounded-xl sm:rounded-2xl border border-[#2D2D44] hover:border-indigo-500/30 transition-colors duration-300"
-              >
-                <div className="flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-indigo-500/10 flex items-center justify-center">
-                  <svg className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={item.icon} />
-                  </svg>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-[2.2vw] sm:text-xs font-bold text-indigo-400 bg-indigo-500/10 px-1.5 sm:px-2 py-0.5 rounded-full whitespace-nowrap">
-                      {item.num}
-                    </span>
-                    <span className="text-[2.8vw] sm:text-sm font-semibold text-slate-200">{item.question}</span>
-                  </div>
-                  <p className="text-[2.2vw] sm:text-xs text-slate-500">{item.example}</p>
-                </div>
-              </div>
-            ))}
+          <div className="mb-8 overflow-hidden rounded-lg border-2 border-zinc-950 bg-white shadow-2xl shadow-zinc-950/10">
+            <Image
+              src="/campaign/steps-panel.png"
+              alt="最短5分、3ステップでHP公開。質問に答える、AIが自動生成、URLで公開"
+              width={1672}
+              height={941}
+              loading="eager"
+              className="h-auto w-full"
+            />
           </div>
 
-          <p className="text-center mt-8 sm:mt-10 text-slate-400 text-[2.8vw] sm:text-sm whitespace-nowrap">
-            所要時間は<span className="text-amber-400 font-bold">約5〜10分</span>。スマホからでもOK。
-          </p>
-
-          {/* 迷惑メール注意書き */}
-          <div className="mt-6 sm:mt-8 p-3 sm:p-4 bg-[#1E2035] rounded-xl border border-amber-500/20">
-            <p className="text-[2.4vw] sm:text-xs text-slate-400 leading-relaxed text-center">
-              <span className="text-amber-400 font-medium">メールが届かない場合：</span>
-              完成通知は <span className="text-slate-300 font-medium">noreply@bantex.jp</span> から送信されます。
-              迷惑メールフォルダをご確認いただくか、
-              <span className="text-slate-300">@bantex.jp</span> からのメールを受信許可に設定してください。
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* ステップセクション */}
-      <section id="steps" className="bg-[#1A1A2E] py-14 sm:py-20 md:py-28 px-2 sm:px-4">
-        <div className="max-w-5xl mx-auto">
-          <h2 className="text-[4.2vw] sm:text-3xl md:text-4xl font-bold text-center mb-10 sm:mb-16 whitespace-nowrap">
-            最短<span className="text-amber-400">10分</span>。3ステップで公開
-          </h2>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-8">
-            {[
-              {
-                step: "1",
-                icon: "M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z",
-                title: "質問に答える",
-                desc: "6つの質問にテキストで回答。\nサイト名、キャッチコピー、\n説明文、連絡先を入力するだけ。",
-              },
-              {
-                step: "2",
-                icon: "M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z",
-                title: "AIが即座に生成",
-                desc: "AIがプロ品質のHPを自動生成。\nプレビューで確認。\n気に入らなければ再生成OK。",
-              },
-              {
-                step: "3",
-                icon: "M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z",
-                title: "決済して即公開",
-                desc: "プレビューに納得したら決済。\nあなた専用のURLで\n即座にサイトが公開されます。",
-              },
-            ].map((item) => (
-              <div
-                key={item.step}
-                className="relative flex flex-col items-center text-center p-5 sm:p-8 bg-[#1E2035] rounded-xl sm:rounded-2xl border border-[#2D2D44]"
-              >
-                <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 text-white text-sm font-bold flex items-center justify-center">
+          <div className="grid gap-4 md:grid-cols-3">
+            {FLOW.map((item) => (
+              <article key={item.step} className="rounded-lg border-2 border-zinc-950 bg-white p-5">
+                <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-full bg-zinc-950 text-xl font-black text-yellow-300">
                   {item.step}
                 </div>
-                <div className="w-11 h-11 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-indigo-500/10 flex items-center justify-center mb-3 sm:mb-5 mt-2">
-                  <svg className="w-5 h-5 sm:w-7 sm:h-7 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={item.icon} />
-                  </svg>
-                </div>
-                <h3 className="text-[3vw] sm:text-lg font-bold mb-1 sm:mb-2">{item.title}</h3>
-                <p className="text-[2.5vw] sm:text-sm text-slate-400 leading-relaxed whitespace-pre-line">{item.desc}</p>
-              </div>
+                <h3 className="text-xl font-black text-zinc-950">{item.title}</h3>
+                <p className="mt-3 text-sm font-bold leading-relaxed text-zinc-700">{item.body}</p>
+              </article>
             ))}
+          </div>
+
+          <div className="mt-6 rounded-lg bg-orange-50 p-4 text-center text-sm font-bold leading-relaxed text-zinc-700">
+            完成通知は <span className="font-black text-zinc-950">noreply@bantex.jp</span> から届きます。届かない場合は迷惑メールフォルダと受信許可設定をご確認ください。
           </div>
         </div>
       </section>
 
-      {/* 料金セクション */}
-      <section id="pricing" className="bg-[#0F0F1A] py-14 sm:py-20 md:py-28 px-2 sm:px-4">
-        <div className="max-w-lg mx-auto text-center">
-          <h2 className="text-[4.2vw] sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4 whitespace-nowrap">
-            この価格、<span className="text-amber-400">本気</span>です
-          </h2>
-          <p className="text-slate-400 text-[2.8vw] sm:text-base mb-8 sm:mb-12 whitespace-nowrap">サーバー・SSL・ドメイン全部込み。追加費用なし。</p>
+      <section id="pricing" className="bg-orange-500 px-4 py-12 sm:px-6 sm:py-18 lg:px-8">
+        <div className="mx-auto max-w-7xl">
+          <div className="mb-8 overflow-hidden rounded-lg border-2 border-zinc-950 bg-white shadow-[8px_8px_0_#18181b]">
+            <Image
+              src="/campaign/pricing-comparison.png"
+              alt="高いHP制作で悩む前に。一般的な制作会社10万円から、OnePage-Flashは初期3,980円税込、月額480円税込"
+              width={1536}
+              height={1024}
+              loading="eager"
+              className="h-auto w-full"
+            />
+          </div>
 
-          <div className="bg-gradient-to-b from-[#1E2035] to-[#1A1A2E] rounded-2xl sm:rounded-3xl border border-indigo-500/30 p-4 sm:p-8 md:p-10 shadow-[0_0_60px_rgba(99,102,241,0.1)]">
-            <span className="inline-flex items-center gap-1 bg-amber-500/10 text-amber-400 border border-amber-500/30 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full text-[2.5vw] sm:text-xs font-medium mb-4 sm:mb-6">
-              業界最安クラス
-            </span>
+          <div className="grid gap-6 lg:grid-cols-[1fr_1fr] lg:items-center">
+          <div>
+            <p className="text-sm font-black text-white">こだわりを削った人向け価格</p>
+            <h2 className="mt-2 text-4xl font-black leading-tight text-white sm:text-6xl">
+              この条件なら、<br />3,980円（税込）。
+            </h2>
+            <p className="mt-4 max-w-xl text-base font-bold leading-relaxed text-white/90">
+              サーバー・SSL込み。月額480円（税込）、初月無料。プレビュー後に決済できるので、先に仕上がりを確認できます。
+            </p>
+          </div>
 
-            <div className="mb-1 sm:mb-2 whitespace-nowrap">
-              <span className="text-[7vw] sm:text-5xl md:text-6xl font-black">¥3,980</span>
-              <span className="text-[2.8vw] sm:text-lg text-slate-400 ml-1 sm:ml-2">初期費用</span>
+          <div className="rounded-lg border-2 border-zinc-950 bg-white p-5 shadow-[8px_8px_0_#18181b] sm:p-7">
+            <div className="mb-5 rounded-lg bg-zinc-950 p-5 text-white">
+              <p className="text-sm font-black text-yellow-300">初期制作費</p>
+              <p className="mt-1 text-5xl font-black text-yellow-300 sm:text-6xl">3,980円</p>
+              <p className="mt-1 text-base font-black">税込 / 一回のみ</p>
             </div>
-            <div className="mb-1 sm:mb-3 whitespace-nowrap">
-              <span className="text-[4.5vw] sm:text-2xl font-bold text-slate-300">+ ¥480</span>
-              <span className="text-slate-400 text-[2.8vw] sm:text-base">/月</span>
+            <div className="mb-5 rounded-lg border-2 border-zinc-950 p-5">
+              <p className="text-sm font-black text-zinc-600">月額利用料</p>
+              <p className="mt-1 text-4xl font-black text-zinc-950">480円<span className="text-lg">/月</span></p>
+              <p className="mt-1 text-sm font-bold text-zinc-700">税込・初月無料・いつでも解約可</p>
             </div>
-            <p className="text-[3vw] sm:text-sm text-amber-400 font-medium mb-1">初月無料</p>
-            <p className="text-[2.5vw] sm:text-sm text-slate-500 mb-5 sm:mb-8 whitespace-nowrap">税込 / いつでも解約可 / 解約後も再開OK</p>
-
-            <ul className="space-y-2 sm:space-y-3 text-[2.8vw] sm:text-sm text-slate-300 mb-5 sm:mb-8 text-left">
+            <ul className="space-y-3 text-sm font-bold text-zinc-800">
               {[
-                "AIによるプロ品質HP自動生成",
-                "プレビューで確認してから決済",
-                "あなた専用URLで即時公開",
-                "月2回の修正込み",
+                "画像無し、1ページ超シンプル、発行URLなんでもOKの範囲",
+                "AIによるホームページ自動生成",
+                "プレビュー確認後に決済",
                 "SSL証明書・サーバー費用込み",
-                "解約後も再開すれば即復旧",
+                "月2回の修正込み",
               ].map((item) => (
-                <li key={item} className="flex items-center gap-2 sm:gap-3 whitespace-nowrap">
-                  <svg className="w-3.5 h-3.5 sm:w-5 sm:h-5 text-emerald-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  {item}
+                <li key={item} className="flex gap-2">
+                  <CheckIcon className="mt-0.5 h-5 w-5 flex-none text-orange-500" />
+                  <span>{item}</span>
                 </li>
               ))}
             </ul>
-
             <Link
               href="/create"
               onClick={handleCtaClick}
-              className="block w-full py-2.5 sm:py-4 bg-amber-500 hover:bg-amber-400 text-gray-900 font-bold rounded-lg sm:rounded-xl text-[3vw] sm:text-lg transition-all duration-300 shadow-[0_0_30px_rgba(245,158,11,0.3)] hover:shadow-[0_0_50px_rgba(245,158,11,0.5)] text-center whitespace-nowrap"
+              className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-full bg-red-600 px-7 py-4 text-base font-black text-white transition hover:bg-red-700"
             >
               無料でプレビューを見る
+              <ArrowIcon />
             </Link>
+          </div>
           </div>
         </div>
       </section>
 
-      {/* 最終CTA */}
-      <section id="cta-final" className="relative py-16 sm:py-24 md:py-32 overflow-hidden px-2 sm:px-4">
-        <div className="absolute inset-0 bg-gradient-to-br from-indigo-900/20 via-[#0F0F1A] to-violet-900/20" />
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="w-64 sm:w-96 h-64 sm:h-96 bg-amber-500/5 rounded-full blur-3xl" />
-        </div>
-
-        <div className="relative z-10 text-center max-w-3xl mx-auto">
-          <h2 className="text-[4.2vw] sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4 whitespace-nowrap">
-            HPがないのは、もったいない。
+      <section id="cta-final" className="bg-zinc-950 px-4 py-14 text-white sm:px-6 sm:py-20 lg:px-8">
+        <div className="mx-auto max-w-4xl text-center">
+          <p className="text-sm font-black text-yellow-300">まず公開。細かいこだわりは後でいい。</p>
+          <h2 className="mt-3 text-4xl font-black leading-tight sm:text-5xl">
+            HP制作で止まっているなら、<br className="hidden sm:block" />今日プレビューしてください。
           </h2>
-          <p className="text-slate-400 mb-6 sm:mb-10 text-[3vw] sm:text-lg leading-relaxed whitespace-nowrap">
-            6つの質問に答えるだけ。
-            <br className="sm:hidden" />
-            10分後にはあなた専用のURLが届きます。
+          <p className="mx-auto mt-4 max-w-2xl text-base font-bold leading-relaxed text-zinc-300">
+            3,980円（税込）の対象は、画像無し・1ページ超シンプル・URLなんでもOKの割り切り制作です。条件が合えば、速く安く出せます。
           </p>
-
-          <Link
-            href="/create"
-            onClick={handleCtaClick}
-            className="inline-flex items-center justify-center gap-1.5 bg-amber-500 hover:bg-amber-400 text-gray-900 font-bold px-5 py-2.5 sm:px-10 sm:py-5 rounded-lg sm:rounded-xl text-[3vw] sm:text-xl transition-all duration-300 hover:scale-105 shadow-[0_0_40px_rgba(245,158,11,0.4)] hover:shadow-[0_0_60px_rgba(245,158,11,0.6)] whitespace-nowrap"
-          >
-            無料でサイトを作ってみる
-            <svg className="w-3.5 h-3.5 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
-          </Link>
-
-          <p className="text-slate-600 text-[2.5vw] sm:text-sm mt-3 sm:mt-4 whitespace-nowrap">
-            クレジットカード不要でプレビューが確認できます
-          </p>
-
-          <div className="mt-6 sm:mt-8">
+          <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
+            <Link
+              href="/create"
+              onClick={handleCtaClick}
+              className="inline-flex items-center justify-center gap-2 rounded-full bg-yellow-300 px-8 py-4 text-base font-black text-zinc-950 transition hover:bg-white"
+            >
+              まずはプレビュー
+              <ArrowIcon />
+            </Link>
             <a
               href="https://lin.ee/5b8JT4C"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 sm:gap-2 text-[#06C755] hover:text-[#05b04c] text-[2.8vw] sm:text-base font-medium transition-colors"
+              className="inline-flex items-center justify-center rounded-full border-2 border-[#06C755] px-8 py-4 text-base font-black text-[#06C755] transition hover:bg-[#06C755] hover:text-white"
             >
-              <svg className="w-4 h-4 sm:w-5 sm:h-5" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M19.365 9.863c.349 0 .63.285.63.631 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63h2.386c.346 0 .627.285.627.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595.06-.023.136-.033.194-.033.195 0 .375.104.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63.346 0 .628.285.628.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.282.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314" />
-              </svg>
-              ご不明な点はLINEでお気軽にどうぞ
+              LINEで相談
             </a>
           </div>
         </div>
       </section>
 
-      {/* フッター */}
-      <footer className="bg-[#0A0A14] py-8 sm:py-12 px-2 sm:px-4 border-t border-[#2D2D44]">
-        <div className="max-w-4xl mx-auto">
-          <div className="flex flex-col sm:flex-row justify-between gap-6 sm:gap-8 mb-8 sm:mb-10 text-center sm:text-left">
-            <div className="sm:max-w-xs">
-              <span className="font-black text-[3vw] sm:text-lg tracking-tight">
-                OnePage<span className="text-amber-400">-Flash</span>
+      <footer className="border-t border-zinc-800 bg-zinc-950 px-4 py-8 text-white sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl">
+          <div className="grid gap-8 sm:grid-cols-[1.2fr_1fr_1fr]">
+            <div>
+              <span className="text-lg font-black">
+                OnePage<span className="text-orange-500">-Flash</span>
               </span>
-              <p className="text-[2.4vw] sm:text-sm text-slate-500 leading-relaxed mt-2 sm:mt-3">
-                テキストを入力するだけで、AIが10分でプロ品質のホームページを生成するサービスです。
+              <p className="mt-3 max-w-sm text-sm font-bold leading-relaxed text-zinc-400">
+                こだわりを抑えた1ページのホームページを、AIで素早く生成するサービスです。
               </p>
             </div>
-
-            <div className="grid grid-cols-2 gap-4 sm:gap-8 text-[2.4vw] sm:text-sm">
-              <div>
-                <div className="text-slate-300 font-medium mb-1.5 sm:mb-3">サービス</div>
-                <div className="space-y-1 sm:space-y-2">
-                  <Link href="/create" className="block text-slate-500 hover:text-white transition-colors">HP作成</Link>
-                  <Link href="/edit" className="block text-slate-500 hover:text-white transition-colors">サイト修正</Link>
-                  <a href="https://lin.ee/5b8JT4C" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-[#06C755] hover:text-[#05b04c] transition-colors">
-                    <svg className="w-3 h-3" viewBox="0 0 24 24" fill="currentColor"><path d="M19.365 9.863c.349 0 .63.285.63.631 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63h2.386c.346 0 .627.285.627.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595.06-.023.136-.033.194-.033.195 0 .375.104.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63.346 0 .628.285.628.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.282.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314" /></svg>
-                    LINEサポート
-                  </a>
-                </div>
+            <div>
+              <div className="mb-3 text-sm font-black text-zinc-200">サービス</div>
+              <div className="space-y-2 text-sm font-bold text-zinc-500">
+                <Link href="/create" className="block transition hover:text-white">HP作成</Link>
+                <Link href="/edit" className="block transition hover:text-white">サイト修正</Link>
+                <a href="https://lin.ee/5b8JT4C" target="_blank" rel="noopener noreferrer" className="block text-[#06C755] transition hover:text-[#59e58a]">LINEサポート</a>
               </div>
-              <div>
-                <div className="text-slate-300 font-medium mb-1.5 sm:mb-3">法的情報</div>
-                <div className="space-y-1 sm:space-y-2">
-                  <Link href="/legal/terms" className="block text-slate-500 hover:text-white transition-colors">利用規約</Link>
-                  <Link href="/legal/privacy" className="block text-slate-500 hover:text-white transition-colors">プライバシーポリシー</Link>
-                  <Link href="/legal/tokushoho" className="block text-slate-500 hover:text-white transition-colors whitespace-nowrap">特定商取引法に基づく表記</Link>
-                </div>
+            </div>
+            <div>
+              <div className="mb-3 text-sm font-black text-zinc-200">法的情報</div>
+              <div className="space-y-2 text-sm font-bold text-zinc-500">
+                <Link href="/legal/terms" className="block transition hover:text-white">利用規約</Link>
+                <Link href="/legal/privacy" className="block transition hover:text-white">プライバシーポリシー</Link>
+                <Link href="/legal/tokushoho" className="block transition hover:text-white">特定商取引法に基づく表記</Link>
               </div>
             </div>
           </div>
 
-          <div className="border-t border-[#2D2D44] pt-4 sm:pt-6">
-            <div className="flex flex-col items-center gap-2 sm:gap-3 text-[2.2vw] sm:text-xs text-slate-600">
-              <p className="text-center whitespace-nowrap">&copy; 2026 OnePage-Flash（株式会社バンテックス）<span className="ml-1 sm:ml-2 text-slate-700">v0.7.9</span></p>
-              <div className="flex items-center gap-3 sm:gap-4">
-                <span className="flex items-center gap-1 sm:gap-1.5">
-                  <svg className="w-3 h-3 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
-                  Stripe 安全決済
-                </span>
-                <span className="flex items-center gap-1 sm:gap-1.5">
-                  <svg className="w-3 h-3 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
-                  SSL暗号化
-                </span>
-              </div>
+          <div className="mt-8 flex flex-col gap-3 border-t border-zinc-800 pt-6 text-xs font-bold text-zinc-600 sm:flex-row sm:items-center sm:justify-between">
+            <p>&copy; 2026 OnePage-Flash（株式会社バンテックス） v0.7.9</p>
+            <div className="flex gap-4">
+              <span>Stripe 安全決済</span>
+              <span>SSL暗号化</span>
             </div>
           </div>
         </div>
