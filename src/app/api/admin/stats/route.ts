@@ -30,9 +30,41 @@ export interface OpfStatsData {
   subsByStatus: Record<string, number>;
   funnel: Record<string, number>;
   utmSources: Array<{ source: string; count: number }>;
+  xAd: {
+    spendYen: number;
+    periodDays: number;
+    pageViews: number;
+    visitors: number;
+    ctaClicks: number;
+    formStarts: number;
+    generateStarts: number;
+    generateCompletes: number;
+    checkoutStarts: number;
+    purchases: number;
+    revenueYen: number;
+    trialRate: number;
+    generateRate: number;
+    checkoutRate: number;
+    purchaseRate: number;
+    costPerVisitorYen: number | null;
+    cpaYen: number | null;
+    roas: number | null;
+  };
+  xCampaigns: Array<{
+    campaign: string;
+    content: string;
+    visitors: number;
+    formStarts: number;
+    generateCompletes: number;
+    checkoutStarts: number;
+    purchases: number;
+    revenueYen: number;
+    cpaYen: number | null;
+  }>;
   recentEvents: Array<{
     event_type: string;
     utm_source: string | null;
+    utm_campaign: string | null;
     session_id: string | null;
     page_url: string | null;
     created_at: string;
@@ -110,7 +142,169 @@ export interface OverviewData {
 // OnePage-Flash 統計取得
 // ---------------------------------------------------------------------------
 
-async function getOpfStats(): Promise<OpfStatsData> {
+const OPF_INITIAL_REVENUE_YEN = 3980;
+const DEFAULT_X_AD_SPEND_YEN = 9500;
+const X_AD_PERIOD_DAYS = 30;
+
+const X_ATTRIBUTION_SQL = `
+  (
+    LOWER(COALESCE(utm_source, '')) IN ('x', 'twitter')
+    OR LOWER(COALESCE(referrer, '')) LIKE '%://x.com%'
+    OR LOWER(COALESCE(referrer, '')) LIKE '%://www.x.com%'
+    OR LOWER(COALESCE(referrer, '')) LIKE '%://twitter.com%'
+    OR LOWER(COALESCE(referrer, '')) LIKE '%://www.twitter.com%'
+    OR LOWER(COALESCE(referrer, '')) LIKE '%://t.co%'
+    OR LOWER(COALESCE(utm_content, '')) LIKE '%twclid:%'
+    OR LOWER(COALESCE(page_url, '')) LIKE '%twclid=%'
+    OR LOWER(COALESCE(page_url, '')) LIKE '%utm_source=x%'
+    OR LOWER(COALESCE(page_url, '')) LIKE '%utm_source=twitter%'
+  )
+`;
+
+function parseCount(value: string | number | null | undefined): number {
+  return typeof value === "number" ? value : parseInt(value ?? "0", 10);
+}
+
+function rate(numerator: number, denominator: number): number {
+  if (denominator <= 0) return 0;
+  return Math.round((numerator / denominator) * 1000) / 10;
+}
+
+function cost(spendYen: number, denominator: number): number | null {
+  if (denominator <= 0) return null;
+  return Math.round(spendYen / denominator);
+}
+
+async function getXAdStats(
+  since: Date,
+  spendYen: number
+): Promise<{ xAd: OpfStatsData["xAd"]; xCampaigns: OpfStatsData["xCampaigns"] }> {
+  const metricsResult = await query<{
+    page_views: string;
+    visitors: string;
+    cta_clicks: string;
+    form_starts: string;
+    generate_starts: string;
+    generate_completes: string;
+    checkout_starts: string;
+    purchases: string;
+  }>(
+    `WITH x_events AS (
+       SELECT *, COALESCE(session_id, user_id::TEXT, id::TEXT) AS session_key
+       FROM opf_ad_events
+       WHERE created_at >= $1
+         AND ${X_ATTRIBUTION_SQL}
+     )
+     SELECT
+       COUNT(*) FILTER (WHERE event_type = 'page_view')::TEXT AS page_views,
+       COUNT(DISTINCT session_key) FILTER (WHERE event_type = 'page_view')::TEXT AS visitors,
+       COUNT(DISTINCT session_key) FILTER (WHERE event_type = 'cta_click')::TEXT AS cta_clicks,
+       COUNT(DISTINCT session_key) FILTER (WHERE event_type = 'form_start')::TEXT AS form_starts,
+       COUNT(DISTINCT session_key) FILTER (WHERE event_type = 'generate_start')::TEXT AS generate_starts,
+       COUNT(DISTINCT session_key) FILTER (WHERE event_type = 'generate_complete')::TEXT AS generate_completes,
+       COUNT(DISTINCT session_key) FILTER (WHERE event_type = 'checkout_start')::TEXT AS checkout_starts,
+       COUNT(DISTINCT session_key) FILTER (WHERE event_type = 'subscribed')::TEXT AS purchases
+     FROM x_events`,
+    [since]
+  );
+  const metrics = metricsResult.rows[0] ?? {
+    page_views: "0",
+    visitors: "0",
+    cta_clicks: "0",
+    form_starts: "0",
+    generate_starts: "0",
+    generate_completes: "0",
+    checkout_starts: "0",
+    purchases: "0",
+  };
+
+  const pageViews = parseCount(metrics.page_views);
+  const visitors = parseCount(metrics.visitors);
+  const ctaClicks = parseCount(metrics.cta_clicks);
+  const formStarts = parseCount(metrics.form_starts);
+  const generateStarts = parseCount(metrics.generate_starts);
+  const generateCompletes = parseCount(metrics.generate_completes);
+  const checkoutStarts = parseCount(metrics.checkout_starts);
+  const purchases = parseCount(metrics.purchases);
+  const revenueYen = purchases * OPF_INITIAL_REVENUE_YEN;
+
+  const campaignResult = await query<{
+    campaign: string;
+    content: string;
+    visitors: string;
+    form_starts: string;
+    generate_completes: string;
+    checkout_starts: string;
+    purchases: string;
+  }>(
+    `WITH x_events AS (
+       SELECT
+         *,
+         COALESCE(session_id, user_id::TEXT, id::TEXT) AS session_key,
+         COALESCE(NULLIF(utm_campaign, ''), '(campaign未設定)') AS campaign_key,
+         CASE
+           WHEN LOWER(COALESCE(utm_content, '')) LIKE '%twclid:%' THEN '(click-id only)'
+           WHEN NULLIF(utm_content, '') IS NULL THEN '(content未設定)'
+           ELSE utm_content
+         END AS content_key
+       FROM opf_ad_events
+       WHERE created_at >= $1
+         AND ${X_ATTRIBUTION_SQL}
+     )
+     SELECT
+       campaign_key AS campaign,
+       content_key AS content,
+       COUNT(DISTINCT session_key) FILTER (WHERE event_type = 'page_view')::TEXT AS visitors,
+       COUNT(DISTINCT session_key) FILTER (WHERE event_type = 'form_start')::TEXT AS form_starts,
+       COUNT(DISTINCT session_key) FILTER (WHERE event_type = 'generate_complete')::TEXT AS generate_completes,
+       COUNT(DISTINCT session_key) FILTER (WHERE event_type = 'checkout_start')::TEXT AS checkout_starts,
+       COUNT(DISTINCT session_key) FILTER (WHERE event_type = 'subscribed')::TEXT AS purchases
+     FROM x_events
+     GROUP BY campaign_key, content_key
+     ORDER BY visitors DESC, purchases DESC
+     LIMIT 10`,
+    [since]
+  );
+
+  return {
+    xAd: {
+      spendYen,
+      periodDays: X_AD_PERIOD_DAYS,
+      pageViews,
+      visitors,
+      ctaClicks,
+      formStarts,
+      generateStarts,
+      generateCompletes,
+      checkoutStarts,
+      purchases,
+      revenueYen,
+      trialRate: rate(formStarts, visitors),
+      generateRate: rate(generateCompletes, formStarts),
+      checkoutRate: rate(checkoutStarts, generateCompletes),
+      purchaseRate: rate(purchases, visitors),
+      costPerVisitorYen: cost(spendYen, visitors),
+      cpaYen: cost(spendYen, purchases),
+      roas: spendYen > 0 ? Math.round((revenueYen / spendYen) * 100) / 100 : null,
+    },
+    xCampaigns: campaignResult.rows.map((row) => {
+      const rowPurchases = parseCount(row.purchases);
+      return {
+        campaign: row.campaign,
+        content: row.content,
+        visitors: parseCount(row.visitors),
+        formStarts: parseCount(row.form_starts),
+        generateCompletes: parseCount(row.generate_completes),
+        checkoutStarts: parseCount(row.checkout_starts),
+        purchases: rowPurchases,
+        revenueYen: rowPurchases * OPF_INITIAL_REVENUE_YEN,
+        cpaYen: cost(spendYen, rowPurchases),
+      };
+    }),
+  };
+}
+
+async function getOpfStats(xAdSpendYen = DEFAULT_X_AD_SPEND_YEN): Promise<OpfStatsData> {
   const activeSubsResult = await query<{ count: string }>(
     `SELECT COUNT(*) as count FROM opf_subscriptions WHERE status = 'active'`
   );
@@ -160,7 +354,8 @@ async function getOpfStats(): Promise<OpfStatsData> {
   );
 
   const thirtyDaysAgo = new Date();
-  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - X_AD_PERIOD_DAYS);
+  const { xAd, xCampaigns } = await getXAdStats(thirtyDaysAgo, xAdSpendYen);
 
   const funnelResult = await query<{ event_type: string; count: string }>(
     `SELECT event_type, COUNT(*) as count FROM opf_ad_events WHERE created_at >= $1 GROUP BY event_type ORDER BY count DESC`,
@@ -183,11 +378,12 @@ async function getOpfStats(): Promise<OpfStatsData> {
   const recentEventsResult = await query<{
     event_type: string;
     utm_source: string | null;
+    utm_campaign: string | null;
     session_id: string | null;
     page_url: string | null;
     created_at: Date;
   }>(
-    `SELECT event_type, utm_source, session_id, page_url, created_at FROM opf_ad_events ORDER BY created_at DESC LIMIT 20`
+    `SELECT event_type, utm_source, utm_campaign, session_id, page_url, created_at FROM opf_ad_events ORDER BY created_at DESC LIMIT 20`
   );
 
   const recentSitesResult = await query<{
@@ -212,6 +408,8 @@ async function getOpfStats(): Promise<OpfStatsData> {
     subsByStatus,
     funnel,
     utmSources,
+    xAd,
+    xCampaigns,
     recentEvents: recentEventsResult.rows.map((r) => ({
       ...r,
       created_at: r.created_at instanceof Date ? r.created_at.toISOString() : r.created_at,
@@ -453,11 +651,16 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   }
 
   const service = request.nextUrl.searchParams.get("service") ?? "overview";
+  const xAdSpendParam = request.nextUrl.searchParams.get("x_ad_spend_yen");
+  const xAdSpendEnv = process.env.X_AD_SPEND_YEN;
+  const xAdSpendYen = parseCount(
+    xAdSpendParam && /^\d+$/.test(xAdSpendParam) ? xAdSpendParam : xAdSpendEnv ?? DEFAULT_X_AD_SPEND_YEN
+  );
 
   try {
     switch (service) {
       case "opf": {
-        const data = await getOpfStats();
+        const data = await getOpfStats(xAdSpendYen);
         return NextResponse.json(data);
       }
 

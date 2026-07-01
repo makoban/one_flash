@@ -16,6 +16,7 @@ export interface UtmParams {
   utm_content?: string;
   utm_term?: string;
   gclid?: string;
+  twclid?: string;
 }
 
 /** LP 到達時に呼ぶ: URL から UTM パラメータを取得し sessionStorage に保存 */
@@ -44,15 +45,35 @@ export function captureUtmParams(): void {
     hasUtm = true;
   }
 
-  // UTM もなく gclid もない場合、referrer から流入元を推定
+  // X Ads の Click ID。X 公式の計測では twclid を下流計測に使う。
+  const twclid = params.get("twclid");
+  if (twclid) {
+    utm.twclid = twclid;
+    if (!utm.utm_source) utm.utm_source = "x";
+    if (!utm.utm_medium) utm.utm_medium = "paid_social";
+    hasUtm = true;
+  }
+
+  // UTM もクリックIDもない場合、referrer から流入元を推定
   if (!hasUtm) {
     const referrer = document.referrer;
-    if (referrer && referrer.includes("google.")) {
-      // Google 検索からの流入（オーガニック）
-      const existing = sessionStorage.getItem(STORAGE_KEY);
-      if (!existing) {
+    const existing = sessionStorage.getItem(STORAGE_KEY);
+    if (referrer && !existing) {
+      const hostname = getReferrerHostname(referrer);
+      if (hostname.includes("google.")) {
+        // Google 検索からの流入（オーガニック）
         utm.utm_source = "google";
         utm.utm_medium = "organic";
+        hasUtm = true;
+      } else if (
+        hostname === "x.com" ||
+        hostname.endsWith(".x.com") ||
+        hostname === "twitter.com" ||
+        hostname.endsWith(".twitter.com") ||
+        hostname === "t.co"
+      ) {
+        utm.utm_source = "x";
+        utm.utm_medium = "social";
         hasUtm = true;
       }
     }
@@ -97,21 +118,70 @@ export async function trackEvent(
   extra?: { pageUrl?: string; step?: string }
 ): Promise<void> {
   try {
-    const utm = getUtmParams();
     await fetch("/api/track", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        eventType,
-        sessionId: getSessionId(),
-        pageUrl: extra?.pageUrl ?? window.location.href,
-        referrer: document.referrer || undefined,
-        step: extra?.step,
-        ...utm,
-      }),
+      body: JSON.stringify(buildTrackPayload(eventType, extra)),
     });
   } catch {
     // トラッキング失敗はサイレントに無視
+  }
+}
+
+/** ページ遷移直前でも落ちにくい sendBeacon 版 */
+export function trackEventBeacon(
+  eventType: string,
+  extra?: { pageUrl?: string; step?: string }
+): void {
+  try {
+    const payload = buildTrackPayload(eventType, extra);
+    const blob = new Blob([JSON.stringify(payload)], {
+      type: "application/json",
+    });
+    if (!navigator.sendBeacon("/api/track", blob)) {
+      void trackEvent(eventType, extra);
+    }
+  } catch {
+    // トラッキング失敗はサイレントに無視
+  }
+}
+
+/** X Pixel のイベントIDが設定されている場合だけ送信する */
+export function trackXPixelEvent(
+  eventId: string | undefined,
+  params?: Record<string, unknown>
+): void {
+  if (!eventId || typeof window === "undefined") return;
+  const twq = (window as unknown as { twq?: (...args: unknown[]) => void }).twq;
+  if (typeof twq !== "function") return;
+
+  const utm = getUtmParams();
+  twq("event", eventId, {
+    ...params,
+    ...(utm.twclid ? { twclid: utm.twclid } : {}),
+  });
+}
+
+function buildTrackPayload(
+  eventType: string,
+  extra?: { pageUrl?: string; step?: string }
+): Record<string, unknown> {
+  const utm = getUtmParams();
+  return {
+    eventType,
+    sessionId: getSessionId(),
+    pageUrl: extra?.pageUrl ?? window.location.href,
+    referrer: document.referrer || undefined,
+    step: extra?.step,
+    ...utm,
+  };
+}
+
+function getReferrerHostname(referrer: string): string {
+  try {
+    return new URL(referrer).hostname.toLowerCase();
+  } catch {
+    return referrer.toLowerCase();
   }
 }
 

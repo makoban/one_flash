@@ -255,6 +255,8 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session): Promis
         utmCampaign: metadata.utm_campaign,
         utmContent: metadata.utm_content,
         utmTerm: metadata.utm_term,
+        gclid: metadata.gclid,
+        twclid: metadata.twclid,
         sessionId: metadata.session_id,
       }).catch((err: unknown) => console.warn("[webhook/stripe] Failed to record ad event:", err));
 

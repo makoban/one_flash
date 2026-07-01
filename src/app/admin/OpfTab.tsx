@@ -8,7 +8,7 @@
 
 "use client";
 
-import { KpiCard, StatusBadge, EventBadge, formatTime } from "./AdminComponents";
+import { KpiCard, StatusBadge, EventBadge, formatTime, formatYen } from "./AdminComponents";
 import type { OpfStatsData } from "../api/admin/stats/route";
 
 // ---------------------------------------------------------------------------
@@ -35,6 +35,10 @@ const FUNNEL_LABELS: Record<string, string> = {
   subscribed: "登録完了",
 };
 
+function formatPercent(value: number): string {
+  return `${value.toFixed(value % 1 === 0 ? 0 : 1)}%`;
+}
+
 // ---------------------------------------------------------------------------
 // コンポーネント
 // ---------------------------------------------------------------------------
@@ -44,7 +48,7 @@ interface OpfTabProps {
 }
 
 export function OpfTab({ data }: OpfTabProps) {
-  const { overview, subsByStatus, funnel, utmSources, recentEvents, recentSites } = data;
+  const { overview, subsByStatus, funnel, utmSources, xAd, xCampaigns, recentEvents, recentSites } = data;
 
   return (
     <div className="space-y-6">
@@ -74,6 +78,114 @@ export function OpfTab({ data }: OpfTabProps) {
           sub={`全${overview.totalSites}サイト`}
           color="amber"
         />
+      </div>
+
+      <div className="rounded-2xl border bg-white p-6">
+        <div className="mb-4 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h2 className="text-sm font-bold text-gray-900">
+              X広告成果（過去{xAd.periodDays}日）
+            </h2>
+            <p className="text-xs text-gray-400">
+              utm_source=x / twitter、twclid、x.com・twitter.com・t.co流入を集計
+            </p>
+          </div>
+          <p className="text-xs font-bold text-gray-500">
+            広告費 {formatYen(xAd.spendYen)}
+          </p>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+          <KpiCard
+            label="LP流入"
+            value={xAd.visitors.toLocaleString("ja-JP")}
+            sub={`PV ${xAd.pageViews.toLocaleString("ja-JP")} / CPV ${xAd.costPerVisitorYen ? formatYen(xAd.costPerVisitorYen) : "-"}`}
+            color="blue"
+          />
+          <KpiCard
+            label="試用開始"
+            value={xAd.formStarts.toLocaleString("ja-JP")}
+            sub={`訪問→開始 ${formatPercent(xAd.trialRate)} / CTA ${xAd.ctaClicks}`}
+            color="purple"
+          />
+          <KpiCard
+            label="決済開始"
+            value={xAd.checkoutStarts.toLocaleString("ja-JP")}
+            sub={`生成→決済 ${formatPercent(xAd.checkoutRate)}`}
+            color="amber"
+          />
+          <KpiCard
+            label="購入"
+            value={xAd.purchases.toLocaleString("ja-JP")}
+            sub={`CVR ${formatPercent(xAd.purchaseRate)} / CPA ${xAd.cpaYen ? formatYen(xAd.cpaYen) : "-"}`}
+            color="green"
+          />
+        </div>
+
+        <div className="mt-4 grid gap-4 sm:grid-cols-3">
+          <div className="rounded-xl bg-gray-50 p-4">
+            <p className="text-xs text-gray-400">生成完了</p>
+            <p className="mt-1 text-lg font-black text-gray-900">
+              {xAd.generateCompletes.toLocaleString("ja-JP")}
+            </p>
+            <p className="text-xs text-gray-500">
+              試用→生成 {formatPercent(xAd.generateRate)}
+            </p>
+          </div>
+          <div className="rounded-xl bg-gray-50 p-4">
+            <p className="text-xs text-gray-400">初期売上</p>
+            <p className="mt-1 text-lg font-black text-gray-900">
+              {formatYen(xAd.revenueYen)}
+            </p>
+            <p className="text-xs text-gray-500">
+              ROAS {xAd.roas === null ? "-" : `${xAd.roas.toFixed(2)}x`}
+            </p>
+          </div>
+          <div className="rounded-xl bg-gray-50 p-4">
+            <p className="text-xs text-gray-400">広告メモ</p>
+            <p className="mt-1 text-sm font-bold text-gray-900">
+              X広告費 {formatYen(xAd.spendYen)}
+            </p>
+            <p className="text-xs text-gray-500">
+              変更時は X_AD_SPEND_YEN または API の x_ad_spend_yen を更新
+            </p>
+          </div>
+        </div>
+
+        {xCampaigns.length > 0 && (
+          <div className="mt-5 overflow-x-auto">
+            <table className="min-w-full text-left text-xs">
+              <thead className="text-gray-400">
+                <tr className="border-b">
+                  <th className="py-2 pr-3 font-medium">campaign</th>
+                  <th className="py-2 pr-3 font-medium">content</th>
+                  <th className="py-2 pr-3 text-right font-medium">流入</th>
+                  <th className="py-2 pr-3 text-right font-medium">試用</th>
+                  <th className="py-2 pr-3 text-right font-medium">生成</th>
+                  <th className="py-2 pr-3 text-right font-medium">決済</th>
+                  <th className="py-2 pr-3 text-right font-medium">購入</th>
+                  <th className="py-2 text-right font-medium">CPA</th>
+                </tr>
+              </thead>
+              <tbody>
+                {xCampaigns.map((row) => (
+                  <tr key={`${row.campaign}:${row.content}`} className="border-b last:border-0">
+                    <td className="py-2 pr-3 font-medium text-gray-700">{row.campaign}</td>
+                    <td className="py-2 pr-3 text-gray-500">{row.content}</td>
+                    <td className="py-2 pr-3 text-right font-bold text-gray-900">{row.visitors}</td>
+                    <td className="py-2 pr-3 text-right text-gray-600">{row.formStarts}</td>
+                    <td className="py-2 pr-3 text-right text-gray-600">{row.generateCompletes}</td>
+                    <td className="py-2 pr-3 text-right text-gray-600">{row.checkoutStarts}</td>
+                    <td className="py-2 pr-3 text-right font-bold text-green-700">{row.purchases}</td>
+                    <td className="py-2 text-right text-gray-600">
+                      {row.cpaYen ? formatYen(row.cpaYen) : "-"}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -188,6 +300,11 @@ export function OpfTab({ data }: OpfTabProps) {
                     {ev.utm_source && (
                       <span className="text-indigo-500">
                         [{ev.utm_source}]{" "}
+                      </span>
+                    )}
+                    {ev.utm_campaign && (
+                      <span className="text-blue-500">
+                        [{ev.utm_campaign}]{" "}
                       </span>
                     )}
                     {ev.page_url ?? "-"}

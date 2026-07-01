@@ -11,6 +11,7 @@ import { useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import UtmCapture from "@/components/UtmCapture";
+import { trackEventBeacon, trackXPixelEvent } from "@/lib/utm";
 
 function fireConversionEvent(): void {
   if (typeof window === "undefined") return;
@@ -27,6 +28,11 @@ function fireConversionEvent(): void {
 function handleCtaClick(e: React.MouseEvent<HTMLAnchorElement>): void {
   e.preventDefault();
   const href = (e.currentTarget as HTMLAnchorElement).href;
+  trackEventBeacon("cta_click");
+  trackXPixelEvent(process.env.NEXT_PUBLIC_X_EVENT_PREVIEW_ID, {
+    status: "started",
+    description: "OnePage-Flash preview CTA",
+  });
   fireConversionEvent();
   setTimeout(() => {
     window.location.href = href;
@@ -102,32 +108,53 @@ const FLOW = [
   },
 ];
 
+const providerJsonLd = {
+  "@type": "Organization",
+  "name": "株式会社バンテックス",
+  "url": "https://bantex.jp/",
+};
+
+const offerJsonLd = {
+  "@type": "Offer",
+  "price": "3980",
+  "priceCurrency": "JPY",
+  "availability": "https://schema.org/InStock",
+  "description": "初期制作3,980円（税込）+ 月額480円/月（税込・初月無料）",
+};
+
 const jsonLd = {
   "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  "name": "OnePage-Flash",
-  "applicationCategory": "WebApplication",
-  "description": "6つの質問に答えるだけで、AIが文章とデザインを作成する1ページホームページ制作サービス。初期3,980円（税込）+ 月額480円（税込・初月無料）。",
-  "url": "https://oneflash.bantex.jp",
-  "operatingSystem": "Web",
-  "offers": {
-    "@type": "Offer",
-    "price": "3980",
-    "priceCurrency": "JPY",
-    "description": "初期制作3,980円（税込）+ 月額480円/月（税込・初月無料）",
-  },
-  "provider": {
-    "@type": "Organization",
-    "name": "株式会社バンテックス",
-    "url": "https://bantex.jp/",
-  },
-  "featureList": [
-    "AIによるホームページ自動生成",
-    "6つの質問から文章とデザインを作成",
-    "画像無しのシンプル1ページ制作",
-    "プレビュー確認後の決済",
-    "サーバー・SSL込み",
-    "月2回の修正込み",
+  "@graph": [
+    {
+      "@type": "SoftwareApplication",
+      "@id": "https://oneflash.bantex.jp/#app",
+      "name": "OnePage-Flash",
+      "applicationCategory": "WebApplication",
+      "description": "HP制作を格安で始めたい方向け。6つの質問に答えるだけで、AIが文章とデザインを作成する1ページホームページ制作サービス。初期3,980円（税込）+ 月額480円（税込・初月無料）。",
+      "url": "https://oneflash.bantex.jp",
+      "operatingSystem": "Web",
+      "keywords": "HP制作 格安, ホームページ 激安, ホームページ制作 格安, 安いホームページ制作, AIホームページ制作",
+      "offers": offerJsonLd,
+      "provider": providerJsonLd,
+      "featureList": [
+        "AIによるホームページ自動生成",
+        "6つの質問から文章とデザインを作成",
+        "画像無しのシンプル1ページ制作",
+        "プレビュー確認後の決済",
+        "サーバー・SSL込み",
+        "月2回の修正込み",
+      ],
+    },
+    {
+      "@type": "Service",
+      "@id": "https://oneflash.bantex.jp/#cheap-homepage-service",
+      "name": "HP制作 格安3,980円 OnePage-Flash",
+      "serviceType": "格安ホームページ制作",
+      "description": "ホームページ制作を激安価格で試したい小規模事業者向けの、画像無し・1ページ超シンプルなAIホームページ制作サービスです。",
+      "areaServed": "JP",
+      "provider": providerJsonLd,
+      "offers": offerJsonLd,
+    },
   ],
 };
 
@@ -205,8 +232,8 @@ export default function HomePage() {
 
       <section id="hero" className="bg-yellow-300 pt-14 sm:pt-16">
         <div className="sr-only">
-          <h1>HPは、こだわりを捨てろ。6つの質問でAIが文章とデザインを作成。ホームページ制作は3,980円税込、月額480円税込で最短5分。</h1>
-          <p>画像無し、1ページ超シンプル、発行URLなんでもOKなら、OnePage-Flashで文章中心のホームページをプレビューしてから決済できます。</p>
+          <h1>HP制作 格安3,980円。OnePage-Flashは6つの質問でAIが文章とデザインを作成するホームページ激安制作サービスです。</h1>
+          <p>画像無し、1ページ超シンプル、発行URLなんでもOKなら、OnePage-Flashで安いホームページ制作をプレビューしてから決済できます。</p>
         </div>
 
         <Link
@@ -217,7 +244,7 @@ export default function HomePage() {
         >
           <Image
             src="/campaign/oneflash-flyer-desktop-20260701b.png"
-            alt="HPは、こだわりを捨てろ。6つの質問に答えるだけでAIが文章とデザインを作成。3,980円税込、最短5分、月額480円税込のOnePage-Flashチラシ"
+            alt="HP制作を格安3,980円税込で始めるOnePage-Flash。6つの質問に答えるだけでAIが文章とデザインを作成、最短5分、月額480円税込のチラシ"
             width={1672}
             height={941}
             priority
@@ -225,7 +252,7 @@ export default function HomePage() {
           />
           <Image
             src="/campaign/oneflash-flyer-mobile-20260701b.png"
-            alt="HPは、こだわりを捨てろ。6つの質問でAIが文章とデザインを作成するスマホ向けOnePage-Flashチラシ"
+            alt="ホームページ制作を激安価格で試せるOnePage-Flash。6つの質問でAIが文章とデザインを作成するスマホ向けチラシ"
             width={941}
             height={1672}
             priority

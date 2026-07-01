@@ -35,6 +35,8 @@ interface CreateCheckoutRequestBody {
     utm_campaign?: string;
     utm_content?: string;
     utm_term?: string;
+    gclid?: string;
+    twclid?: string;
   };
   sessionId?: string;
 }
@@ -119,6 +121,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         ...(utm?.utm_campaign && { utm_campaign: utm.utm_campaign }),
         ...(utm?.utm_content && { utm_content: utm.utm_content }),
         ...(utm?.utm_term && { utm_term: utm.utm_term }),
+        ...(utm?.gclid && { gclid: utm.gclid }),
+        ...(utm?.twclid && { twclid: utm.twclid }),
         ...(sessionId && { session_id: sessionId }),
       },
     });

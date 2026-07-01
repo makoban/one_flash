@@ -14,8 +14,17 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "OnePage-Flash - 6つの質問でHP制作3,980円（税込）",
-  description: "画像無し・1ページ超シンプル・URLなんでもOKなら、6つの質問に答えるだけでAIが文章とデザインを作成。初期3,980円（税込）+ 月額480円（税込・初月無料）。",
+  title: "HP制作 格安3,980円ならOnePage-Flash | ホームページ激安制作",
+  description: "HP制作を格安で始めたい方向け。画像無し・1ページ超シンプル・URLなんでもOKなら、6つの質問に答えるだけでAIが文章とデザインを作成。初期3,980円（税込）+ 月額480円（税込・初月無料）。",
+  keywords: [
+    "HP制作 格安",
+    "ホームページ 激安",
+    "ホームページ制作 格安",
+    "安いホームページ制作",
+    "1ページ ホームページ制作",
+    "AI ホームページ制作",
+    "OnePage-Flash",
+  ],
   metadataBase: new URL("https://oneflash.bantex.jp"),
   alternates: {
     canonical: "/",
@@ -23,14 +32,14 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     url: "https://oneflash.bantex.jp",
-    title: "OnePage-Flash - 6つの質問でHP制作3,980円（税込）",
-    description: "画像無し・1ページ超シンプル・URLなんでもOKなら、6つの質問に答えるだけでAIが文章とデザインを作成。初期3,980円（税込）+ 月額480円（税込・初月無料）。",
+    title: "HP制作 格安3,980円ならOnePage-Flash | ホームページ激安制作",
+    description: "HP制作を格安で始めたい方向け。画像無し・1ページ超シンプル・URLなんでもOKなら、6つの質問に答えるだけでAIが文章とデザインを作成。初期3,980円（税込）+ 月額480円（税込・初月無料）。",
     images: [
       {
         url: "/campaign/oneflash-flyer-desktop-20260701b.png",
         width: 1672,
         height: 941,
-        alt: "HPは、こだわりを捨てろ。6つの質問でAIが文章とデザインを作成するOnePage-Flashのチラシ",
+        alt: "HP制作を格安3,980円税込で始めるOnePage-Flashのチラシ",
       },
     ],
     siteName: "OnePage-Flash",
@@ -38,8 +47,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "OnePage-Flash - 6つの質問でHP制作3,980円（税込）",
-    description: "画像無し・1ページ超シンプル・URLなんでもOKなら、6つの質問に答えるだけでAIが文章とデザインを作成。初期3,980円（税込）+ 月額480円（税込・初月無料）。",
+    title: "HP制作 格安3,980円ならOnePage-Flash | ホームページ激安制作",
+    description: "HP制作を格安で始めたい方向け。画像無し・1ページ超シンプル・URLなんでもOKなら、6つの質問に答えるだけでAIが文章とデザインを作成。初期3,980円（税込）+ 月額480円（税込・初月無料）。",
     images: ["/campaign/oneflash-flyer-desktop-20260701b.png"],
   },
   robots: {
@@ -54,6 +63,7 @@ export const metadata: Metadata = {
 const GA_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
 const AW_ID = process.env.NEXT_PUBLIC_AW_CONVERSION_ID;
 const GTAG_ID = GA_ID || AW_ID;
+const X_PIXEL_ID = process.env.NEXT_PUBLIC_X_PIXEL_ID;
 
 export default function RootLayout({
   children,
@@ -90,6 +100,20 @@ export default function RootLayout({
               `}
             </Script>
           </>
+        )}
+        {/* X Pixel */}
+        {X_PIXEL_ID && (
+          <Script id="x-pixel-init" strategy="afterInteractive">
+            {`
+              !function(e,t,n,s,u,a){
+                e.twq||(s=e.twq=function(){s.exe?s.exe.apply(s,arguments):s.queue.push(arguments);},
+                s.version='1.1',s.queue=[],u=t.createElement(n),u.async=!0,
+                u.src='https://static.ads-twitter.com/uwt.js',
+                a=t.getElementsByTagName(n)[0],a.parentNode.insertBefore(u,a))
+              }(window,document,'script');
+              twq('config','${X_PIXEL_ID}');
+            `}
+          </Script>
         )}
       </head>
       <body

@@ -46,5 +46,17 @@ services:
         sync: false
       - key: NEXT_PUBLIC_AW_CONVERSION_LABEL
         sync: false
+      - key: X_AD_SPEND_YEN
+        value: "9500"
+      - key: NEXT_PUBLIC_X_PIXEL_ID
+        sync: false
+      - key: NEXT_PUBLIC_X_EVENT_PREVIEW_ID
+        sync: false
+      - key: NEXT_PUBLIC_X_EVENT_GENERATE_ID
+        sync: false
+      - key: NEXT_PUBLIC_X_EVENT_CHECKOUT_ID
+        sync: false
+      - key: NEXT_PUBLIC_X_EVENT_PURCHASE_ID
+        sync: false
       - key: ADMIN_PASSWORD
         sync: false

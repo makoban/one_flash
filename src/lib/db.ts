@@ -456,6 +456,7 @@ export async function insertAdEvent(params: {
   referrer?: string;
   userAgent?: string;
   gclid?: string;
+  twclid?: string;
   step?: string;
 }): Promise<void> {
   // form_step イベントの場合、event_type を "form_step_N" 形式で保存
@@ -463,12 +464,15 @@ export async function insertAdEvent(params: {
     ? `${params.eventType}_${params.step}`
     : params.eventType;
 
-  // gclid は utm_content カラムに "(gclid:xxx)" として付与（DBスキーマ変更不要）
+  // Click ID は utm_content カラムに付与（DBスキーマ変更不要）
   let utmContent = params.utmContent ?? null;
-  if (params.gclid && !utmContent) {
-    utmContent = `gclid:${params.gclid}`;
-  } else if (params.gclid && utmContent) {
-    utmContent = `${utmContent}|gclid:${params.gclid}`;
+  const clickIds = [
+    params.gclid ? `gclid:${params.gclid}` : null,
+    params.twclid ? `twclid:${params.twclid}` : null,
+  ].filter(Boolean);
+  if (clickIds.length > 0) {
+    const clickIdText = clickIds.join("|");
+    utmContent = utmContent ? `${utmContent}|${clickIdText}` : clickIdText;
   }
 
   await query(

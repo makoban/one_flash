@@ -4,8 +4,9 @@
  * コンバージョンイベントを opf_ad_events テーブルに記録する。
  *
  * イベント種別:
- *   - page_view      : LP到達
- *   - form_start     : 入力フォーム最初の入力
+ *   - page_view       : LP到達
+ *   - cta_click       : LP上の作成CTAクリック
+ *   - form_start      : 入力フォーム最初の入力
  *   - checkout_start  : Stripe Checkoutへ遷移直前
  *   - subscribed      : 決済完了（Webhook側で記録）
  */
@@ -13,7 +14,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { insertAdEvent } from "@/lib/db";
 
-const ALLOWED_EVENTS = ["page_view", "form_start", "form_step", "generate_start", "generate_complete", "checkout_start"];
+const ALLOWED_EVENTS = [
+  "page_view",
+  "cta_click",
+  "form_start",
+  "form_step",
+  "generate_start",
+  "generate_complete",
+  "checkout_start",
+];
 
 interface TrackRequestBody {
   eventType: string;
@@ -26,6 +35,7 @@ interface TrackRequestBody {
   utm_content?: string;
   utm_term?: string;
   gclid?: string;
+  twclid?: string;
   /** form_step イベント時: "step_1", "step_2", ... "step_6" */
   step?: string;
 }
@@ -53,6 +63,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       utmContent: body.utm_content,
       utmTerm: body.utm_term,
       gclid: body.gclid,
+      twclid: body.twclid,
       step: body.step,
     });
 

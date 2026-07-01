@@ -16,7 +16,7 @@ import Link from "next/link";
 import CardStepForm from "@/components/CardStepForm";
 import PreviewSection from "@/app/create/PreviewSection";
 import type { SiteFormData } from "@/lib/gemini";
-import { trackEvent, getUtmParams, getSessionId } from "@/lib/utm";
+import { trackEvent, trackXPixelEvent, getUtmParams, getSessionId } from "@/lib/utm";
 
 // ---------------------------------------------------------------------------
 // 型定義
@@ -129,6 +129,10 @@ function CreatePage() {
     try {
       const preview = await generateAndScreenshot(data, undefined, setGenerationProgress);
       trackEvent("generate_complete");
+      trackXPixelEvent(process.env.NEXT_PUBLIC_X_EVENT_GENERATE_ID, {
+        status: "completed",
+        description: "OnePage-Flash preview generated",
+      });
       setPreviewData(preview);
       const entry: HistoryEntry = {
         id: 1,
@@ -261,6 +265,12 @@ function CreatePage() {
     setIsPublishing(true);
 
     trackEvent("checkout_start");
+    trackXPixelEvent(process.env.NEXT_PUBLIC_X_EVENT_CHECKOUT_ID, {
+      value: 3980,
+      currency: "JPY",
+      status: "started",
+      description: "OnePage-Flash checkout started",
+    });
 
     try {
       const utm = getUtmParams();

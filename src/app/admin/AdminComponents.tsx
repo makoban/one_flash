@@ -95,6 +95,7 @@ export function StatusBadge({ status }: StatusBadgeProps) {
 
 const EVENT_LABEL_MAP: Record<string, { text: string; bg: string }> = {
   page_view: { text: "PV", bg: "bg-gray-100 text-gray-600" },
+  cta_click: { text: "CTA", bg: "bg-orange-100 text-orange-700" },
   form_start: { text: "Q1", bg: "bg-blue-100 text-blue-600" },
   form_step_2: { text: "Q2", bg: "bg-blue-100 text-blue-600" },
   form_step_3: { text: "Q3", bg: "bg-blue-100 text-blue-600" },
