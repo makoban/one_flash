@@ -9,6 +9,15 @@ const UTM_KEYS = ["utm_source", "utm_medium", "utm_campaign", "utm_content", "ut
 const STORAGE_KEY = "opf_utm";
 const SESSION_ID_KEY = "opf_session_id";
 
+const PATH_CAMPAIGNS: Record<string, UtmParams> = {
+  "/start": {
+    utm_source: "x",
+    utm_medium: "paid_social",
+    utm_campaign: "oneflash_9500_202607",
+    utm_content: "ad01",
+  },
+};
+
 export interface UtmParams {
   utm_source?: string;
   utm_medium?: string;
@@ -24,8 +33,9 @@ export function captureUtmParams(): void {
   if (typeof window === "undefined") return;
 
   const params = new URLSearchParams(window.location.search);
-  const utm: UtmParams = {};
-  let hasUtm = false;
+  const pathCampaign = PATH_CAMPAIGNS[window.location.pathname];
+  const utm: UtmParams = { ...(pathCampaign ?? {}) };
+  let hasUtm = Boolean(pathCampaign);
 
   for (const key of UTM_KEYS) {
     const value = params.get(key);

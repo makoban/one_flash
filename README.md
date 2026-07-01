@@ -37,13 +37,13 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 
 ## X Ads tracking
 
-Use a tagged URL for the current X promotion so LP visits, trial starts, checkout starts, and purchases stay tied together in `/admin`:
+Use the clean campaign URL for the current X promotion. It keeps the visible ad URL natural while internally attributing visits, trial starts, checkout starts, and purchases to the X campaign in `/admin`:
 
 ```text
-https://oneflash.bantex.jp/?utm_source=x&utm_medium=paid_social&utm_campaign=oneflash_9500_202607&utm_content=ad01
+https://oneflash.bantex.jp/start
 ```
 
-The app also captures `twclid` when X Ads appends it. The admin API defaults the campaign spend to `9500` yen for the OnePage-Flash tab; override it with `X_AD_SPEND_YEN` or `/api/admin/stats?...&service=opf&x_ad_spend_yen=9500`.
+The `/start` path is mapped internally to `utm_source=x`, `utm_medium=paid_social`, `utm_campaign=oneflash_9500_202607`, and `utm_content=ad01`. The app also captures `twclid` when X Ads appends it. The admin API defaults the campaign spend to `9500` yen for the OnePage-Flash tab; override it with `X_AD_SPEND_YEN` or `/api/admin/stats?...&service=opf&x_ad_spend_yen=9500`.
 
 Optional X Pixel env vars:
 
