@@ -310,7 +310,7 @@ function CreatePage() {
         </Link>
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">OnePage-Flash</h1>
         <p className="mt-2 text-sm text-gray-500">
-          テキストを入力するだけで、10分でホームページが完成
+          6つの質問に答えるだけで、AIが文章とデザインを作成
         </p>
       </div>
 

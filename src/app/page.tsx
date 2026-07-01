@@ -92,8 +92,8 @@ const FLOW = [
   },
   {
     step: "2",
-    title: "AIがページを生成",
-    body: "入力内容をもとに、文章中心の1ページHPを自動生成します。",
+    title: "AIが文章とデザインを作成",
+    body: "入力内容をもとに、文章とデザインを組み立てた1ページHPを自動生成します。",
   },
   {
     step: "3",
@@ -107,7 +107,7 @@ const jsonLd = {
   "@type": "SoftwareApplication",
   "name": "OnePage-Flash",
   "applicationCategory": "WebApplication",
-  "description": "こだわりを抑えた1ページのホームページをAIで自動生成するサービス。初期3,980円（税込）+ 月額480円（税込・初月無料）。",
+  "description": "6つの質問に答えるだけで、AIが文章とデザインを作成する1ページホームページ制作サービス。初期3,980円（税込）+ 月額480円（税込・初月無料）。",
   "url": "https://oneflash.bantex.jp",
   "operatingSystem": "Web",
   "offers": {
@@ -123,6 +123,7 @@ const jsonLd = {
   },
   "featureList": [
     "AIによるホームページ自動生成",
+    "6つの質問から文章とデザインを作成",
     "画像無しのシンプル1ページ制作",
     "プレビュー確認後の決済",
     "サーバー・SSL込み",
@@ -204,8 +205,8 @@ export default function HomePage() {
 
       <section id="hero" className="bg-yellow-300 pt-14 sm:pt-16">
         <div className="sr-only">
-          <h1>HPは、こだわりを捨てろ。こだわりないならホームページ制作は3,980円税込、月額480円税込で最短5分。</h1>
-          <p>画像無し、1ページ超シンプル、発行URLなんでもOKなら、OnePage-Flashでプレビューを見てから決済できます。</p>
+          <h1>HPは、こだわりを捨てろ。6つの質問でAIが文章とデザインを作成。ホームページ制作は3,980円税込、月額480円税込で最短5分。</h1>
+          <p>画像無し、1ページ超シンプル、発行URLなんでもOKなら、OnePage-Flashで文章中心のホームページをプレビューしてから決済できます。</p>
         </div>
 
         <Link
@@ -215,16 +216,16 @@ export default function HomePage() {
           className="block"
         >
           <Image
-            src="/campaign/oneflash-flyer-desktop.png"
-            alt="HPは、こだわりを捨てろ。こだわりないなら3,980円税込、最短5分、月額480円税込のOnePage-Flashチラシ"
+            src="/campaign/oneflash-flyer-desktop-20260701b.png"
+            alt="HPは、こだわりを捨てろ。6つの質問に答えるだけでAIが文章とデザインを作成。3,980円税込、最短5分、月額480円税込のOnePage-Flashチラシ"
             width={1672}
             height={941}
             priority
             className="hidden h-auto w-full md:block"
           />
           <Image
-            src="/campaign/oneflash-flyer-mobile.png"
-            alt="HPは、こだわりを捨てろ。スマホ向けOnePage-Flashチラシ"
+            src="/campaign/oneflash-flyer-mobile-20260701b.png"
+            alt="HPは、こだわりを捨てろ。6つの質問でAIが文章とデザインを作成するスマホ向けOnePage-Flashチラシ"
             width={941}
             height={1672}
             priority
@@ -249,7 +250,7 @@ export default function HomePage() {
 
           <div className="mb-8 overflow-hidden rounded-lg border-2 border-zinc-950 bg-white shadow-[8px_8px_0_#18181b]">
             <Image
-              src="/campaign/conditions-panel.png"
+              src="/campaign/conditions-panel-20260701b.png"
               alt="3つのこだわりが無ければOK。画像無し、1ページ超シンプル、URLなんでもOKの条件説明"
               width={1536}
               height={1024}
@@ -282,7 +283,7 @@ export default function HomePage() {
               HPが無いままの機会損失を、今日で止める。
             </h2>
             <p className="mt-4 text-base font-bold leading-relaxed text-zinc-700">
-              写真、デザイン、独自URLに悩んで止まっているなら、まずはこだわりを削った1ページで十分です。
+              写真、文章、デザイン、独自URLに悩んで止まっているなら、6つの質問からAIに任せる1ページで十分です。
             </p>
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
@@ -300,13 +301,13 @@ export default function HomePage() {
         <div className="mx-auto max-w-7xl">
           <div className="mb-8 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <p className="text-sm font-black text-yellow-300">AIが実際に作ったサンプル</p>
+              <p className="text-sm font-black text-yellow-300">6つの質問からAIが作るサンプル</p>
               <h2 className="text-3xl font-black leading-tight sm:text-4xl">
                 1ページでも、最低限の信頼は作れる。
               </h2>
             </div>
             <p className="max-w-xl text-sm font-bold leading-relaxed text-zinc-300 sm:text-base">
-              業種の雰囲気に合わせたサンプルです。クリックすると実物を確認できます。
+              入力内容をもとに、文章とデザインを組み立てたサンプルです。クリックすると実物を確認できます。
             </p>
           </div>
 
@@ -367,8 +368,8 @@ export default function HomePage() {
 
           <div className="mb-8 overflow-hidden rounded-lg border-2 border-zinc-950 bg-white shadow-2xl shadow-zinc-950/10">
             <Image
-              src="/campaign/steps-panel.png"
-              alt="最短5分、3ステップでHP公開。質問に答える、AIが自動生成、URLで公開"
+              src="/campaign/steps-panel-20260701b.png"
+              alt="最短5分、3ステップでHP公開。6つの質問に答える、AIが文章とデザインを作成、URLで公開"
               width={1672}
               height={941}
               loading="eager"
@@ -398,7 +399,7 @@ export default function HomePage() {
         <div className="mx-auto max-w-7xl">
           <div className="mb-8 overflow-hidden rounded-lg border-2 border-zinc-950 bg-white shadow-[8px_8px_0_#18181b]">
             <Image
-              src="/campaign/pricing-comparison.png"
+              src="/campaign/pricing-comparison-20260701b.png"
               alt="高いHP制作で悩む前に。一般的な制作会社10万円から、OnePage-Flashは初期3,980円税込、月額480円税込"
               width={1536}
               height={1024}
@@ -432,7 +433,7 @@ export default function HomePage() {
             <ul className="space-y-3 text-sm font-bold text-zinc-800">
               {[
                 "画像無し、1ページ超シンプル、発行URLなんでもOKの範囲",
-                "AIによるホームページ自動生成",
+                "6つの質問からAIが文章とデザインを作成",
                 "プレビュー確認後に決済",
                 "SSL証明書・サーバー費用込み",
                 "月2回の修正込み",
@@ -494,7 +495,7 @@ export default function HomePage() {
                 OnePage<span className="text-orange-500">-Flash</span>
               </span>
               <p className="mt-3 max-w-sm text-sm font-bold leading-relaxed text-zinc-400">
-                こだわりを抑えた1ページのホームページを、AIで素早く生成するサービスです。
+                6つの質問に答えるだけで、AIが文章とデザインを作成する1ページホームページ制作サービスです。
               </p>
             </div>
             <div>

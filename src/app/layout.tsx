@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "OnePage-Flash - こだわりないならHP制作3,980円（税込）",
-  description: "画像無し・1ページ超シンプル・URLなんでもOKなら、AIでホームページを最短5分生成。初期3,980円（税込）+ 月額480円（税込・初月無料）。",
+  title: "OnePage-Flash - 6つの質問でHP制作3,980円（税込）",
+  description: "画像無し・1ページ超シンプル・URLなんでもOKなら、6つの質問に答えるだけでAIが文章とデザインを作成。初期3,980円（税込）+ 月額480円（税込・初月無料）。",
   metadataBase: new URL("https://oneflash.bantex.jp"),
   alternates: {
     canonical: "/",
@@ -23,14 +23,14 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     url: "https://oneflash.bantex.jp",
-    title: "OnePage-Flash - こだわりないならHP制作3,980円（税込）",
-    description: "画像無し・1ページ超シンプル・URLなんでもOKなら、AIでホームページを最短5分生成。初期3,980円（税込）+ 月額480円（税込・初月無料）。",
+    title: "OnePage-Flash - 6つの質問でHP制作3,980円（税込）",
+    description: "画像無し・1ページ超シンプル・URLなんでもOKなら、6つの質問に答えるだけでAIが文章とデザインを作成。初期3,980円（税込）+ 月額480円（税込・初月無料）。",
     images: [
       {
-        url: "/campaign/oneflash-flyer-desktop.png",
+        url: "/campaign/oneflash-flyer-desktop-20260701b.png",
         width: 1672,
         height: 941,
-        alt: "HPは、こだわりを捨てろ。OnePage-Flashのチラシ",
+        alt: "HPは、こだわりを捨てろ。6つの質問でAIが文章とデザインを作成するOnePage-Flashのチラシ",
       },
     ],
     siteName: "OnePage-Flash",
@@ -38,9 +38,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "OnePage-Flash - こだわりないならHP制作3,980円（税込）",
-    description: "画像無し・1ページ超シンプル・URLなんでもOKなら、AIでホームページを最短5分生成。初期3,980円（税込）+ 月額480円（税込・初月無料）。",
-    images: ["/campaign/oneflash-flyer-desktop.png"],
+    title: "OnePage-Flash - 6つの質問でHP制作3,980円（税込）",
+    description: "画像無し・1ページ超シンプル・URLなんでもOKなら、6つの質問に答えるだけでAIが文章とデザインを作成。初期3,980円（税込）+ 月額480円（税込・初月無料）。",
+    images: ["/campaign/oneflash-flyer-desktop-20260701b.png"],
   },
   robots: {
     index: true,
