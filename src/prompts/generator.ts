@@ -38,7 +38,7 @@ const COLOR_THEMES = {
       cardBorder: "#e5e7eb",
       textPrimary: "#111827",
       textSecondary: "#4b5563",
-      textMuted: "#9ca3af",
+      textMuted: "#6d7787",
     },
     fonts: {
       display: "Noto Sans JP",
@@ -65,7 +65,7 @@ const COLOR_THEMES = {
       cardBorder: "#e8ecf1",
       textPrimary: "#0c1524",
       textSecondary: "#4a5568",
-      textMuted: "#a0aec0",
+      textMuted: "#627793",
     },
     fonts: {
       display: "Playfair Display",
@@ -92,7 +92,7 @@ const COLOR_THEMES = {
       cardBorder: "#e9d5ff",
       textPrimary: "#1e1b4b",
       textSecondary: "#6b21a8",
-      textMuted: "#a78bfa",
+      textMuted: "#7e55f8",
     },
     fonts: {
       display: "Zen Maru Gothic",
@@ -119,7 +119,7 @@ const COLOR_THEMES = {
       cardBorder: "#fce7f3",
       textPrimary: "#111827",
       textSecondary: "#9d174d",
-      textMuted: "#f472b6",
+      textMuted: "#e2127e",
     },
     fonts: {
       display: "Noto Sans JP",
@@ -146,7 +146,7 @@ const COLOR_THEMES = {
       cardBorder: "#fed7aa",
       textPrimary: "#431407",
       textSecondary: "#9a3412",
-      textMuted: "#fb923c",
+      textMuted: "#be5804",
     },
     fonts: {
       display: "Zen Maru Gothic",
@@ -173,7 +173,7 @@ const COLOR_THEMES = {
       cardBorder: "#e8ecf1",
       textPrimary: "#0c1524",
       textSecondary: "#4a5568",
-      textMuted: "#a0aec0",
+      textMuted: "#627793",
     },
     fonts: {
       display: "Playfair Display",
@@ -200,7 +200,7 @@ const COLOR_THEMES = {
       cardBorder: "#e8ecf1",
       textPrimary: "#0c1524",
       textSecondary: "#4a5568",
-      textMuted: "#a0aec0",
+      textMuted: "#627793",
     },
     fonts: {
       display: "Playfair Display",
@@ -227,7 +227,7 @@ const COLOR_THEMES = {
       cardBorder: "#e2e8f0",
       textPrimary: "#111827",
       textSecondary: "#475569",
-      textMuted: "#94a3b8",
+      textMuted: "#637895",
     },
     fonts: {
       display: "Noto Sans JP",
@@ -254,7 +254,7 @@ const COLOR_THEMES = {
       cardBorder: "#bfdbfe",
       textPrimary: "#1e1b4b",
       textSecondary: "#1d4ed8",
-      textMuted: "#60a5fa",
+      textMuted: "#0870f2",
     },
     fonts: {
       display: "Zen Maru Gothic",
@@ -281,7 +281,7 @@ const COLOR_THEMES = {
       cardBorder: "#e5e7eb",
       textPrimary: "#111827",
       textSecondary: "#4b5563",
-      textMuted: "#9ca3af",
+      textMuted: "#6d7787",
     },
     fonts: {
       display: "Noto Sans JP",
@@ -308,7 +308,7 @@ const COLOR_THEMES = {
       cardBorder: "#e9d5ff",
       textPrimary: "#1e1b4b",
       textSecondary: "#6b21a8",
-      textMuted: "#a78bfa",
+      textMuted: "#7e55f8",
     },
     fonts: {
       display: "Zen Maru Gothic",
@@ -335,7 +335,7 @@ const COLOR_THEMES = {
       cardBorder: "#e8ecf1",
       textPrimary: "#0c1524",
       textSecondary: "#4a5568",
-      textMuted: "#a0aec0",
+      textMuted: "#627793",
     },
     fonts: {
       display: "Playfair Display",
@@ -659,6 +659,14 @@ tailwind.config に以下を設定すること:
 - アクセント色: ${p.accent} / ライトアクセント: ${p.accentLight}
 - テキスト色: ${p.textPrimary} / ${p.textSecondary} / ${p.textMuted}
 - カード: 背景 ${p.cardBg} / ボーダー ${p.cardBorder}
+
+### 【必須】文字色のコントラスト（見えない文字を絶対に作らない）
+- すべての文字は、その**背景色に対して十分な濃さのコントラスト**を確保する（本文は WCAG AA 4.5:1 以上、大きな見出しは 3:1 以上）。背景に溶けて読めない文字を作らない。
+- **ライトアクセント色（accentLight: ${p.accentLight}）や淡い色を、文字色に使わない。** これらは枠線・下線・装飾円・アイコン背景などの装飾専用。本文・見出し・連絡先・ラベルの文字には textPrimary / textSecondary / heroText / accent（濃い方）を使う。
+- **明るい背景（白・淡色・sectionBg）には濃い文字**（textPrimary/textSecondary）、**暗い背景（sectionBgDark やダークなヒーロー）には白系の文字**を使う。逆にしない。
+- **ヒーローが明るい色（黄・オレンジ・淡いグラデーション）を含む場合、白文字は見えなくなる。** その場合は文字の背後に暗いオーバーレイ（例: rgba(0,0,0,0.35) の層）を敷くか、文字を濃い色にして必ず読めるようにする。
+- accent 色を文字に使うのは、その色が背景に対して 4.5:1 以上ある場合のみ（薄いゴールド等を白背景の小さな文字に使わない）。
+- textMuted はあくまで補足的な小さめテキスト用。連絡先・営業時間・本文など重要情報には使わない。
 
 ### デザイン方向性
 ${theme.heroStyle}
