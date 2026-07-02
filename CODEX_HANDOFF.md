@@ -205,4 +205,14 @@ master へ push → Render 自動デプロイ（約1分で反映確認: `/api/mi
   矛盾していた FOOD の「営業時間・定休日は必ず表示」を「記載がある場合のみ」に修正。
 - **スマホ見切れ**: レスポンシブ節を強化。CTA/電話ボタンは 320px でもはみ出さない
   （white-space:nowrap 禁止、max-width:100%、狭幅は w-full sm:w-auto で縦積み、装飾特大文字は
-  overflow:hidden でクリップ、iframe は width:100%）。
+  overflow:hidden でクリップ、iframe は width:100%）。本番レンダリングで 320/375/414px 横スクロール無し・電話ボタン収まりを確認。
+
+### 追加修正: ヒーローのキャッチコピー先頭が消える「で健やかな毎日を」現象（2026-07-02, ユーザー報告）
+- 症状: ヒーロー見出しの先頭語が消え、助詞から始まる（例: 「笑顔で健やかな毎日を」→「で健やかな毎日を」）。
+- 原因: プロンプトが「キャッチコピーの一部にグラデーションテキストを使う」よう促し、AI が
+  コピーを分割して一部に独自クラス `.text-gradient`（`color:transparent; background-clip:text;`
+  ＋ Tailwind CDN の `from-brand-300`/`to-white` = `var(--tw-gradient-from/to)` 依存）を適用。
+  brand スケール未定義等で変数が解決されないと背景が消え、**透明の文字＝消える**。分割の前半が消えて
+  助詞だけ残る。本番再現で `.text-gradient { ... color: transparent }` を確認。
+- 対応（`src/prompts/generator.ts`）: キャッチコピーは**全文を単色（heroText色）で表示・分割禁止・
+  透明/background-clip禁止**に変更。グラデーション文字は装飾見出し限定＋実色コード指定＋透明放置禁止に。

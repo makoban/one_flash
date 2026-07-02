@@ -428,7 +428,7 @@ STEP1で推定した業種に対応するルールを以下から選択し、そ
 推奨アイコン（Lucide）: sparkles, scissors, star, gem, crown, wand-sparkles, heart, smile, calendar
 デザイン特性:
   - イタリック体（font-style: italic）を積極的に使用（見出し・キャッチコピー）
-  - グラデーションテキスト（background-clip: text）を見出しの一部に使用
+  - グラデーションテキスト（background-clip: text）はセクション見出し等の装飾にのみ限定使用可（具体的な色コードで指定し、透明のまま消えないようにする）。キャッチコピー本文には使わない
   - CTAボタンはアウトラインスタイル（background: transparent, border 2px, hover時に塗り）
   - カードタイプ: Bタイプ（shadow-lg, rounded-2xl, hover時にtranslateY）
   - colorfulテーマが選ばれている場合: accent色を #c9748a（ローズ）にオーバーライド
@@ -635,7 +635,7 @@ tailwind.config に以下を設定すること:
 - CSSパターン: ドット(radial-gradient)、斜め線(repeating-linear-gradient)、グリッド(linear-gradient 2方向)
 - アクセント色の半透明ぼかし円を「光」として複数配置
 - Lucideアイコンを大きめに装飾として配置（opacity: 0.08〜0.15、rotate angle変化）
-- 見出しグラデーションテキスト（background-clip: text）
+- 見出しグラデーションテキスト（background-clip: text。※キャッチコピーには使わず、装飾見出しのみ。必ず実色コード指定で透明化させない）
 - 細い装飾線・装飾フレーム（rounded-full, 細いborder, 数字/記号の装飾）
 - mix-blend-mode: overlay, screen などで深みを出す
 
@@ -677,7 +677,9 @@ ${theme.heroStyle}
 - 業種英字の超大型装飾テキスト（例: MEDICAL・BEAUTY・CAFE 等をfont-size: clamp(120px,22vw,320px)、opacity: 0.04〜0.06 で背景に薄く敷く・letter-spacing: 0.1em）
 - アクセントとして、ぼかし円（position: absolute, 幅300〜500px, background: radial-gradient(circle, アクセント色 0%, transparent 70%), filter: blur(40px), opacity: 0.4〜0.6）を左右非対称に2〜3個配置
 - 英字サブラベル（font-label、tracking-[0.3em]、text-xs、opacity-70）をキャッチコピーの上に配置（先頭にLucideアイコンw-4 h-4を添える）
-- キャッチコピーはfont-displayで大胆に大きく（text-4xl sm:text-6xl lg:text-7xl）、一部にグラデーションテキストを使って洗練感を出す
+- キャッチコピーはfont-displayで大胆に大きく（text-4xl sm:text-6xl lg:text-7xl）表示する。**入力されたキャッチコピー全文を、必ず視認できる単色（ヒーローテキスト色 ${p.heroText}）で表示すること。**
+  - 【厳守】キャッチコピーの文字に color: transparent / -webkit-text-fill-color: transparent / background-clip:text（グラデーション文字）を使わない。文字が消えて一部だけ表示される不具合の原因になる。
+  - 【厳守】キャッチコピーを複数の <span> に分割して一部だけ別色・別スタイルにしない。1つの見出しとしてそのまま入れる（改行は <br> のみ可）。
 - キャッチコピーの下に1〜2行の短い説明文（font-sans、text-base〜text-lg、opacity-80、max-w-2xl）
 - CTAボタン: px-8 py-4 rounded-full、アクセント色背景、font-weight: 600、hover時にscale(1.05)とshadow増加、テキスト左にLucideアイコン（phone, arrow-right等）（BEAUTYのみアウトラインスタイル）
 - ヒーロー下部にスクロールインジケーター（chevron-downアイコン、scrollBounceアニメーション）
@@ -756,7 +758,7 @@ ${theme.heroStyle}
 - カードホバー: transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1)
 - スムーズスクロール: html { scroll-behavior: smooth; }
 - ヘッダー: backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255,255,255,0.1)
-- グラデーションテキスト（BEAUTYで積極使用）: background: linear-gradient() + -webkit-background-clip: text + color: transparent
+- グラデーションテキスト: **キャッチコピー（ヒーロー見出し）には使わない。** 使う場合は装飾的な短い語のみとし、必ず具体的な色コードで指定する（background: linear-gradient(90deg, #実色1, #実色2) + -webkit-background-clip: text + -webkit-text-fill-color: transparent）。Tailwindの from-*/to-* 変数（var(--tw-gradient-from)等）に依存した独自クラスは、変数未解決で文字が透明化＝消えるため使わない。透明のままにせず、対応ブラウザ以外でも見えるよう単色フォールバックを併記する。
 - ドットパターン背景（SCHOOL推奨）: background-image: radial-gradient(circle, ${p.accent}22 1px, transparent 1px); background-size: 24px 24px
 - overflow-x: hidden を body に設定
 - フッター: ダーク背景（${p.sectionBgDark}）、サイト名 + コピーライト「© 2026 ${formData.siteName}」+ 小さく "Powered by OnePage-Flash"
