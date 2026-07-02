@@ -35,7 +35,10 @@ export interface GeminiModelCandidate {
 
 const GENERATION_MODEL_CONFIG = {
   temperature: 0.7,
-  maxOutputTokens: 8192,
+  // 8192 では本命 gemini-2.5-flash のリッチなHTMLが </html> 到達前に打ち切られ、
+  // 「Generated HTML does not contain closing </html> tag」で予備モデルに交代していた。
+  // gemini-2.5系は最大65536まで対応。余裕を持たせて完走させる。
+  maxOutputTokens: 32768,
 };
 
 const MODERATION_MODEL_CONFIG = {

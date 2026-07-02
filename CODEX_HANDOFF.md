@@ -182,15 +182,27 @@ master へ push → Render 自動デプロイ（約1分で反映確認: `/api/mi
 - **結果: 5/5 成功（画像化まで完了、navigation timeout 失敗ゼロ）** → スクショ堅牢化・UX 修正は本番で有効。
 - **合計 約90〜103秒（生成AIだけで73〜75秒）。** UX の目安表示は「30秒〜1分」→「1〜2分」に修正済み。
 
-### ⚠️ 未解決の重要課題（要調査）: 第一候補モデルが毎回フォールバック
-- 5/5 すべて `gemini-2.5-flash-lite`（予備）で生成。第一候補 `gemini-2.5-flash` が**毎回失敗して**予備に切替わっている。
-- 影響: 毎回フォールバック分の遅延が乗る（生成 73〜75s の一因）。第一候補が一度も使われていない。
-- 確認ポイント（Codex/次担当へ）:
-  - `src/lib/gemini.ts` の `geminiGenerationModels`（`gemini-2.5-flash` → `gemini-2.5-flash-lite`）。
-  - `src/app/api/generate/route.ts` の `withGeminiModelFallback` / `isRetryableGeminiError`
-    （"generated html does not contain" もリトライ対象。parse 失敗で無駄なリトライの可能性）。
-  - Gemini API の quota / モデルアクセス権 / モデル名の有効性を要確認。
-  - もし `gemini-2.5-flash` が恒常的に使えないなら、生成の第一候補を `flash-lite` にすると
-    無駄なフォールバック待ちを削減できる（ただし根本原因の確認を推奨）。
-- なお生成そのものが遅い（8192 token 上限で 22k〜27k 文字の HTML 出力）ため、
-  速度改善には出力量/プロンプト最適化や streaming 検討も選択肢。
+### ✅ 解決済み: 第一候補モデルが毎回フォールバックしていた原因（確定）
+- 本番診断（`/api/generate` の `meta.fallbackReason` を一時的に追加して取得）で確定した実エラー:
+  **`gemini-2.5-flash: Generated HTML does not contain closing </html> tag`**
+- 原因: `GENERATION_MODEL_CONFIG.maxOutputTokens = 8192` が小さすぎ、第一候補 `gemini-2.5-flash` の
+  リッチで長い HTML が `</html>` 到達前に**トークン上限で打ち切られ**、`parseGeneratorResponse`
+  （`src/prompts/generator.ts`）が「closing </html> tag が無い」で throw → `isRetryableGeminiError` の
+  `"generated html does not contain"` に該当 → リトライ扱いで予備 `flash-lite` に交代していた
+  （flash-lite は簡素な出力で 8192 に収まり成功、20,435 字で `</html>` 到達）。
+- **影響は速度だけでなく品質にも波及**: 常に能力の低い flash-lite で生成 → 指示（ダミー禁止・
+  レスポンシブ）を守りにくく、ダミー連絡先やスマホ崩れの一因になっていた可能性が高い。
+- 対応: `src/lib/gemini.ts` の `maxOutputTokens` を **8192 → 32768** に引き上げ（gemini-2.5 系は最大 65536）。
+  これで flash が完走し、第一候補（高性能モデル）が使われるようになる想定。
+- 診断コードは `src/app/api/generate/route.ts` に残置（`meta.fallbackReason`。今後の監視に有用）。
+
+## 6. 生成内容の品質修正（2026-07-02, ユーザー報告対応）— `src/prompts/generator.ts`
+ユーザー報告: (a) スマホ幅で電話ボタン等が見切れる、(b) 未入力の連絡先/営業時間がダミーで表示される、
+(c) 書かれていない要素を出さないでほしい。
+- **ダミー撲滅**: 「【最優先・絶対厳守】書かれていない項目は一切表示しない」ルールを追加。
+  【連絡先情報】に実在する項目のみ表示、無い項目は行/アイコン/セクションごと省略、
+  ダミー値（03-1234-5678, info@example.com, 9:00〜18:00 等）を明示的に禁止。住所が無ければ地図も出さない。
+  矛盾していた FOOD の「営業時間・定休日は必ず表示」を「記載がある場合のみ」に修正。
+- **スマホ見切れ**: レスポンシブ節を強化。CTA/電話ボタンは 320px でもはみ出さない
+  （white-space:nowrap 禁止、max-width:100%、狭幅は w-full sm:w-auto で縦積み、装飾特大文字は
+  overflow:hidden でクリップ、iframe は width:100%）。
