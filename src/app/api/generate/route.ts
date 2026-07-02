@@ -41,15 +41,19 @@ async function withGeminiModelFallback<T>(
   label: string,
   candidates: GeminiModelCandidate[],
   operation: (candidate: GeminiModelCandidate) => Promise<T>
-): Promise<{ result: T; modelName: string }> {
+): Promise<{ result: T; modelName: string; attempts: number; firstErrorMessage?: string }> {
   let lastError: unknown;
+  let firstErrorMessage: string | undefined;
   for (let attempt = 1; attempt <= GEMINI_RETRY_DELAYS_MS.length + 1; attempt++) {
     const candidate = candidates[(attempt - 1) % candidates.length];
     try {
       const result = await operation(candidate);
-      return { result, modelName: candidate.modelName };
+      return { result, modelName: candidate.modelName, attempts: attempt, firstErrorMessage };
     } catch (error) {
       lastError = error;
+      if (firstErrorMessage === undefined) {
+        firstErrorMessage = `${candidate.modelName}: ${getErrorMessage(error)}`.slice(0, 300);
+      }
       const retryable = isRetryableGeminiError(error);
       console.warn(`[generate] ${label} attempt ${attempt} failed with ${candidate.modelName}:`, error);
       if (!retryable || attempt > GEMINI_RETRY_DELAYS_MS.length) {
@@ -144,6 +148,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     let html = "";
     let usedTemplateFallback = false;
     let generationModelName = "";
+    let generationFallbackReason: string | undefined;
 
     try {
       const generationAttempt = await withGeminiModelFallback(
@@ -157,6 +162,10 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       );
       html = generationAttempt.result;
       generationModelName = generationAttempt.modelName;
+      // 第一候補以外で成功した場合、切替の原因（初回失敗理由）を診断用に記録
+      if (generationAttempt.modelName !== geminiGenerationModels[0].modelName) {
+        generationFallbackReason = generationAttempt.firstErrorMessage;
+      }
     } catch (error) {
       console.error("[generate] All model attempts failed, using fallback template");
       await notifyCustomerError("generate", "Gemini全モデル失敗→フォールバック使用", {
@@ -184,6 +193,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         meta: {
           generationModel: generationModelName || "template",
           templateFallback: usedTemplateFallback,
+          fallbackReason: generationFallbackReason,
         },
       },
       { status: 200 }
