@@ -9,7 +9,7 @@
 
 import { useEffect } from "react";
 import Link from "next/link";
-import Image from "next/image";
+import Image, { getImageProps } from "next/image";
 import UtmCapture from "@/components/UtmCapture";
 import { trackEventBeacon, trackXPixelEvent } from "@/lib/utm";
 
@@ -64,6 +64,26 @@ const SAMPLES = [
   { slug: "sample-komorebi", label: "カフェ", time: "9分", img: "/samples/pc-4.png" },
   { slug: "sample-shanti", label: "ヨガスタジオ", time: "6分", img: "/samples/pc-5.png" },
 ];
+
+const heroDesktopImage = getImageProps({
+  src: "/campaign/oneflash-flyer-desktop-20260701b.png",
+  alt: "HP制作を格安3,980円税込で始めるOnePage-Flash。6つの質問に答えるだけでAIが文章とデザインを作成、最短5分、月額480円税込のチラシ",
+  width: 1672,
+  height: 941,
+  sizes: "100vw",
+  quality: 70,
+}).props;
+
+const heroMobileImage = getImageProps({
+  src: "/campaign/oneflash-flyer-mobile-20260701b.png",
+  alt: "ホームページ制作を激安価格で試せるOnePage-Flash。6つの質問でAIが文章とデザインを作成するスマホ向けチラシ",
+  width: 941,
+  height: 1672,
+  sizes: "100vw",
+  quality: 70,
+  loading: "eager",
+  fetchPriority: "high",
+}).props;
 
 const CONDITIONS = [
   {
@@ -209,20 +229,20 @@ export default function HomePage() {
 
       <nav className="fixed left-0 right-0 top-0 z-50 border-b border-zinc-200 bg-white/92 backdrop-blur-md">
         <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:h-16 sm:px-6 lg:px-8">
-          <span className="text-base font-black sm:text-lg">
+          <span className="text-sm font-black sm:text-lg">
             OnePage<span className="text-orange-500">-Flash</span>
           </span>
           <div className="flex items-center gap-2 sm:gap-4">
             <Link
               href="/edit"
-              className="text-sm font-bold text-zinc-600 transition hover:text-zinc-950"
+              className="whitespace-nowrap text-xs font-bold text-zinc-600 transition hover:text-zinc-950 sm:text-sm"
             >
-              サイト修正
+              購入済サイトの修正
             </Link>
             <Link
               href="/create"
               onClick={handleCtaClick}
-              className="rounded-full bg-orange-500 px-4 py-2 text-sm font-black text-white shadow-lg shadow-orange-500/25 transition hover:bg-orange-600 sm:px-5"
+              className="whitespace-nowrap rounded-full bg-orange-500 px-3 py-2 text-xs font-black text-white shadow-lg shadow-orange-500/25 transition hover:bg-orange-600 sm:px-5 sm:text-sm"
             >
               今すぐ作成
             </Link>
@@ -242,22 +262,23 @@ export default function HomePage() {
           aria-label="OnePage-Flashでホームページをプレビューする"
           className="block"
         >
-          <Image
-            src="/campaign/oneflash-flyer-desktop-20260701b.png"
-            alt="HP制作を格安3,980円税込で始めるOnePage-Flash。6つの質問に答えるだけでAIが文章とデザインを作成、最短5分、月額480円税込のチラシ"
-            width={1672}
-            height={941}
-            priority
-            className="hidden h-auto w-full md:block"
-          />
-          <Image
-            src="/campaign/oneflash-flyer-mobile-20260701b.png"
-            alt="ホームページ制作を激安価格で試せるOnePage-Flash。6つの質問でAIが文章とデザインを作成するスマホ向けチラシ"
-            width={941}
-            height={1672}
-            priority
-            className="block h-auto w-full md:hidden"
-          />
+          <picture>
+            <source
+              media="(min-width: 768px)"
+              srcSet={heroDesktopImage.srcSet}
+              sizes={heroDesktopImage.sizes}
+            />
+            <source
+              media="(max-width: 767px)"
+              srcSet={heroMobileImage.srcSet}
+              sizes={heroMobileImage.sizes}
+            />
+            <img
+              {...heroMobileImage}
+              alt="HP制作を格安3,980円税込で始めるOnePage-Flash。6つの質問でAIが文章とデザインを作成するチラシ"
+              className="aspect-[941/1672] h-auto w-full md:aspect-[1672/941]"
+            />
+          </picture>
         </Link>
       </section>
 
@@ -281,7 +302,8 @@ export default function HomePage() {
               alt="3つのこだわりが無ければOK。画像無し、1ページ超シンプル、URLなんでもOKの条件説明"
               width={1536}
               height={1024}
-              loading="eager"
+              sizes="(min-width: 1280px) 1280px, 100vw"
+              quality={70}
               className="h-auto w-full"
             />
           </div>
@@ -353,7 +375,8 @@ export default function HomePage() {
                     alt={`AIが作った${sample.label}のホームページサンプル`}
                     width={640}
                     height={360}
-                    loading="eager"
+                    sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+                    quality={70}
                     className="h-full w-full object-cover object-top transition duration-500 group-hover:scale-105"
                   />
                 </div>
@@ -399,7 +422,8 @@ export default function HomePage() {
               alt="最短5分、3ステップでHP公開。6つの質問に答える、AIが文章とデザインを作成、URLで公開"
               width={1672}
               height={941}
-              loading="eager"
+              sizes="(min-width: 1024px) 1024px, 100vw"
+              quality={70}
               className="h-auto w-full"
             />
           </div>
@@ -430,7 +454,8 @@ export default function HomePage() {
               alt="高いHP制作で悩む前に。一般的な制作会社10万円から、OnePage-Flashは初期3,980円税込、月額480円税込"
               width={1536}
               height={1024}
-              loading="eager"
+              sizes="(min-width: 1280px) 1280px, 100vw"
+              quality={70}
               className="h-auto w-full"
             />
           </div>
@@ -529,7 +554,7 @@ export default function HomePage() {
               <div className="mb-3 text-sm font-black text-zinc-200">サービス</div>
               <div className="space-y-2 text-sm font-bold text-zinc-500">
                 <Link href="/create" className="block transition hover:text-white">HP作成</Link>
-                <Link href="/edit" className="block transition hover:text-white">サイト修正</Link>
+                <Link href="/edit" className="block transition hover:text-white">購入済サイトの修正</Link>
                 <a href="https://lin.ee/5b8JT4C" target="_blank" rel="noopener noreferrer" className="block text-[#06C755] transition hover:text-[#59e58a]">LINEサポート</a>
               </div>
             </div>
