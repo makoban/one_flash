@@ -4,7 +4,14 @@
  * HTMLをCloudflare Worker経由でR2にアップロードし、
  * メタデータ（formData, email, パスワード）も保存する。
  *
- * Request:  { html, subdomain, formData, email, password? }
+ * 認証（既存顧客サイトの乗っ取り防止）:
+ *   - 既存サイトの上書き（再公開）: そのサイトのパスワード（password）が必須。
+ *     Worker /_api/verify で照合し、一致しなければ拒否する。
+ *   - 新規サイトの公開: 管理者パスワード（pw === ADMIN_PASSWORD）が必須。
+ *     （通常の顧客作成フローは Stripe Webhook / admin API 経由で公開されるため、
+ *      この公開エンドポイントを匿名で新規作成に使うことはできない）
+ *
+ * Request:  { html, subdomain, formData, email, password?, pw? }
  * Response: { url, subdomain, password? }
  */
 
@@ -14,7 +21,7 @@ import { notifyCustomerError } from "@/lib/slack";
 export const runtime = "nodejs";
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
-  let body: { html?: string; subdomain?: string; formData?: Record<string, unknown>; email?: string; password?: string } | undefined;
+  let body: { html?: string; subdomain?: string; formData?: Record<string, unknown>; email?: string; password?: string; pw?: string } | undefined;
   try {
     body = (await request.json()) as {
       html?: string;
@@ -22,8 +29,9 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       formData?: Record<string, unknown>;
       email?: string;
       password?: string;
+      pw?: string;
     };
-    const { html, subdomain, formData, email, password } = body;
+    const { html, subdomain, formData, email, password, pw } = body;
 
     if (!html || typeof html !== "string") {
       return NextResponse.json({ error: "html is required" }, { status: 400 });
@@ -43,6 +51,46 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         { error: "WORKER_URL and UPLOAD_SECRET must be configured" },
         { status: 500 }
       );
+    }
+
+    // --- 認証チェック ---
+    const adminPassword = process.env.ADMIN_PASSWORD;
+    const isAdmin = Boolean(adminPassword && pw && pw === adminPassword);
+
+    if (!isAdmin) {
+      // 既存サイトの再公開: サイトパスワードの照合を必須にする。
+      if (!password || typeof password !== "string") {
+        return NextResponse.json(
+          { error: "サイトのパスワードが必要です" },
+          { status: 401 }
+        );
+      }
+
+      const verifyRes = await fetch(`${workerUrl}/_api/verify`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ subdomain, password, secret: uploadSecret }),
+      });
+
+      if (verifyRes.status === 404) {
+        // サイトが存在しない = 新規公開。匿名での新規公開は許可しない。
+        return NextResponse.json(
+          { error: "対象のサイトが見つかりません" },
+          { status: 404 }
+        );
+      }
+      if (verifyRes.status === 403) {
+        return NextResponse.json(
+          { error: "パスワードが正しくありません" },
+          { status: 403 }
+        );
+      }
+      if (!verifyRes.ok) {
+        return NextResponse.json(
+          { error: "認証に失敗しました" },
+          { status: 500 }
+        );
+      }
     }
 
     console.log(`[publish] Uploading site: ${subdomain}`);

@@ -5,7 +5,7 @@
  *
  * 処理フロー:
  *   1. revision_token で対象サイトを特定
- *   2. 無料修正回数チェック（0回なら Stripe 決済へリダイレクト）
+ *   2. 無料修正回数チェック（上限到達なら 403 で案内を返す）
  *   3. R2 から現在の HTML を取得
  *   4. Gemini でHTML修正
  *   5. R2 の HTML を上書き保存
@@ -16,19 +16,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { geminiModel, moderationModel } from "@/lib/gemini";
 import { uploadSiteHTML, getSiteHTML, getSitePublicUrl } from "@/lib/r2";
-import { query, getSiteByRevisionToken, findOrCreateUser } from "@/lib/db";
+import { query, getSiteByRevisionToken } from "@/lib/db";
 import { sendRevisionCompletionEmail } from "@/lib/email";
 import { buildRefinerPrompt, parseRefinerResponse, validateRevisionInstruction } from "@/prompts/refiner";
 import { buildFeasibilityPrompt, parseFeasibilityResponse } from "@/prompts/feasibility";
 import { notifyCustomerError } from "@/lib/slack";
-import type { OpfSiteRow } from "@/lib/db";
 
 // ---------------------------------------------------------------------------
 // 定数
 // ---------------------------------------------------------------------------
 
 /** 無料修正可能な最大回数 */
-const FREE_REVISION_LIMIT = 2;
+const FREE_REVISION_LIMIT = 5;
 
 // ---------------------------------------------------------------------------
 // ハンドラー
@@ -80,15 +79,13 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     );
 
     if (remainingFreeRevisions === 0) {
-      // 有料修正が必要: フロントエンドに決済URLを返す
-      // TODO: Stripe 有料修正 Checkout セッション作成
+      // 無料修正の上限に達した場合の案内（有料修正フローは未提供）
       return NextResponse.json(
         {
-          requiresPayment: true,
-          message: "無料修正回数を使い切りました。500円の決済が必要です。",
-          // TODO: checkoutUrl: await createRevisionCheckoutSession(...)
+          limitReached: true,
+          message: `無料修正の上限（${FREE_REVISION_LIMIT}回）に達しました。追加の修正をご希望の場合はお問い合わせください。`,
         },
-        { status: 402 }
+        { status: 403 }
       );
     }
 

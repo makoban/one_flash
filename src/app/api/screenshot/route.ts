@@ -166,13 +166,27 @@ async function captureScreenshot(
   try {
     await page.setViewport(viewport);
 
-    await page.setContent(html, {
-      waitUntil: "networkidle0",
-      timeout: NETWORK_IDLE_TIMEOUT_MS,
-    });
+    // networkidle0（接続が完全に0になるまで待機）は Google Fonts / lucide /
+    // 外部画像などの CDN が滞留すると成立せず、タイムアウト（navigation timeout）で
+    // 全体が失敗する。networkidle2 + タイムアウト時も続行する方式で堅牢化する。
+    try {
+      await page.setContent(html, {
+        waitUntil: "networkidle2",
+        timeout: NETWORK_IDLE_TIMEOUT_MS,
+      });
+    } catch (err) {
+      // 外部リソースが滞留してもレンダリング済みの内容でスクショを続行する
+      console.warn(
+        "[screenshot] setContent timeout, proceeding with current render:",
+        err instanceof Error ? err.message : String(err)
+      );
+    }
 
-    // Google Fonts のレンダリング完了を待つ
-    await page.evaluate(() => document.fonts.ready);
+    // Google Fonts のレンダリング完了を待つ（ハング防止のため最大2秒でタイムアウト）
+    await Promise.race([
+      page.evaluate(() => document.fonts.ready).catch(() => undefined),
+      new Promise((resolve) => setTimeout(resolve, 2000)),
+    ]);
     // 追加の安全マージン（フォントレンダリングが反映されるまで）
     await new Promise((resolve) => setTimeout(resolve, 500));
 

@@ -20,6 +20,9 @@ const RATE_LIMITS: Record<string, RateLimitConfig> = {
   "/api/generate": { windowMs: 60_000, maxRequests: 5 },
   "/api/create-checkout-session": { windowMs: 60_000, maxRequests: 3 },
   "/api/revise": { windowMs: 60_000, maxRequests: 5 },
+  // パスワード総当たり防止（正規の編集ログイン/再公開は数回で足りる）
+  "/api/verify": { windowMs: 60_000, maxRequests: 10 },
+  "/api/publish": { windowMs: 60_000, maxRequests: 10 },
 };
 
 // ---------------------------------------------------------------------------
@@ -92,5 +95,5 @@ export function middleware(request: NextRequest): NextResponse | undefined {
 }
 
 export const config = {
-  matcher: ["/api/generate", "/api/create-checkout-session", "/api/revise"],
+  matcher: ["/api/generate", "/api/create-checkout-session", "/api/revise", "/api/verify", "/api/publish"],
 };

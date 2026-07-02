@@ -114,6 +114,8 @@ async function regenerateSample(sample, index) {
       subdomain: sample.slug,
       formData: sample.formData,
       email: sample.formData.email,
+      // 新規サイト公開には管理者パスワードが必要（/api/publish の認証）
+      pw: process.env.ADMIN_PASSWORD,
     }),
   });
 

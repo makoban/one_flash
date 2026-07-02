@@ -151,14 +151,14 @@ function ReviseContent() {
         success?: boolean;
         publicUrl?: string;
         freeRevisionsRemaining?: number;
-        requiresPayment?: boolean;
+        limitReached?: boolean;
         message?: string;
         error?: string;
         warnings?: string[];
       };
 
-      if (response.status === 402 && data.requiresPayment) {
-        setError(data.message ?? "有料修正が必要です（500円）");
+      if (response.status === 403 && data.limitReached) {
+        setError(data.message ?? "無料修正の上限に達しました。お問い合わせください。");
         return;
       }
 
@@ -404,7 +404,7 @@ function ReviseContent() {
             {/* 注意事項 */}
             <div className="mt-6 pt-6 border-t border-gray-100">
               <p className="text-xs text-gray-400 leading-relaxed text-center">
-                無料修正は月2回まで。3回目以降は500円/回となります。
+                無料修正は5回までご利用いただけます。
                 修正はAIが自動で行うため、イメージと異なる場合があります。
                 その場合は再度修正をご依頼ください。
               </p>

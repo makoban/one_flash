@@ -197,6 +197,12 @@ CREATE TABLE IF NOT EXISTS opf_subscriptions (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- ココナラ連携用カラム（既存DBには手動ALTER済みだが、新規DB用に冪等で追加）
+ALTER TABLE opf_subscriptions ADD COLUMN IF NOT EXISTS payment_source VARCHAR(20) NOT NULL DEFAULT 'stripe';
+ALTER TABLE opf_subscriptions ADD COLUMN IF NOT EXISTS coconala_order_id VARCHAR(255);
+ALTER TABLE opf_subscriptions ADD COLUMN IF NOT EXISTS expires_at TIMESTAMPTZ;
+ALTER TABLE opf_subscriptions ADD COLUMN IF NOT EXISTS notes TEXT;
+
 CREATE TABLE IF NOT EXISTS opf_sites (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES opf_users(id),
@@ -257,6 +263,20 @@ CREATE TABLE IF NOT EXISTS opf_html_backups (
   html TEXT NOT NULL,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+CREATE TABLE IF NOT EXISTS opf_payment_logs (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  subscription_id UUID NOT NULL REFERENCES opf_subscriptions(id),
+  confirmed_at TIMESTAMPTZ DEFAULT NOW(),
+  period_start DATE,
+  period_end DATE,
+  amount INT DEFAULT 1000,
+  source VARCHAR(20) DEFAULT 'coconala',
+  memo TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_opf_payment_logs_subscription_id ON opf_payment_logs(subscription_id);
 
 CREATE TABLE IF NOT EXISTS opf_error_logs (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

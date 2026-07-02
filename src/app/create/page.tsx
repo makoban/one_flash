@@ -49,13 +49,23 @@ interface GenerationProgress {
 // 生成中に順に表示するメッセージ
 // ---------------------------------------------------------------------------
 
+// 生成中に順に表示する「作業中」メッセージ（ループ表示）。
+// 実処理（AI生成 + スクリーンショット生成）が終わるまで循環し続けるため、
+// 完了していないのに「完成しました！」と表示してしまうことがない。
 const GENERATING_MESSAGES = [
-  "あなたのサイトを設計中...",
-  "最適なレイアウトを選定中...",
-  "キャッチコピーを磨いています...",
-  "最終チェック中...",
-  "完成しました！",
+  "入力内容を確認しています...",
+  "サイトの構成を設計しています...",
+  "最適なレイアウトを選んでいます...",
+  "文章・キャッチコピーを整えています...",
+  "デザインを組み立てています...",
+  "プレビュー画像を生成しています...",
+  "仕上げの調整をしています...",
 ];
+
+// 生成完了時にだけ表示する文言（プレビュー表示の直前に一瞬だけ出す）
+const COMPLETED_MESSAGE = "完成しました！";
+// 「完成しました！」を見せてからプレビューへ切り替えるまでの待機時間
+const COMPLETION_FLASH_MS = 900;
 
 const MESSAGE_INTERVAL_MS = 2000;
 const MAX_GENERATE_REQUEST_ATTEMPTS = 3;
@@ -92,6 +102,8 @@ function CreatePage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isRegenerating, setIsRegenerating] = useState(false);
   const [regenerationsLeft, setRegenerationsLeft] = useState(MAX_REGENERATIONS);
+  // 生成が実際に完了したか（「完成しました！」表示の制御用）
+  const [generationCompleted, setGenerationCompleted] = useState(false);
   const [generationProgress, setGenerationProgress] = useState<GenerationProgress>({
     attempt: 1,
     maxAttempts: MAX_GENERATE_REQUEST_ATTEMPTS,
@@ -118,6 +130,7 @@ function CreatePage() {
     setFormData(data);
     setIsSubmitting(true);
     setPageState("generating");
+    setGenerationCompleted(false);
     setGenerationProgress({
       attempt: 1,
       maxAttempts: MAX_GENERATE_REQUEST_ATTEMPTS,
@@ -142,11 +155,16 @@ function CreatePage() {
       };
       setHistory([entry]);
       setCurrentHistoryIndex(0);
+      // 実処理が完了したこの瞬間にだけ「完成しました！」を表示し、
+      // 少し見せてからプレビューへ遷移する（早すぎる完了表示を防ぐ）
+      setGenerationCompleted(true);
+      await sleep(COMPLETION_FLASH_MS);
       setPageState("preview");
     } catch (err: unknown) {
       const message =
         err instanceof Error ? err.message : "エラーが発生しました。もう一度お試しください。";
       setError(message);
+      setGenerationCompleted(false);
       setPageState("form");
     } finally {
       setIsSubmitting(false);
@@ -358,7 +376,7 @@ function CreatePage() {
       )}
 
       {pageState === "generating" && (
-        <GeneratingView progress={generationProgress} />
+        <GeneratingView progress={generationProgress} completed={generationCompleted} />
       )}
 
       {pageState === "preview" && previewData && formData && (
@@ -552,89 +570,98 @@ function sleep(ms: number): Promise<void> {
 // 生成中ビュー
 // ---------------------------------------------------------------------------
 
-function GeneratingView({ progress }: { progress: GenerationProgress }) {
+function GeneratingView({
+  progress,
+  completed,
+}: {
+  progress: GenerationProgress;
+  completed: boolean;
+}) {
   const [messageIndex, setMessageIndex] = useState(0);
-  const done = messageIndex >= GENERATING_MESSAGES.length - 1;
 
+  // 完了するまで作業中メッセージを循環表示する（時間で「完成」に到達しない）
   useEffect(() => {
-    if (messageIndex >= GENERATING_MESSAGES.length - 1) {
-      return;
-    }
-
+    if (completed) return;
     const timer = setTimeout(() => {
-      setMessageIndex((prev) => prev + 1);
+      setMessageIndex((prev) => (prev + 1) % GENERATING_MESSAGES.length);
     }, MESSAGE_INTERVAL_MS);
-
     return () => clearTimeout(timer);
-  }, [messageIndex]);
+  }, [messageIndex, completed]);
 
   return (
     <div className="flex flex-col items-center justify-center py-20 px-4">
-      {/* スピナー */}
+      {/* スピナー / 完了チェック */}
       <div className="relative mb-8">
-        <div className="w-20 h-20 border-4 border-indigo-100 rounded-full" />
-        <div className="absolute inset-0 w-20 h-20 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin" />
-        {/* 中央アイコン */}
-        <div className="absolute inset-0 flex items-center justify-center">
-          <svg
-            className="w-8 h-8 text-indigo-500"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            aria-hidden="true"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={1.5}
-              d="M13 10V3L4 14h7v7l9-11h-7z"
-            />
-          </svg>
-        </div>
+        {completed ? (
+          <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center">
+            <svg
+              className="w-10 h-10 text-green-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+              style={{ animation: "fadeSlideIn 0.4s ease both" }}
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+        ) : (
+          <>
+            <div className="w-20 h-20 border-4 border-indigo-100 rounded-full" />
+            <div className="absolute inset-0 w-20 h-20 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <svg
+                className="w-8 h-8 text-indigo-500"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={1.5}
+                  d="M13 10V3L4 14h7v7l9-11h-7z"
+                />
+              </svg>
+            </div>
+          </>
+        )}
       </div>
 
       {/* メッセージ */}
       <div className="text-center">
         <p
-          key={messageIndex}
-          className="text-lg font-semibold text-gray-800"
+          key={completed ? "done" : messageIndex}
+          className={`text-lg font-semibold ${completed ? "text-green-700" : "text-gray-800"}`}
           style={{ animation: "fadeSlideIn 0.4s ease both" }}
         >
-          {GENERATING_MESSAGES[messageIndex]}
+          {completed ? COMPLETED_MESSAGE : GENERATING_MESSAGES[messageIndex]}
         </p>
         <p className="mt-2 text-sm text-gray-400">
-          AIがあなたのホームページを作成しています
+          {completed
+            ? "プレビューを表示します..."
+            : "AIがあなたのホームページを作成しています（30秒〜1分ほどかかります）"}
         </p>
-        {progress.retrying && (
+        {!completed && progress.retrying && (
           <p className="mt-3 text-sm font-medium text-indigo-600">
             {progress.message}（{progress.attempt}/{progress.maxAttempts}回目）
           </p>
         )}
       </div>
 
-      {/* ステップインジケーター */}
-      <div className="mt-8 flex gap-2">
-        {GENERATING_MESSAGES.map((_, i) => (
-          <div
-            key={i}
-            className={`w-2 h-2 rounded-full transition-all duration-500 ${
-              i < messageIndex
-                ? "bg-indigo-500"
-                : i === messageIndex
-                ? "bg-indigo-400 scale-125"
-                : "bg-gray-200"
-            }`}
-          />
-        ))}
-      </div>
-
-      {done && (
-        <p
-          className="mt-6 text-sm text-indigo-600 font-medium"
-          style={{ animation: "fadeSlideIn 0.4s ease both" }}
-        >
-          まもなくプレビューが表示されます...
-        </p>
+      {/* ステップインジケーター（作業中のみ） */}
+      {!completed && (
+        <div className="mt-8 flex gap-2">
+          {GENERATING_MESSAGES.map((_, i) => (
+            <div
+              key={i}
+              className={`w-2 h-2 rounded-full transition-all duration-500 ${
+                i === messageIndex ? "bg-indigo-400 scale-125" : "bg-gray-200"
+              }`}
+            />
+          ))}
+        </div>
       )}
 
       {/* アニメーション定義 */}

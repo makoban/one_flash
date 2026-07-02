@@ -25,9 +25,10 @@ import {
   query,
   insertAdEvent,
 } from "@/lib/db";
-import { getDraftHTML, deleteDraftHTML, deactivateSite } from "@/lib/r2";
+import { getDraftHTML, deleteDraftHTML, deactivateSite, getSiteHTML } from "@/lib/r2";
 import { sendSiteCompletionEmail, sendPaymentFailureEmail } from "@/lib/email";
 import { notifyCustomerError } from "@/lib/slack";
+import crypto from "crypto";
 import type Stripe from "stripe";
 
 export const runtime = "nodejs";
@@ -131,6 +132,44 @@ function extractSubscriptionId(invoice: Stripe.Invoice): string | null {
 }
 
 // ---------------------------------------------------------------------------
+// サブドメイン衝突ガード
+// R2 公開は DB 登録より先に行われるため、既存サブドメインと衝突すると
+// 既存顧客のサイトを上書き（＆パスワード再生成）してしまう。
+// 公開前に空きを確認し、衝突していれば別サブドメインを採番する。
+// ---------------------------------------------------------------------------
+
+function generateSubdomainCandidate(): string {
+  const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
+  const bytes = crypto.randomBytes(8);
+  let s = "";
+  for (let i = 0; i < 8; i++) s += chars[bytes[i] % chars.length];
+  return `site-${s}`;
+}
+
+async function isSubdomainTaken(subdomain: string): Promise<boolean> {
+  try {
+    const html = await getSiteHTML(subdomain);
+    // 既存の実サイト / 非公開ページがあれば「使用中」とみなす。
+    // ソフト削除プレースホルダのみ再利用可能とする。
+    return Boolean(html && html !== "<!-- deleted -->" && html !== "<!-- expired -->");
+  } catch {
+    // 確認に失敗した場合は公開をブロックしない（false を返す）
+    return false;
+  }
+}
+
+async function ensureFreeSubdomain(preferred: string): Promise<string> {
+  if (!(await isSubdomainTaken(preferred))) return preferred;
+  console.warn(`[webhook/stripe] Subdomain collision detected: ${preferred}, regenerating`);
+  for (let i = 0; i < 5; i++) {
+    const candidate = generateSubdomainCandidate();
+    if (!(await isSubdomainTaken(candidate))) return candidate;
+  }
+  // ここに到達するのは事実上あり得ない（衝突が6連続）
+  return `${preferred}-${crypto.randomBytes(2).toString("hex")}`;
+}
+
+// ---------------------------------------------------------------------------
 // checkout.session.completed
 // サブスク決済完了 → ドラフトHTML公開 + DB登録 + メール送信
 // ---------------------------------------------------------------------------
@@ -185,11 +224,14 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session): Promis
     return;
   }
 
+  // 既存サイトとの衝突を避けるため、公開前に空きサブドメインを確定する
+  const publishSubdomain = await ensureFreeSubdomain(subdomain);
+
   const publishResponse = await fetch(`${workerUrl}/_api/publish`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      subdomain,
+      subdomain: publishSubdomain,
       html,
       secret: uploadSecret,
       formData: { siteName, catchphrase, description, contactInfo, colorTheme },
@@ -202,12 +244,22 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session): Promis
     const publishError = errorData.error ?? publishResponse.statusText;
     console.error(`[webhook/stripe] Publish failed: ${publishError}`);
     await notifyCustomerError("webhook/stripe", "課金済みだがサイト公開失敗（R2アップロード）", {
-      subdomain, email: customerEmail, error: publishError,
+      subdomain: publishSubdomain, email: customerEmail, error: publishError,
     });
     return;
   }
 
-  console.log(`[webhook/stripe] Site published: ${subdomain}`);
+  console.log(`[webhook/stripe] Site published: ${publishSubdomain}`);
+
+  // 衝突で採番し直した場合、/complete ポーリング（check-site-status）が
+  // 正しいサブドメインを見つけられるよう session metadata を更新する
+  if (publishSubdomain !== subdomain) {
+    await stripe.checkout.sessions
+      .update(session.id, { metadata: { ...metadata, subdomain: publishSubdomain } })
+      .catch((err: unknown) =>
+        console.warn("[webhook/stripe] Failed to update session metadata after subdomain change:", err)
+      );
+  }
 
   // --- Step 3: DB登録（DB未設定でもサイト公開は成功させる） ---
   let revisionToken: string | null = null;
@@ -238,7 +290,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session): Promis
       const siteRecord = await createSite({
         userId: user.id,
         subscriptionId: subscriptionRecord?.id ?? "",
-        subdomain,
+        subdomain: publishSubdomain,
         siteName,
         inputSnapshot: { siteName, catchphrase, description, contactInfo, colorTheme, email: customerEmail },
       });
@@ -260,14 +312,14 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session): Promis
         sessionId: metadata.session_id,
       }).catch((err: unknown) => console.warn("[webhook/stripe] Failed to record ad event:", err));
 
-      console.log(`[webhook/stripe] DB records created for ${subdomain}`);
+      console.log(`[webhook/stripe] DB records created for ${publishSubdomain}`);
     } else {
       console.warn("[webhook/stripe] DATABASE_URL not set, skipping DB registration");
     }
   } catch (dbErr) {
     console.error("[webhook/stripe] DB registration failed (site still published):", dbErr);
     await notifyCustomerError("webhook/stripe", "DB登録失敗（サイトは公開済み）", {
-      subdomain, email: customerEmail,
+      subdomain: publishSubdomain, email: customerEmail,
       error: dbErr instanceof Error ? dbErr.message : String(dbErr),
     });
   }
@@ -278,11 +330,11 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session): Promis
   );
 
   // --- Step 5: 完了メール送信 ---
-  const publicUrl = `${workerUrl}/s/${subdomain}`;
+  const publicUrl = `${workerUrl}/s/${publishSubdomain}`;
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
   const revisionUrl = revisionToken
     ? `${appUrl}/revise?token=${revisionToken}`
-    : `${appUrl}/revise?subdomain=${subdomain}`;
+    : `${appUrl}/revise?subdomain=${publishSubdomain}`;
 
   if (customerEmail) {
     try {
@@ -390,9 +442,22 @@ async function handlePaymentSucceeded(invoice: Stripe.Invoice): Promise<void> {
   if (!existing) return;
 
   // 期間情報を更新
-  const lines = invoiceData.lines as { data?: Array<{ period?: { start?: number; end?: number } }> } | undefined;
-  if (lines?.data?.[0]) {
-    const line = lines.data[0];
+  // 初回請求には初期制作費（単発）と月額（継続）の2行が含まれるため、
+  // 継続課金（recurring）の行を優先して期間を採用する。
+  const lines = invoiceData.lines as
+    | {
+        data?: Array<{
+          period?: { start?: number; end?: number };
+          price?: { recurring?: unknown } | null;
+        }>;
+      }
+    | undefined;
+  const lineData = lines?.data ?? [];
+  const subLine =
+    lineData.find((l) => l.price?.recurring) ??
+    lineData.find((l) => l.period?.start && l.period?.end) ??
+    lineData[0];
+  if (subLine) {
     await query(
       `UPDATE opf_subscriptions SET
          status = 'active',
@@ -402,8 +467,8 @@ async function handlePaymentSucceeded(invoice: Stripe.Invoice): Promise<void> {
        WHERE stripe_subscription_id = $1`,
       [
         subId,
-        line.period?.start ? new Date(line.period.start * 1000) : null,
-        line.period?.end ? new Date(line.period.end * 1000) : null,
+        subLine.period?.start ? new Date(subLine.period.start * 1000) : null,
+        subLine.period?.end ? new Date(subLine.period.end * 1000) : null,
       ]
     );
   }
