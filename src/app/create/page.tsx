@@ -641,7 +641,7 @@ function GeneratingView({
         <p className="mt-2 text-sm text-gray-400">
           {completed
             ? "プレビューを表示します..."
-            : "AIがあなたのホームページを作成しています（30秒〜1分ほどかかります）"}
+            : "AIがあなたのホームページを作成しています（1〜2分ほどかかります。そのままお待ちください）"}
         </p>
         {!completed && progress.retrying && (
           <p className="mt-3 text-sm font-medium text-indigo-600">

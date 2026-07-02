@@ -163,3 +163,34 @@
 - `src/app/revise/page.tsx`
 - `src/app/api/screenshot/route.ts`
 - `src/app/create/page.tsx`
+
+---
+
+## 5. 本番デプロイ後の E2E 計測（2026-07-02, 本番 = oneflash.bantex.jp）
+
+master へ push → Render 自動デプロイ（約1分で反映確認: `/api/migrate` が 200→401）。
+本番 `/api/generate` + `/api/screenshot` を業種別に実測（いずれもステートレス。DB/Stripe/顧客データ非影響）。
+
+| 業種 | 生成(AI) | 画像化(2枚) | 合計 | モデル |
+|---|---|---|---|---|
+| 税理士 | 75.2s | 28.4s | 103.5s | flash-lite |
+| 美容室 | 73.6s | 16.5s | 90.1s | flash-lite |
+| 整体院 | 73.1s | 19.7s | 92.8s | flash-lite |
+| カフェ | 72.9s | 17.0s | 89.8s | flash-lite |
+| 学習塾 | 75.4s | 16.4s | 91.8s | flash-lite |
+
+- **結果: 5/5 成功（画像化まで完了、navigation timeout 失敗ゼロ）** → スクショ堅牢化・UX 修正は本番で有効。
+- **合計 約90〜103秒（生成AIだけで73〜75秒）。** UX の目安表示は「30秒〜1分」→「1〜2分」に修正済み。
+
+### ⚠️ 未解決の重要課題（要調査）: 第一候補モデルが毎回フォールバック
+- 5/5 すべて `gemini-2.5-flash-lite`（予備）で生成。第一候補 `gemini-2.5-flash` が**毎回失敗して**予備に切替わっている。
+- 影響: 毎回フォールバック分の遅延が乗る（生成 73〜75s の一因）。第一候補が一度も使われていない。
+- 確認ポイント（Codex/次担当へ）:
+  - `src/lib/gemini.ts` の `geminiGenerationModels`（`gemini-2.5-flash` → `gemini-2.5-flash-lite`）。
+  - `src/app/api/generate/route.ts` の `withGeminiModelFallback` / `isRetryableGeminiError`
+    （"generated html does not contain" もリトライ対象。parse 失敗で無駄なリトライの可能性）。
+  - Gemini API の quota / モデルアクセス権 / モデル名の有効性を要確認。
+  - もし `gemini-2.5-flash` が恒常的に使えないなら、生成の第一候補を `flash-lite` にすると
+    無駄なフォールバック待ちを削減できる（ただし根本原因の確認を推奨）。
+- なお生成そのものが遅い（8192 token 上限で 22k〜27k 文字の HTML 出力）ため、
+  速度改善には出力量/プロンプト最適化や streaming 検討も選択肢。
