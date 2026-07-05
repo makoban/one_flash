@@ -281,3 +281,22 @@ Codex の応急修正（クライアントJSONガード, commit 2e0621b）で英
 - ローカル `next start` + E2E（SKIP_LIVE_GENERATE=1）: 全テスト PASS。
 - ローカル実サーバーでジョブAPI動作確認: jobId発行→（Geminiキー無しのため）error が日本語・retryable:false で返る、
   不明IDは404。
+
+### 本番検証結果（2026-07-05 13:32〜, commit 0cce925 デプロイ後）
+- push から約140秒で Render デプロイ完了（`/api/generate-job-status` の応答で確認）。
+- 本番フルE2E（scripts/e2e-prod-safe.mjs）**全5テスト PASS**:
+  - public pages and mobile overflow (4.9s)
+  - malformed generate JSON is retried and localized (legacy fallback) (11.1s)
+  - job polling survives broken status JSON (13.6s) ← 本番バンドルがジョブ方式を使っていることの証明
+  - screenshot fallback and checkout JSON guard (2.7s)
+  - live mobile create reaches preview (108.2s) ← iPhone UA/390px viewport で実生成→プレビュー到達
+- ユーザー実機（iPhone Safari）でも /create からプレビュー到達を確認。
+- 成果物: tmp/e2e-prod-safe/2026-07-05T04-32-39-197Z/
+
+### 今後の注意（Codex向け）
+- 旧 `/api/generate` は**削除しないこと**（旧バンドル利用中の既存ユーザーとフォールバック経路が使う）。
+- ジョブストアは in-memory・単一インスタンス前提。Render を複数インスタンスにする場合は
+  ジョブストアを共有ストレージ（DB/Redis）に移す必要がある。
+- /api/revise は依然80秒級の同期リクエスト（クライアント側ガード+Wake Lockで緩和済み）。
+  再発するようなら generate と同様のジョブ化を検討。
+- /preview（開発用ページ）は本番でも /api/generate を叩ける。悪用が気になる場合は保護を検討（既存問題）。
