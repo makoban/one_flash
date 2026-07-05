@@ -25,10 +25,11 @@ import { trackEvent, trackXPixelEvent, getUtmParams, getSessionId } from "@/lib/
 type PageState = "form" | "generating" | "preview" | "complete";
 
 interface PreviewData {
-  pcImage: string;
-  mobileImage: string;
+  pcImage?: string | null;
+  mobileImage?: string | null;
   html: string;
   warnings?: string[];
+  screenshotWarning?: string;
 }
 
 interface HistoryEntry {
@@ -393,9 +394,20 @@ function CreatePage() {
             </ul>
           </div>
         )}
+        {previewData.screenshotWarning && (
+          <div className="max-w-2xl mx-auto mb-6 p-4 bg-amber-50 border border-amber-200 rounded-xl">
+            <p className="text-sm font-semibold text-amber-800">
+              プレビュー画像の生成だけ失敗しました
+            </p>
+            <p className="mt-1 text-sm text-amber-700">
+              {previewData.screenshotWarning}
+            </p>
+          </div>
+        )}
         <PreviewSection
           pcImage={previewData.pcImage}
           mobileImage={previewData.mobileImage}
+          html={previewData.html}
           formData={formData}
           regenerationsLeft={regenerationsLeft}
           onRegenerate={handleRegenerate}
@@ -520,23 +532,35 @@ async function generateAndScreenshot(
   const { html, warnings } = (await generateResponse.json()) as { html: string; warnings?: string[] };
 
   // Step 2: スクリーンショット取得
-  const screenshotResponse = await fetch("/api/screenshot", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ html }),
-  });
+  try {
+    const screenshotResponse = await fetch("/api/screenshot", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ html }),
+    });
 
-  if (!screenshotResponse.ok) {
-    const errorData = (await screenshotResponse.json()) as { error?: string };
-    throw new Error(errorData.error ?? "スクリーンショットの取得に失敗しました");
+    if (!screenshotResponse.ok) {
+      const errorData = await readErrorResponse(screenshotResponse);
+      throw new Error(errorData.error ?? "スクリーンショットの取得に失敗しました");
+    }
+
+    const { pcImage, mobileImage } = (await screenshotResponse.json()) as {
+      pcImage: string;
+      mobileImage: string;
+    };
+
+    return { pcImage, mobileImage, html, warnings: warnings ?? [] };
+  } catch (error) {
+    console.warn("[create] screenshot failed, falling back to HTML preview:", error);
+    return {
+      pcImage: null,
+      mobileImage: null,
+      html,
+      warnings: warnings ?? [],
+      screenshotWarning:
+        "画面内プレビューで表示しています。サイト生成自体は完了しているため、このまま修正や決済へ進めます。",
+    };
   }
-
-  const { pcImage, mobileImage } = (await screenshotResponse.json()) as {
-    pcImage: string;
-    mobileImage: string;
-  };
-
-  return { pcImage, mobileImage, html, warnings: warnings ?? [] };
 }
 
 async function readErrorResponse(response: Response): Promise<{ error?: string; retryable?: boolean }> {

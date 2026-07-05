@@ -9,6 +9,7 @@
 
 import { useState } from "react";
 import type { SiteFormData } from "@/lib/gemini";
+import PreviewFrame from "@/components/PreviewFrame";
 
 // ---------------------------------------------------------------------------
 // 型定義
@@ -17,8 +18,8 @@ import type { SiteFormData } from "@/lib/gemini";
 interface HistoryEntry {
   id: number;
   previewData: {
-    pcImage: string;
-    mobileImage: string;
+    pcImage?: string | null;
+    mobileImage?: string | null;
     html: string;
   };
   instruction: string;
@@ -26,8 +27,9 @@ interface HistoryEntry {
 }
 
 interface PreviewSectionProps {
-  pcImage: string;
-  mobileImage: string;
+  pcImage?: string | null;
+  mobileImage?: string | null;
+  html: string;
   formData: SiteFormData;
   regenerationsLeft: number;
   onRegenerate: (updatedData: SiteFormData, instruction: string) => void;
@@ -66,6 +68,7 @@ const THEME_LABELS: Record<SiteFormData["colorTheme"], string> = {
 export default function PreviewSection({
   pcImage,
   mobileImage,
+  html,
   formData,
   regenerationsLeft,
   onRegenerate,
@@ -86,6 +89,8 @@ export default function PreviewSection({
   const [historyOpen, setHistoryOpen] = useState(false);
 
   const currentImage = activeTab === "pc" ? pcImage : mobileImage;
+  const hasImagePreview =
+    typeof currentImage === "string" && currentImage.startsWith("data:image");
 
   // 変更があるかどうか
   const hasChanges =
@@ -146,13 +151,17 @@ export default function PreviewSection({
                 <div className="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin" />
                 <p className="text-sm text-gray-500 font-medium">再生成中...</p>
               </div>
-            ) : (
+            ) : hasImagePreview ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={currentImage}
                 alt={activeTab === "pc" ? "PC版プレビュー" : "スマホ版プレビュー"}
                 className="w-full h-auto block"
               />
+            ) : (
+              <div className="bg-white p-2">
+                <PreviewFrame html={html} />
+              </div>
             )}
 
             <div className="absolute top-3 left-3">

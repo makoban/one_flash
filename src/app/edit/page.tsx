@@ -10,14 +10,15 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import PreviewSection from "@/app/create/PreviewSection";
 import type { SiteFormData } from "@/lib/gemini";
 
 type PageState = "login" | "generating" | "preview" | "complete";
 
 interface PreviewData {
-  pcImage: string;
-  mobileImage: string;
+  pcImage?: string | null;
+  mobileImage?: string | null;
   html: string;
 }
 
@@ -47,7 +48,7 @@ export default function EditPage() {
 
   // --- URLからサブドメインを抽出 ---
   function extractSubdomain(input: string): string {
-    let s = input.trim().toLowerCase();
+    const s = input.trim().toLowerCase();
     // フルURLの場合: https://site-xxx.oneflash.net → site-xxx
     // workers.dev URLの場合: .../s/site-xxx → site-xxx
     const subdomainMatch = s.match(/\/s\/([a-z0-9][a-z0-9-]+[a-z0-9])/);
@@ -90,24 +91,9 @@ export default function EditPage() {
       setFormData({ ...data.formData, subdomain: data.subdomain });
       setSubdomain(data.subdomain);
 
-      // 既存HTMLからスクリーンショットを取得
+      // 既存HTMLからスクリーンショットを取得。画像化に失敗してもHTMLプレビューで続行する。
       setPageState("generating");
-      const screenshotResponse = await fetch("/api/screenshot", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ html: data.html }),
-      });
-
-      if (!screenshotResponse.ok) {
-        throw new Error("スクリーンショットの取得に失敗しました");
-      }
-
-      const { pcImage, mobileImage } = (await screenshotResponse.json()) as {
-        pcImage: string;
-        mobileImage: string;
-      };
-
-      const preview = { pcImage, mobileImage, html: data.html };
+      const preview = await getPreviewFromScreenshotOrHtml(data.html);
       setPreviewData(preview);
       const entry: HistoryEntry = { id: 1, previewData: preview, instruction: "現在のサイト", timestamp: new Date() };
       setHistory([entry]);
@@ -142,19 +128,7 @@ export default function EditPage() {
       }
       const { html } = (await genResponse.json()) as { html: string };
 
-      // スクリーンショット
-      const ssResponse = await fetch("/api/screenshot", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ html }),
-      });
-      if (!ssResponse.ok) throw new Error("スクリーンショットの取得に失敗しました");
-      const { pcImage, mobileImage } = (await ssResponse.json()) as {
-        pcImage: string;
-        mobileImage: string;
-      };
-
-      const preview = { pcImage, mobileImage, html };
+      const preview = await getPreviewFromScreenshotOrHtml(html);
       setPreviewData(preview);
       setRegenerationsLeft((prev) => prev - 1);
       setHistory((prev) => {
@@ -271,9 +245,9 @@ export default function EditPage() {
             </div>
 
             <div className="mt-6 pt-4 border-t border-gray-100 text-center">
-              <a href="/create" className="text-sm text-indigo-600 hover:underline">
+              <Link href="/create" className="text-sm text-indigo-600 hover:underline">
                 新しくサイトを作成する
-              </a>
+              </Link>
             </div>
           </div>
         </div>
@@ -290,6 +264,7 @@ export default function EditPage() {
         <PreviewSection
           pcImage={previewData.pcImage}
           mobileImage={previewData.mobileImage}
+          html={previewData.html}
           formData={formData}
           regenerationsLeft={regenerationsLeft}
           onRegenerate={handleRegenerate}
@@ -328,15 +303,39 @@ export default function EditPage() {
             >
               さらに修正する
             </button>
-            <a
+            <Link
               href="/"
               className="block w-full py-3 px-6 text-gray-500 text-sm hover:text-gray-700 transition-colors"
             >
               トップに戻る
-            </a>
+            </Link>
           </div>
         </div>
       )}
     </main>
   );
+}
+
+async function getPreviewFromScreenshotOrHtml(html: string): Promise<PreviewData> {
+  try {
+    const response = await fetch("/api/screenshot", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ html }),
+    });
+
+    if (!response.ok) {
+      throw new Error("スクリーンショットの取得に失敗しました");
+    }
+
+    const { pcImage, mobileImage } = (await response.json()) as {
+      pcImage: string;
+      mobileImage: string;
+    };
+
+    return { pcImage, mobileImage, html };
+  } catch (error) {
+    console.warn("[edit] screenshot failed, falling back to HTML preview:", error);
+    return { pcImage: null, mobileImage: null, html };
+  }
 }
