@@ -230,3 +230,54 @@ master へ push → Render 自動デプロイ（約1分で反映確認: `/api/mi
     明背景＝濃字/暗背景＝白字、明るいヒーローは暗いオーバーレイ or 濃字で可読化、accent 文字は 4.5:1 以上のときのみ、
     textMuted は補足小テキスト限定（連絡先・本文に使わない）。
 - 監査/補正の算出は Node スクリプトで実施（WCAG相対輝度・コントラスト比）。実ページでの再検証は別途レンダリング監査で実施。
+
+## 8. iPhone Safari 生成エラーの恒久対策: 生成のジョブ化ほか（2026-07-05, Claude Code）
+
+背景: iPhone Safari で /create 最終ステップ後に "The string did not match the expected pattern." が表示された件。
+Codex の応急修正（クライアントJSONガード, commit 2e0621b）で英語エラーは解消したが、根本原因
+（80〜100秒の長時間HTTPリクエストが画面ロック/アプリ切替/回線切替で切断される）が残っていたため、以下を実施。
+
+### (1) 生成のジョブ化（ポーリング方式）— 根本対策
+- `src/lib/generationService.ts`: 旧 /api/generate ルート内の生成ロジックをほぼ verbatim で移設（挙動同一）。
+  モデレーション却下は `GenerationRejectedError`(422) として throw。
+- `src/lib/generationJobs.ts`: in-memory ジョブストア（TTL 15分、globalThis 保持で dev ホットリロード対応、
+  middleware のレート制限と同じ Render 単一インスタンス前提）。
+- `POST /api/generate-job`: ジョブ開始→即 jobId 返却(202)。middleware で /api/generate と同じ 5回/分 制限。
+- `GET /api/generate-job-status?id=`: ポーリング用（レート制限なし、force-dynamic + no-store）。
+  pending / complete(html, warnings) / error(error, retryable) / 404(ジョブ消失=リトライ扱い)。
+- `src/lib/generateClient.ts`: クライアント共通の生成ヘルパー。ジョブ方式を優先し、
+  開始APIが404/405（旧サーバー・デプロイ切替中）なら従来の同期 /api/generate に自動フォールバック。
+  ポーリングは5秒後開始・3秒間隔・1ジョブ240秒上限。**期限判定はポーリングの後**に行い、
+  スリープ復帰直後でも必ず1回は最新状態を確認する（完了結果を取り逃さない）。
+  壊れたJSON/通信断は次のポーリングでやり直し。全体で最大3回リトライ（既存UXと同じ文言）。
+- 使用箇所: /create の初回生成・再生成、/edit の再生成。**旧 /api/generate は後方互換のため残置**
+  （旧バンドルを開いたままの既存ユーザー・/preview 開発ページが使用）。
+
+### (2) Wake Lock（画面ロック防止）
+- `src/lib/wakeLock.ts`: Screen Wake Lock API（iOS Safari 16.4+）。生成/再生成/修正の実行中だけ取得し、
+  visibilitychange で再取得。非対応ブラウザでは完全no-op。
+- 適用: /create 初回生成・再生成、/edit 再生成、/revise 送信。
+
+### (3) /revise（有料顧客）の JSON ガード — Codex 修正の取りこぼし
+- `src/app/revise/page.tsx`: 未ガードだった response.json() を readJsonOrNull に変更。
+  200なのに読めない場合は「修正自体は完了している場合があります。公開サイトを確認してから再試行を」
+  という案内にし、無料修正回数の二重消費を防ぐ。catch も toUserFacingErrorMessage で日本語化。
+
+### (4) サーバー側エラーの日本語化
+- `src/app/api/generate/route.ts`: 非リトライ系エラーで raw な英語メッセージ（getErrorMessage）を
+  返していたのを `GENERATION_FATAL_MESSAGE`（日本語汎用文言）に変更。詳細は console/Slack 通知に残る。
+
+### (5) クライアント共通ヘルパー
+- `src/lib/clientHttp.ts`: readJsonOrNull / readJsonResponse / readErrorResponse / toUserFacingErrorMessage を共通化。
+  create/edit ページの重複定義を削除しこちらを import。
+
+### (6) E2E 更新（scripts/e2e-prod-safe.mjs）
+- 既存の壊れJSONテストは「/api/generate-job → 404」をモックし**旧方式フォールバック経路**の検証に変更。
+- 新テスト「job polling survives broken status JSON」: ジョブ開始→ステータス1回目壊れJSON→pending→complete
+  でプレビュー到達を検証（本修正の核心の再現テスト）。
+
+### 検証結果（2026-07-05）
+- `npx tsc --noEmit` / `npx eslint`（変更ファイル） / `npm run build` すべてパス。
+- ローカル `next start` + E2E（SKIP_LIVE_GENERATE=1）: 全テスト PASS。
+- ローカル実サーバーでジョブAPI動作確認: jobId発行→（Geminiキー無しのため）error が日本語・retryable:false で返る、
+  不明IDは404。

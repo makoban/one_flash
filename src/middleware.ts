@@ -18,6 +18,8 @@ interface RateLimitConfig {
 
 const RATE_LIMITS: Record<string, RateLimitConfig> = {
   "/api/generate": { windowMs: 60_000, maxRequests: 5 },
+  // ジョブ開始も同期生成と同等に制限（ポーリング用の /api/generate-job-status は制限しない）
+  "/api/generate-job": { windowMs: 60_000, maxRequests: 5 },
   "/api/create-checkout-session": { windowMs: 60_000, maxRequests: 3 },
   "/api/revise": { windowMs: 60_000, maxRequests: 5 },
   // パスワード総当たり防止（正規の編集ログイン/再公開は数回で足りる）
@@ -95,5 +97,5 @@ export function middleware(request: NextRequest): NextResponse | undefined {
 }
 
 export const config = {
-  matcher: ["/api/generate", "/api/create-checkout-session", "/api/revise", "/api/verify", "/api/publish"],
+  matcher: ["/api/generate", "/api/generate-job", "/api/create-checkout-session", "/api/revise", "/api/verify", "/api/publish"],
 };

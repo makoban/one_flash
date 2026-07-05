@@ -13,6 +13,13 @@ import { useState } from "react";
 import Link from "next/link";
 import PreviewSection from "@/app/create/PreviewSection";
 import type { SiteFormData } from "@/lib/gemini";
+import { generateSiteHtml } from "@/lib/generateClient";
+import {
+  readErrorResponse,
+  readJsonResponse,
+  toUserFacingErrorMessage,
+} from "@/lib/clientHttp";
+import { acquireScreenWakeLock } from "@/lib/wakeLock";
 
 type PageState = "login" | "generating" | "preview" | "complete";
 
@@ -122,24 +129,11 @@ export default function EditPage() {
     setIsRegenerating(true);
     setFormData(updatedData);
 
+    // 再生成中にスマホの画面が消灯して通信が中断されるのを防ぐ
+    const releaseWakeLock = acquireScreenWakeLock();
     try {
-      // HTML生成
-      const genResponse = await fetch("/api/generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ formData: updatedData, instruction }),
-      });
-      if (!genResponse.ok) {
-        const data = await readErrorResponse(genResponse);
-        throw new Error(data.error ?? "生成に失敗しました");
-      }
-      const { html } = await readJsonResponse<{ html?: string }>(
-        genResponse,
-        "再生成結果を読み込めませんでした。もう一度お試しください。"
-      );
-      if (!html) {
-        throw new Error("再生成結果にHTMLが含まれていません。もう一度お試しください。");
-      }
+      // HTML生成（ジョブ方式 + ポーリング。旧サーバーへは自動フォールバック）
+      const { html } = await generateSiteHtml(updatedData, instruction);
 
       const preview = await getPreviewFromScreenshotOrHtml(html);
       setPreviewData(preview);
@@ -157,6 +151,7 @@ export default function EditPage() {
         )
       );
     } finally {
+      releaseWakeLock();
       setIsRegenerating(false);
     }
   }
@@ -341,35 +336,6 @@ export default function EditPage() {
       )}
     </main>
   );
-}
-
-async function readJsonResponse<T>(response: Response, fallbackMessage: string): Promise<T> {
-  try {
-    return (await response.json()) as T;
-  } catch {
-    throw new Error(fallbackMessage);
-  }
-}
-
-async function readErrorResponse(response: Response): Promise<{ error?: string }> {
-  try {
-    return (await response.json()) as { error?: string };
-  } catch {
-    return {};
-  }
-}
-
-function toUserFacingErrorMessage(error: unknown, fallbackMessage: string): string {
-  const message = error instanceof Error ? error.message : "";
-  if (
-    !message ||
-    /the string did not match the expected pattern|unexpected end of json input|unexpected token .*json|failed to execute 'json'|body stream|failed to fetch|load failed|networkerror/i.test(
-      message
-    )
-  ) {
-    return fallbackMessage;
-  }
-  return message;
 }
 
 async function getPreviewFromScreenshotOrHtml(html: string): Promise<PreviewData> {

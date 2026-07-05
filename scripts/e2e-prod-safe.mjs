@@ -325,6 +325,11 @@ async function testGenerateMalformedJson(browser) {
         });
         return true;
       }
+      // ジョブ未対応の旧サーバーを再現 → クライアントは /api/generate にフォールバック
+      if (url.pathname === "/api/generate-job") {
+        await request.respond({ status: 404, contentType: "text/plain", body: "not found" });
+        return true;
+      }
       if (url.pathname === "/api/generate") {
         generateCalls += 1;
         await request.respond({
@@ -354,6 +359,72 @@ async function testGenerateMalformedJson(browser) {
   await page.close();
 }
 
+async function testJobFlowSurvivesBrokenStatusJson(browser) {
+  let statusCalls = 0;
+  const { page } = await newPage(browser, {
+    route: async (request, url) => {
+      if (url.pathname === "/api/moderate") {
+        await request.respond({
+          status: 200,
+          contentType: "application/json",
+          body: JSON.stringify({ isSafe: true, reason: "OK" }),
+        });
+        return true;
+      }
+      if (url.pathname === "/api/generate-job") {
+        await request.respond({
+          status: 202,
+          contentType: "application/json",
+          body: JSON.stringify({ jobId: "e2e-job-1" }),
+        });
+        return true;
+      }
+      if (url.pathname === "/api/generate-job-status") {
+        statusCalls += 1;
+        // 1回目: 壊れたJSON（iOS Safariの通信切断を再現）→ 次のポーリングで回復すること
+        if (statusCalls === 1) {
+          await request.respond({ status: 200, contentType: "application/json", body: "" });
+          return true;
+        }
+        // 2回目: 生成中
+        if (statusCalls === 2) {
+          await request.respond({
+            status: 200,
+            contentType: "application/json",
+            body: JSON.stringify({ status: "pending" }),
+          });
+          return true;
+        }
+        // 3回目以降: 完了
+        await request.respond({
+          status: 200,
+          contentType: "application/json",
+          body: JSON.stringify({ status: "complete", html: MOCK_HTML, warnings: [] }),
+        });
+        return true;
+      }
+      if (url.pathname === "/api/screenshot") {
+        await request.respond({ status: 500, contentType: "text/plain", body: "screenshot failed" });
+        return true;
+      }
+      return false;
+    },
+  });
+
+  await page.goto(`${BASE_URL}/create`, { waitUntil: "domcontentloaded" });
+  await fillCreateForm(page);
+  await clickByText(page, "サイトを生成する");
+
+  await page.waitForFunction(
+    () => document.body.innerText.includes("このサイトを公開する"),
+    { timeout: 90_000 }
+  );
+  await assertNoRawBrowserError(page);
+  assert(statusCalls >= 3, `Expected at least 3 status polls, got ${statusCalls}`);
+  await screenshot(page, "mock-job-flow-broken-status-json");
+  await page.close();
+}
+
 async function testScreenshotFallbackAndCheckoutJsonGuard(browser) {
   const { page } = await newPage(browser, {
     route: async (request, url) => {
@@ -363,6 +434,11 @@ async function testScreenshotFallbackAndCheckoutJsonGuard(browser) {
           contentType: "application/json",
           body: JSON.stringify({ isSafe: true, reason: "OK" }),
         });
+        return true;
+      }
+      // ジョブ未対応の旧サーバーを再現（フォールバック経路で検証）
+      if (url.pathname === "/api/generate-job") {
+        await request.respond({ status: 404, contentType: "text/plain", body: "not found" });
         return true;
       }
       if (url.pathname === "/api/generate") {
@@ -485,8 +561,11 @@ async function main() {
   const browser = await createBrowser();
   try {
     await withTest("public pages and mobile overflow", () => testPublicPages(browser));
-    await withTest("malformed generate JSON is retried and localized", () =>
+    await withTest("malformed generate JSON is retried and localized (legacy fallback)", () =>
       testGenerateMalformedJson(browser)
+    );
+    await withTest("job polling survives broken status JSON", () =>
+      testJobFlowSurvivesBrokenStatusJson(browser)
     );
     await withTest("screenshot fallback and checkout JSON guard", () =>
       testScreenshotFallbackAndCheckoutJsonGuard(browser)

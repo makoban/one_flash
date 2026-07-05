@@ -17,6 +17,17 @@ import CardStepForm from "@/components/CardStepForm";
 import PreviewSection from "@/app/create/PreviewSection";
 import type { SiteFormData } from "@/lib/gemini";
 import { trackEvent, trackXPixelEvent, getUtmParams, getSessionId } from "@/lib/utm";
+import {
+  generateSiteHtml,
+  MAX_GENERATE_REQUEST_ATTEMPTS,
+  type GenerationProgress,
+} from "@/lib/generateClient";
+import {
+  readErrorResponse,
+  readJsonResponse,
+  toUserFacingErrorMessage,
+} from "@/lib/clientHttp";
+import { acquireScreenWakeLock } from "@/lib/wakeLock";
 
 // ---------------------------------------------------------------------------
 // 型定義
@@ -37,13 +48,6 @@ interface HistoryEntry {
   previewData: PreviewData;
   instruction: string;
   timestamp: Date;
-}
-
-interface GenerationProgress {
-  attempt: number;
-  maxAttempts: number;
-  retrying: boolean;
-  message: string | null;
 }
 
 // ---------------------------------------------------------------------------
@@ -69,12 +73,6 @@ const COMPLETED_MESSAGE = "完成しました！";
 const COMPLETION_FLASH_MS = 900;
 
 const MESSAGE_INTERVAL_MS = 2000;
-const MAX_GENERATE_REQUEST_ATTEMPTS = 3;
-const GENERATE_RETRY_DELAYS_MS = [2500, 7000];
-const GENERATE_RESPONSE_READ_RETRY_MESSAGE =
-  "通信が不安定なため、AI生成結果の読み込みを自動で再試行しています。";
-const GENERATE_RESPONSE_READ_FINAL_MESSAGE =
-  "通信が不安定でAI生成結果を読み込めませんでした。入力内容は保持されていますので、同じ内容で再試行してください。";
 
 // ---------------------------------------------------------------------------
 // 再生成の最大回数（プロトタイプ用）
@@ -143,6 +141,9 @@ function CreatePage() {
       message: null,
     });
 
+    // 生成中にスマホの画面が消灯して通信が中断されるのを防ぐ
+    const releaseWakeLock = acquireScreenWakeLock();
+
     trackEvent("generate_start");
     try {
       const preview = await generateAndScreenshot(data, undefined, setGenerationProgress);
@@ -175,6 +176,7 @@ function CreatePage() {
       setGenerationCompleted(false);
       setPageState("form");
     } finally {
+      releaseWakeLock();
       setIsSubmitting(false);
     }
   }
@@ -186,6 +188,7 @@ function CreatePage() {
     setIsRegenerating(true);
     setFormData(updatedData);
 
+    const releaseWakeLock = acquireScreenWakeLock();
     try {
       const preview = await generateAndScreenshot(updatedData, instruction);
       setPreviewData(preview);
@@ -209,6 +212,7 @@ function CreatePage() {
         )
       );
     } finally {
+      releaseWakeLock();
       setIsRegenerating(false);
     }
   }
@@ -514,76 +518,8 @@ async function generateAndScreenshot(
   instruction?: string,
   onProgress?: (progress: GenerationProgress) => void
 ): Promise<PreviewData> {
-  // Step 1: HTML生成
-  let generateResponse: Response | null = null;
-  let generateErrorData: { error?: string; retryable?: boolean } = {};
-  let generatePayload: { html: string; warnings?: string[] } | null = null;
-
-  for (let attempt = 1; attempt <= MAX_GENERATE_REQUEST_ATTEMPTS; attempt++) {
-    onProgress?.({
-      attempt,
-      maxAttempts: MAX_GENERATE_REQUEST_ATTEMPTS,
-      retrying: attempt > 1,
-      message:
-        attempt > 1
-          ? "AI生成サービスが混み合っているため、自動で再試行しています。"
-          : null,
-    });
-
-    generateResponse = await fetch("/api/generate", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ formData: data, instruction }),
-    });
-
-    if (generateResponse.ok) {
-      const payload = await readJsonOrNull<{ html?: unknown; warnings?: unknown }>(generateResponse);
-      const html = typeof payload?.html === "string" ? payload.html : "";
-      if (html.trim().length > 0) {
-        const warnings = Array.isArray(payload?.warnings)
-          ? payload.warnings.filter((warning): warning is string => typeof warning === "string")
-          : [];
-        generatePayload = { html, warnings };
-        break;
-      }
-
-      generateErrorData = {
-        error: GENERATE_RESPONSE_READ_FINAL_MESSAGE,
-        retryable: true,
-      };
-      if (attempt === MAX_GENERATE_REQUEST_ATTEMPTS) {
-        break;
-      }
-
-      onProgress?.({
-        attempt,
-        maxAttempts: MAX_GENERATE_REQUEST_ATTEMPTS,
-        retrying: true,
-        message: GENERATE_RESPONSE_READ_RETRY_MESSAGE,
-      });
-      const delay = GENERATE_RETRY_DELAYS_MS[attempt - 1] ?? 7000;
-      await sleep(delay);
-      continue;
-    }
-
-    generateErrorData = await readErrorResponse(generateResponse);
-    const shouldRetry = isRetryableGenerateError(generateResponse.status, generateErrorData);
-    if (!shouldRetry || attempt === MAX_GENERATE_REQUEST_ATTEMPTS) {
-      break;
-    }
-
-    const delay = GENERATE_RETRY_DELAYS_MS[attempt - 1] ?? 7000;
-    await sleep(delay);
-  }
-
-  if (!generatePayload) {
-    throw new Error(
-      generateErrorData.error ??
-        "AI生成サービスが混み合っています。入力内容は保持されていますので、少し時間を置いて再試行してください。"
-    );
-  }
-
-  const { html, warnings } = generatePayload;
+  // Step 1: HTML生成（ジョブ方式 + ポーリング。旧サーバーへは自動フォールバック）
+  const { html, warnings } = await generateSiteHtml(data, instruction, onProgress);
 
   // Step 2: スクリーンショット取得
   try {
@@ -615,58 +551,6 @@ async function generateAndScreenshot(
         "画面内プレビューで表示しています。サイト生成自体は完了しているため、このまま修正や決済へ進めます。",
     };
   }
-}
-
-async function readJsonOrNull<T>(response: Response): Promise<T | null> {
-  try {
-    return (await response.json()) as T;
-  } catch {
-    return null;
-  }
-}
-
-async function readJsonResponse<T>(response: Response, fallbackMessage: string): Promise<T> {
-  try {
-    return (await response.json()) as T;
-  } catch {
-    throw new Error(fallbackMessage);
-  }
-}
-
-async function readErrorResponse(response: Response): Promise<{ error?: string; retryable?: boolean }> {
-  try {
-    return (await response.json()) as { error?: string; retryable?: boolean };
-  } catch {
-    return {};
-  }
-}
-
-function isRetryableGenerateError(
-  status: number,
-  errorData: { error?: string; retryable?: boolean }
-): boolean {
-  if (errorData.retryable) return true;
-  if ([429, 500, 502, 503, 504].includes(status)) {
-    const message = errorData.error ?? "";
-    if (/missing gemini|api key/i.test(message)) return false;
-    return true;
-  }
-  return /high demand|service unavailable|overloaded|temporarily|googlegenerativeai/i.test(
-    errorData.error ?? ""
-  );
-}
-
-function toUserFacingErrorMessage(error: unknown, fallbackMessage: string): string {
-  const message = error instanceof Error ? error.message : "";
-  if (
-    !message ||
-    /the string did not match the expected pattern|unexpected end of json input|unexpected token .*json|failed to execute 'json'|body stream|failed to fetch|load failed|networkerror/i.test(
-      message
-    )
-  ) {
-    return fallbackMessage;
-  }
-  return message;
 }
 
 function sleep(ms: number): Promise<void> {

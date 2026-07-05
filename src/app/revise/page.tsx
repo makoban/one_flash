@@ -11,8 +11,17 @@
 
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
+import { readJsonOrNull, toUserFacingErrorMessage } from "@/lib/clientHttp";
+import { acquireScreenWakeLock } from "@/lib/wakeLock";
 
 const MAX_INSTRUCTION_LENGTH = 500;
+
+// 200応答なのに結果を読み込めなかった場合の案内。
+// サーバー側では修正が完了して無料修正回数を消費している可能性があるため、
+// むやみに再実行させず、まず公開サイトの確認を促す。
+const REVISE_RESULT_READ_ERROR_MESSAGE =
+  "通信が不安定で修正結果を読み込めませんでした。修正自体は完了している場合があります。" +
+  "お手数ですが、公開中のサイトを開いて内容をご確認のうえ、反映されていないときだけもう一度お試しください。";
 
 /** 修正対象の6項目 */
 interface RevisionFields {
@@ -140,6 +149,8 @@ function ReviseContent() {
     setError(null);
     setIsSubmitting(true);
 
+    // 修正中にスマホの画面が消灯して通信が中断されるのを防ぐ
+    const releaseWakeLock = acquireScreenWakeLock();
     try {
       const response = await fetch("/api/revise", {
         method: "POST",
@@ -147,7 +158,9 @@ function ReviseContent() {
         body: JSON.stringify({ token, instruction }),
       });
 
-      const data = (await response.json()) as {
+      // iOS Safari では長時間リクエスト後にボディが読めないことがあるため、
+      // JSON の読み取り失敗を英語エラーのまま表示しない
+      const data = await readJsonOrNull<{
         success?: boolean;
         publicUrl?: string;
         freeRevisionsRemaining?: number;
@@ -155,15 +168,21 @@ function ReviseContent() {
         message?: string;
         error?: string;
         warnings?: string[];
-      };
+      }>(response);
 
-      if (response.status === 403 && data.limitReached) {
+      if (response.status === 403 && data?.limitReached) {
         setError(data.message ?? "無料修正の上限に達しました。お問い合わせください。");
         return;
       }
 
       if (!response.ok) {
-        throw new Error(data.error ?? "修正に失敗しました");
+        throw new Error(data?.error ?? "修正に失敗しました。もう一度お試しください。");
+      }
+
+      if (!data) {
+        // 200 なのに結果が読めない → 修正は反映済みの可能性がある
+        setError(REVISE_RESULT_READ_ERROR_MESSAGE);
+        return;
       }
 
       setWarnings(data.warnings ?? []);
@@ -174,10 +193,9 @@ function ReviseContent() {
       setFreeInstruction("");
       setFields(EMPTY_FIELDS);
     } catch (err: unknown) {
-      const message =
-        err instanceof Error ? err.message : "エラーが発生しました。もう一度お試しください。";
-      setError(message);
+      setError(toUserFacingErrorMessage(err, REVISE_RESULT_READ_ERROR_MESSAGE));
     } finally {
+      releaseWakeLock();
       setIsSubmitting(false);
     }
   }
