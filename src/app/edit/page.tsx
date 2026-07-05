@@ -77,16 +77,19 @@ export default function EditPage() {
       });
 
       if (!response.ok) {
-        const data = (await response.json()) as { error?: string };
+        const data = await readErrorResponse(response);
         throw new Error(data.error ?? "認証に失敗しました");
       }
 
-      const data = (await response.json()) as {
-        subdomain: string;
-        email: string;
-        formData: SiteFormData;
-        html: string;
-      };
+      const data = await readJsonResponse<{
+        subdomain?: string;
+        email?: string;
+        formData?: SiteFormData;
+        html?: string;
+      }>(response, "サイト情報を読み込めませんでした。もう一度お試しください。");
+      if (!data.subdomain || !data.formData || !data.html) {
+        throw new Error("サイト情報に必要なデータが含まれていません。もう一度お試しください。");
+      }
 
       setFormData({ ...data.formData, subdomain: data.subdomain });
       setSubdomain(data.subdomain);
@@ -100,8 +103,12 @@ export default function EditPage() {
       setCurrentHistoryIndex(0);
       setPageState("preview");
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "エラーが発生しました";
-      setError(message);
+      setError(
+        toUserFacingErrorMessage(
+          err,
+          "通信が不安定でサイト情報を読み込めませんでした。もう一度お試しください。"
+        )
+      );
       setPageState("login");
     } finally {
       setIsVerifying(false);
@@ -123,10 +130,16 @@ export default function EditPage() {
         body: JSON.stringify({ formData: updatedData, instruction }),
       });
       if (!genResponse.ok) {
-        const data = (await genResponse.json()) as { error?: string };
+        const data = await readErrorResponse(genResponse);
         throw new Error(data.error ?? "生成に失敗しました");
       }
-      const { html } = (await genResponse.json()) as { html: string };
+      const { html } = await readJsonResponse<{ html?: string }>(
+        genResponse,
+        "再生成結果を読み込めませんでした。もう一度お試しください。"
+      );
+      if (!html) {
+        throw new Error("再生成結果にHTMLが含まれていません。もう一度お試しください。");
+      }
 
       const preview = await getPreviewFromScreenshotOrHtml(html);
       setPreviewData(preview);
@@ -137,8 +150,12 @@ export default function EditPage() {
       });
       setCurrentHistoryIndex((prev) => prev + 1);
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "再生成に失敗しました";
-      setError(message);
+      setError(
+        toUserFacingErrorMessage(
+          err,
+          "通信が不安定で再生成結果を読み込めませんでした。もう一度お試しください。"
+        )
+      );
     } finally {
       setIsRegenerating(false);
     }
@@ -173,16 +190,26 @@ export default function EditPage() {
       });
 
       if (!response.ok) {
-        const data = (await response.json()) as { error?: string };
+        const data = await readErrorResponse(response);
         throw new Error(data.error ?? "公開に失敗しました");
       }
 
-      const result = (await response.json()) as { url: string };
+      const result = await readJsonResponse<{ url?: string }>(
+        response,
+        "公開結果を読み込めませんでした。もう一度お試しください。"
+      );
+      if (!result.url) {
+        throw new Error("公開URLを取得できませんでした。もう一度お試しください。");
+      }
       setPublishedUrl(result.url);
       setPageState("complete");
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "公開に失敗しました";
-      setError(message);
+      setError(
+        toUserFacingErrorMessage(
+          err,
+          "通信が不安定で公開結果を読み込めませんでした。もう一度お試しください。"
+        )
+      );
     } finally {
       setIsPublishing(false);
     }
@@ -314,6 +341,35 @@ export default function EditPage() {
       )}
     </main>
   );
+}
+
+async function readJsonResponse<T>(response: Response, fallbackMessage: string): Promise<T> {
+  try {
+    return (await response.json()) as T;
+  } catch {
+    throw new Error(fallbackMessage);
+  }
+}
+
+async function readErrorResponse(response: Response): Promise<{ error?: string }> {
+  try {
+    return (await response.json()) as { error?: string };
+  } catch {
+    return {};
+  }
+}
+
+function toUserFacingErrorMessage(error: unknown, fallbackMessage: string): string {
+  const message = error instanceof Error ? error.message : "";
+  if (
+    !message ||
+    /the string did not match the expected pattern|unexpected end of json input|unexpected token .*json|failed to execute 'json'|body stream|failed to fetch|load failed|networkerror/i.test(
+      message
+    )
+  ) {
+    return fallbackMessage;
+  }
+  return message;
 }
 
 async function getPreviewFromScreenshotOrHtml(html: string): Promise<PreviewData> {

@@ -71,6 +71,10 @@ const COMPLETION_FLASH_MS = 900;
 const MESSAGE_INTERVAL_MS = 2000;
 const MAX_GENERATE_REQUEST_ATTEMPTS = 3;
 const GENERATE_RETRY_DELAYS_MS = [2500, 7000];
+const GENERATE_RESPONSE_READ_RETRY_MESSAGE =
+  "通信が不安定なため、AI生成結果の読み込みを自動で再試行しています。";
+const GENERATE_RESPONSE_READ_FINAL_MESSAGE =
+  "通信が不安定でAI生成結果を読み込めませんでした。入力内容は保持されていますので、同じ内容で再試行してください。";
 
 // ---------------------------------------------------------------------------
 // 再生成の最大回数（プロトタイプ用）
@@ -162,9 +166,12 @@ function CreatePage() {
       await sleep(COMPLETION_FLASH_MS);
       setPageState("preview");
     } catch (err: unknown) {
-      const message =
-        err instanceof Error ? err.message : "エラーが発生しました。もう一度お試しください。";
-      setError(message);
+      setError(
+        toUserFacingErrorMessage(
+          err,
+          "通信が不安定で生成結果を読み込めませんでした。入力内容は保持されていますので、同じ内容で再試行してください。"
+        )
+      );
       setGenerationCompleted(false);
       setPageState("form");
     } finally {
@@ -195,9 +202,12 @@ function CreatePage() {
       });
       setCurrentHistoryIndex((prev) => prev + 1);
     } catch (err: unknown) {
-      const message =
-        err instanceof Error ? err.message : "再生成に失敗しました。もう一度お試しください。";
-      setError(message);
+      setError(
+        toUserFacingErrorMessage(
+          err,
+          "通信が不安定で再生成結果を読み込めませんでした。もう一度お試しください。"
+        )
+      );
     } finally {
       setIsRegenerating(false);
     }
@@ -249,25 +259,33 @@ function CreatePage() {
       });
 
       if (!response.ok) {
-        const errorData = (await response.json()) as { error?: string };
+        const errorData = await readErrorResponse(response);
         throw new Error(errorData.error ?? "サイト公開に失敗しました");
       }
 
-      const result = (await response.json()) as {
-        site: { publicUrl: string; revisionUrl: string; revisionToken: string };
-        subscription: { expiresAt: string };
-      };
+      const result = await readJsonResponse<{
+        site?: { publicUrl?: string; revisionUrl?: string; revisionToken?: string };
+        subscription?: { expiresAt?: string };
+      }>(response, "公開結果を読み込めませんでした。もう一度お試しください。");
+      const site = result.site;
+      const expiresAt = result.subscription?.expiresAt;
+      if (!site?.publicUrl || !site.revisionUrl || !site.revisionToken || !expiresAt) {
+        throw new Error("公開結果に必要な情報が含まれていません。もう一度お試しください。");
+      }
       setAdminPublishResult({
-        publicUrl: result.site.publicUrl,
-        revisionUrl: result.site.revisionUrl,
-        revisionToken: result.site.revisionToken,
-        expiresAt: result.subscription.expiresAt,
+        publicUrl: site.publicUrl,
+        revisionUrl: site.revisionUrl,
+        revisionToken: site.revisionToken,
+        expiresAt,
       });
       setPageState("complete");
     } catch (err: unknown) {
-      const message =
-        err instanceof Error ? err.message : "エラーが発生しました。";
-      setError(message);
+      setError(
+        toUserFacingErrorMessage(
+          err,
+          "通信が不安定で公開結果を読み込めませんでした。もう一度お試しください。"
+        )
+      );
     } finally {
       setIsPublishing(false);
     }
@@ -305,16 +323,25 @@ function CreatePage() {
       });
 
       if (!response.ok) {
-        const errorData = (await response.json()) as { error?: string };
+        const errorData = await readErrorResponse(response);
         throw new Error(errorData.error ?? "決済セッションの作成に失敗しました");
       }
 
-      const { url } = (await response.json()) as { url: string };
+      const { url } = await readJsonResponse<{ url?: string }>(
+        response,
+        "決済ページの作成結果を読み込めませんでした。もう一度お試しください。"
+      );
+      if (!url) {
+        throw new Error("決済ページURLを取得できませんでした。もう一度お試しください。");
+      }
       window.location.href = url;
     } catch (err: unknown) {
-      const message =
-        err instanceof Error ? err.message : "エラーが発生しました。もう一度お試しください。";
-      setError(message);
+      setError(
+        toUserFacingErrorMessage(
+          err,
+          "通信が不安定で決済ページの作成結果を読み込めませんでした。もう一度お試しください。"
+        )
+      );
       setIsPublishing(false);
     }
   }
@@ -490,6 +517,7 @@ async function generateAndScreenshot(
   // Step 1: HTML生成
   let generateResponse: Response | null = null;
   let generateErrorData: { error?: string; retryable?: boolean } = {};
+  let generatePayload: { html: string; warnings?: string[] } | null = null;
 
   for (let attempt = 1; attempt <= MAX_GENERATE_REQUEST_ATTEMPTS; attempt++) {
     onProgress?.({
@@ -509,7 +537,33 @@ async function generateAndScreenshot(
     });
 
     if (generateResponse.ok) {
-      break;
+      const payload = await readJsonOrNull<{ html?: unknown; warnings?: unknown }>(generateResponse);
+      const html = typeof payload?.html === "string" ? payload.html : "";
+      if (html.trim().length > 0) {
+        const warnings = Array.isArray(payload?.warnings)
+          ? payload.warnings.filter((warning): warning is string => typeof warning === "string")
+          : [];
+        generatePayload = { html, warnings };
+        break;
+      }
+
+      generateErrorData = {
+        error: GENERATE_RESPONSE_READ_FINAL_MESSAGE,
+        retryable: true,
+      };
+      if (attempt === MAX_GENERATE_REQUEST_ATTEMPTS) {
+        break;
+      }
+
+      onProgress?.({
+        attempt,
+        maxAttempts: MAX_GENERATE_REQUEST_ATTEMPTS,
+        retrying: true,
+        message: GENERATE_RESPONSE_READ_RETRY_MESSAGE,
+      });
+      const delay = GENERATE_RETRY_DELAYS_MS[attempt - 1] ?? 7000;
+      await sleep(delay);
+      continue;
     }
 
     generateErrorData = await readErrorResponse(generateResponse);
@@ -522,14 +576,14 @@ async function generateAndScreenshot(
     await sleep(delay);
   }
 
-  if (!generateResponse?.ok) {
+  if (!generatePayload) {
     throw new Error(
       generateErrorData.error ??
         "AI生成サービスが混み合っています。入力内容は保持されていますので、少し時間を置いて再試行してください。"
     );
   }
 
-  const { html, warnings } = (await generateResponse.json()) as { html: string; warnings?: string[] };
+  const { html, warnings } = generatePayload;
 
   // Step 2: スクリーンショット取得
   try {
@@ -563,6 +617,22 @@ async function generateAndScreenshot(
   }
 }
 
+async function readJsonOrNull<T>(response: Response): Promise<T | null> {
+  try {
+    return (await response.json()) as T;
+  } catch {
+    return null;
+  }
+}
+
+async function readJsonResponse<T>(response: Response, fallbackMessage: string): Promise<T> {
+  try {
+    return (await response.json()) as T;
+  } catch {
+    throw new Error(fallbackMessage);
+  }
+}
+
 async function readErrorResponse(response: Response): Promise<{ error?: string; retryable?: boolean }> {
   try {
     return (await response.json()) as { error?: string; retryable?: boolean };
@@ -584,6 +654,19 @@ function isRetryableGenerateError(
   return /high demand|service unavailable|overloaded|temporarily|googlegenerativeai/i.test(
     errorData.error ?? ""
   );
+}
+
+function toUserFacingErrorMessage(error: unknown, fallbackMessage: string): string {
+  const message = error instanceof Error ? error.message : "";
+  if (
+    !message ||
+    /the string did not match the expected pattern|unexpected end of json input|unexpected token .*json|failed to execute 'json'|body stream|failed to fetch|load failed|networkerror/i.test(
+      message
+    )
+  ) {
+    return fallbackMessage;
+  }
+  return message;
 }
 
 function sleep(ms: number): Promise<void> {
