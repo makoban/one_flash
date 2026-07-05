@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "e2e:prod-safe": "node scripts/e2e-prod-safe.mjs"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.992.0",
