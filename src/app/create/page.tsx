@@ -73,7 +73,7 @@ const COMPLETED_MESSAGE = "完成しました！";
 const COMPLETION_FLASH_MS = 900;
 
 const MESSAGE_INTERVAL_MS = 2000;
-const AVERAGE_GENERATION_SECONDS = 90;
+const AVERAGE_GENERATION_SECONDS = 120;
 
 const GENERATING_GUIDE = {
   desktopImage: "/onboarding/opf-generating-guide-desktop.jpg",
@@ -685,7 +685,7 @@ function GeneratingView({
           <p className="mt-2 text-sm leading-relaxed text-gray-500">
             {completed
               ? "プレビューを表示します..."
-              : "平均90秒ほどでプレビューが完成します。この画面を閉じずに、そのままお待ちください。"}
+              : "平均2分ほどでプレビューが完成します。この画面を閉じずに、そのままお待ちください。"}
           </p>
           {!completed && (
             <p className="mt-2 text-xs leading-relaxed text-gray-400">
@@ -707,7 +707,7 @@ function GeneratingView({
             <div className="mt-6">
               <div className="mb-2 flex items-center justify-between text-xs text-gray-400">
                 <span>待ち時間の目安</span>
-                <span>{elapsedSeconds}秒 / 平均{AVERAGE_GENERATION_SECONDS}秒</span>
+                <span>{elapsedSeconds}秒 / 平均2分</span>
               </div>
               <div className="h-2 w-full overflow-hidden rounded-full bg-gray-100">
                 <div
