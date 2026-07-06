@@ -46,6 +46,59 @@ const COLOR_THEMES: Array<{
   { value: "executive", label: "エグゼクティブ", description: "洗練されたプレミアムデザイン", colors: ["#0c1524", "#c9a96e", "#1a3a5c"], recommend: "コンサルタント・経営者・士業全般・IT企業" },
 ];
 
+type StepGuide = {
+  title: string;
+  body: string;
+  desktopImage: string;
+  mobileImage: string;
+  alt: string;
+};
+
+const STEP_GUIDES: Record<number, StepGuide> = {
+  1: {
+    title: "まずは屋号からで大丈夫です",
+    body: "まだ文章が固まっていなくても、無料プレビューで完成イメージを確認できます。",
+    desktopImage: "/onboarding/opf-guide-step-01-desktop.jpg",
+    mobileImage: "/onboarding/opf-guide-step-01-mobile.jpg",
+    alt: "屋号や事業名の入力を案内する女性ガイド",
+  },
+  2: {
+    title: "強みは短くてもAIが整えます",
+    body: "例文のように一言で入力すれば、ホームページ向けの見出しに整えます。",
+    desktopImage: "/onboarding/opf-guide-step-02-desktop.jpg",
+    mobileImage: "/onboarding/opf-guide-step-02-mobile.jpg",
+    alt: "キャッチコピー作成を案内する女性ガイド",
+  },
+  3: {
+    title: "思いつく内容をそのまま書いてください",
+    body: "長くても箇条書きでも大丈夫です。AIが見やすい1ページに整理します。",
+    desktopImage: "/onboarding/opf-guide-step-03-desktop.jpg",
+    mobileImage: "/onboarding/opf-guide-step-03-mobile.jpg",
+    alt: "サービス説明の入力を案内する女性ガイド",
+  },
+  4: {
+    title: "予約や問い合わせ先をまとめます",
+    body: "電話、メール、SNS、予約URLなど、載せたい連絡先を自由に入れてください。",
+    desktopImage: "/onboarding/opf-guide-step-04-desktop.jpg",
+    mobileImage: "/onboarding/opf-guide-step-04-mobile.jpg",
+    alt: "問い合わせ先の入力を案内する女性ガイド",
+  },
+  5: {
+    title: "雰囲気を選ぶだけで見た目が変わります",
+    body: "業種に近いものを選べば、色や空気感をAIが合わせて作成します。",
+    desktopImage: "/onboarding/opf-guide-step-05-desktop.jpg",
+    mobileImage: "/onboarding/opf-guide-step-05-mobile.jpg",
+    alt: "サイトの雰囲気選びを案内する女性ガイド",
+  },
+  6: {
+    title: "ここまで無料でプレビュー作成できます",
+    body: "完成URLと修正リンクを送るため、受け取れるメールアドレスを入力してください。",
+    desktopImage: "/onboarding/opf-guide-step-06-desktop.jpg",
+    mobileImage: "/onboarding/opf-guide-step-06-mobile.jpg",
+    alt: "無料プレビュー作成前のメール入力を案内する女性ガイド",
+  },
+};
+
 /** サブドメインを自動生成する（ランダム8文字） */
 function generateSubdomain(): string {
   const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
@@ -240,15 +293,25 @@ export default function CardStepForm({
   }
 
   const progressPercent = Math.round((currentStep / totalSteps) * 100);
+  const remainingAfterAnswer = Math.max(totalSteps - currentStep, 0);
+  const remainingLabel =
+    remainingAfterAnswer > 0
+      ? `これに答えたらあと${remainingAfterAnswer}問`
+      : "これで無料プレビュー作成へ";
 
   return (
     <div className="w-full max-w-2xl mx-auto">
       {/* プログレスバーエリア */}
       <div className="mb-6">
         <div className="flex justify-between items-center mb-2">
-          <span className="text-sm font-semibold text-indigo-600">
-            ステップ {currentStep}/{totalSteps}
-          </span>
+          <div>
+            <span className="text-sm font-semibold text-indigo-600">
+              ステップ {currentStep}/{totalSteps}
+            </span>
+            <span className="ml-2 inline-flex rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-indigo-600 shadow-sm ring-1 ring-indigo-100">
+              {remainingLabel}
+            </span>
+          </div>
           <span className="text-xs text-gray-400">{progressPercent}% 完了</span>
         </div>
         <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
@@ -278,6 +341,7 @@ export default function CardStepForm({
         {/* 各ステップのコンテンツ */}
         {currentStep === 1 && (
           <StepSiteName
+            guide={STEP_GUIDES[1]}
             value={formData.siteName}
             error={errors.siteName}
             onChange={(v) => handleChange("siteName", v)}
@@ -287,6 +351,7 @@ export default function CardStepForm({
         )}
         {currentStep === 2 && (
           <StepCatchphrase
+            guide={STEP_GUIDES[2]}
             value={formData.catchphrase}
             error={errors.catchphrase}
             onChange={(v) => handleChange("catchphrase", v)}
@@ -296,6 +361,7 @@ export default function CardStepForm({
         )}
         {currentStep === 3 && (
           <StepDescription
+            guide={STEP_GUIDES[3]}
             value={formData.description}
             error={errors.description}
             onChange={(v) => handleChange("description", v)}
@@ -304,6 +370,7 @@ export default function CardStepForm({
         )}
         {currentStep === 4 && (
           <StepContact
+            guide={STEP_GUIDES[4]}
             value={formData.contactInfo}
             error={errors.contactInfo}
             onChange={(v) => handleChange("contactInfo", v)}
@@ -312,12 +379,14 @@ export default function CardStepForm({
         )}
         {currentStep === 5 && (
           <StepColorTheme
+            guide={STEP_GUIDES[5]}
             value={formData.colorTheme}
             onChange={(v) => handleChange("colorTheme", v)}
           />
         )}
         {currentStep === 6 && !isAdmin && (
           <StepEmail
+            guide={STEP_GUIDES[6]}
             email={formData.email}
             emailError={errors.email}
             onEmailChange={(v) => handleChange("email", v)}
@@ -391,6 +460,7 @@ export default function CardStepForm({
 // ---------------------------------------------------------------------------
 
 interface StepSiteNameProps {
+  guide: StepGuide;
   value: string;
   error?: string;
   onChange: (v: string) => void;
@@ -398,9 +468,10 @@ interface StepSiteNameProps {
   inputRef: (el: HTMLInputElement | null) => void;
 }
 
-function StepSiteName({ value, error, onChange, onKeyDown, inputRef }: StepSiteNameProps) {
+function StepSiteName({ guide, value, error, onChange, onKeyDown, inputRef }: StepSiteNameProps) {
   return (
     <div>
+      <GuidePanel guide={guide} />
       <QuestionLabel step={1} />
       <h2 className="text-lg font-bold text-gray-900 mt-1 mb-4 leading-snug">
         どんなお仕事をされていますか？<br />
@@ -435,6 +506,7 @@ function StepSiteName({ value, error, onChange, onKeyDown, inputRef }: StepSiteN
 // ---------------------------------------------------------------------------
 
 interface StepCatchphraseProps {
+  guide: StepGuide;
   value: string;
   error?: string;
   onChange: (v: string) => void;
@@ -442,9 +514,10 @@ interface StepCatchphraseProps {
   inputRef: (el: HTMLInputElement | null) => void;
 }
 
-function StepCatchphrase({ value, error, onChange, onKeyDown, inputRef }: StepCatchphraseProps) {
+function StepCatchphrase({ guide, value, error, onChange, onKeyDown, inputRef }: StepCatchphraseProps) {
   return (
     <div>
+      <GuidePanel guide={guide} />
       <QuestionLabel step={2} />
       <h2 className="text-lg font-bold text-gray-900 mt-1 mb-4 leading-snug">
         あなたのサービスの一番の強みを<br />
@@ -479,15 +552,17 @@ function StepCatchphrase({ value, error, onChange, onKeyDown, inputRef }: StepCa
 // ---------------------------------------------------------------------------
 
 interface StepDescriptionProps {
+  guide: StepGuide;
   value: string;
   error?: string;
   onChange: (v: string) => void;
   textareaRef: (el: HTMLTextAreaElement | null) => void;
 }
 
-function StepDescription({ value, error, onChange, textareaRef }: StepDescriptionProps) {
+function StepDescription({ guide, value, error, onChange, textareaRef }: StepDescriptionProps) {
   return (
     <div>
+      <GuidePanel guide={guide} />
       <QuestionLabel step={3} />
       <h2 className="text-lg font-bold text-gray-900 mt-1 mb-4 leading-snug">
         お客さんに一番伝えたいことを<br />
@@ -516,15 +591,17 @@ function StepDescription({ value, error, onChange, textareaRef }: StepDescriptio
 // ---------------------------------------------------------------------------
 
 interface StepContactProps {
+  guide: StepGuide;
   value: string;
   error?: string;
   onChange: (v: string) => void;
   textareaRef: (el: HTMLTextAreaElement | null) => void;
 }
 
-function StepContact({ value, error, onChange, textareaRef }: StepContactProps) {
+function StepContact({ guide, value, error, onChange, textareaRef }: StepContactProps) {
   return (
     <div>
+      <GuidePanel guide={guide} />
       <QuestionLabel step={4} />
       <h2 className="text-lg font-bold text-gray-900 mt-1 mb-4 leading-snug">
         お客さんからの問い合わせは<br />
@@ -553,13 +630,15 @@ function StepContact({ value, error, onChange, textareaRef }: StepContactProps) 
 // ---------------------------------------------------------------------------
 
 interface StepColorThemeProps {
+  guide: StepGuide;
   value: SiteFormData["colorTheme"];
   onChange: (v: SiteFormData["colorTheme"]) => void;
 }
 
-function StepColorTheme({ value, onChange }: StepColorThemeProps) {
+function StepColorTheme({ guide, value, onChange }: StepColorThemeProps) {
   return (
     <div>
+      <GuidePanel guide={guide} />
       <QuestionLabel step={5} />
       <div className="flex items-center justify-between mt-1 mb-5">
         <h2 className="text-lg font-bold text-gray-900 leading-snug">
@@ -617,6 +696,7 @@ function StepColorTheme({ value, onChange }: StepColorThemeProps) {
 // ---------------------------------------------------------------------------
 
 interface StepEmailProps {
+  guide: StepGuide;
   email: string;
   emailError?: string;
   onEmailChange: (v: string) => void;
@@ -625,6 +705,7 @@ interface StepEmailProps {
 }
 
 function StepEmail({
+  guide,
   email,
   emailError,
   onEmailChange,
@@ -633,6 +714,7 @@ function StepEmail({
 }: StepEmailProps) {
   return (
     <div>
+      <GuidePanel guide={guide} />
       <QuestionLabel step={6} />
       <h2 className="text-lg font-bold text-gray-900 mt-1 mb-5 leading-snug">
         最後に、メールアドレスを<br />
@@ -658,6 +740,31 @@ function StepEmail({
         </p>
       )}
     </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// 共通: 女性ガイド
+// ---------------------------------------------------------------------------
+
+function GuidePanel({ guide }: { guide: StepGuide }) {
+  return (
+    <figure className="mb-5 overflow-hidden rounded-xl border border-indigo-100 bg-indigo-50">
+      <picture>
+        <source media="(max-width: 640px)" srcSet={guide.mobileImage} />
+        <img
+          src={guide.desktopImage}
+          alt={guide.alt}
+          className="h-40 w-full object-cover sm:h-48"
+          loading="eager"
+          decoding="async"
+        />
+      </picture>
+      <figcaption className="border-t border-indigo-100 bg-white/95 px-4 py-3">
+        <p className="text-sm font-bold leading-snug text-gray-900">{guide.title}</p>
+        <p className="mt-1 text-xs leading-relaxed text-gray-500">{guide.body}</p>
+      </figcaption>
+    </figure>
   );
 }
 
