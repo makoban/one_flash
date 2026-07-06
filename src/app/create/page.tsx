@@ -73,6 +73,15 @@ const COMPLETED_MESSAGE = "完成しました！";
 const COMPLETION_FLASH_MS = 900;
 
 const MESSAGE_INTERVAL_MS = 2000;
+const AVERAGE_GENERATION_SECONDS = 90;
+
+const GENERATING_GUIDE = {
+  desktopGif: "/onboarding/opf-generating-guide-desktop.gif",
+  mobileGif: "/onboarding/opf-generating-guide-mobile.gif",
+  desktopFallback: "/onboarding/opf-generating-guide-desktop.jpg",
+  mobileFallback: "/onboarding/opf-generating-guide-mobile.jpg",
+  alt: "ホームページ生成中にこのまま待つよう案内する女性ガイド",
+};
 
 // ---------------------------------------------------------------------------
 // 再生成の最大回数（プロトタイプ用）
@@ -569,6 +578,8 @@ function GeneratingView({
   completed: boolean;
 }) {
   const [messageIndex, setMessageIndex] = useState(0);
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  const [returnedFromBackground, setReturnedFromBackground] = useState(false);
 
   // 完了するまで作業中メッセージを循環表示する（時間で「完成」に到達しない）
   useEffect(() => {
@@ -579,81 +590,151 @@ function GeneratingView({
     return () => clearTimeout(timer);
   }, [messageIndex, completed]);
 
+  useEffect(() => {
+    if (completed) return;
+    const timer = setInterval(() => {
+      setElapsedSeconds((prev) => prev + 1);
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [completed]);
+
+  useEffect(() => {
+    if (completed) return;
+    let wentBackground = false;
+    const handleVisibilityChange = (): void => {
+      if (document.visibilityState === "hidden") {
+        wentBackground = true;
+        return;
+      }
+      if (wentBackground && document.visibilityState === "visible") {
+        setReturnedFromBackground(true);
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
+  }, [completed]);
+
+  const estimatePercent = Math.min(
+    Math.round((elapsedSeconds / AVERAGE_GENERATION_SECONDS) * 100),
+    96
+  );
+
   return (
-    <div className="flex flex-col items-center justify-center py-20 px-4">
-      {/* スピナー / 完了チェック */}
-      <div className="relative mb-8">
-        {completed ? (
-          <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center">
-            <svg
-              className="w-10 h-10 text-green-600"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              aria-hidden="true"
-              style={{ animation: "fadeSlideIn 0.4s ease both" }}
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
+    <div className="mx-auto flex w-full max-w-2xl flex-col items-center justify-center px-4 py-10 sm:py-14">
+      <div className="w-full overflow-hidden rounded-2xl border border-indigo-100 bg-white shadow-lg">
+        <picture>
+          <source
+            media="(max-width: 640px)"
+            srcSet={completed ? GENERATING_GUIDE.mobileFallback : GENERATING_GUIDE.mobileGif}
+          />
+          <img
+            src={completed ? GENERATING_GUIDE.desktopFallback : GENERATING_GUIDE.desktopGif}
+            alt={GENERATING_GUIDE.alt}
+            className="h-52 w-full object-cover sm:h-64"
+            loading="eager"
+            decoding="async"
+          />
+        </picture>
+
+        <div className="px-5 py-6 text-center sm:px-8">
+          {/* スピナー / 完了チェック */}
+          <div className="mb-5 flex justify-center">
+            {completed ? (
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
+                <svg
+                  className="h-8 w-8 text-green-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                  style={{ animation: "fadeSlideIn 0.4s ease both" }}
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+            ) : (
+              <div className="relative h-20 w-20 overflow-hidden rounded-full">
+                <div className="absolute inset-2 h-16 w-16 rounded-full border-4 border-indigo-100" />
+                <div className="absolute inset-2 h-16 w-16 animate-spin rounded-full border-4 border-indigo-500 border-t-transparent" />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <svg
+                    className="h-7 w-7 text-indigo-500"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={1.5}
+                      d="M13 10V3L4 14h7v7l9-11h-7z"
+                    />
+                  </svg>
+                </div>
+              </div>
+            )}
           </div>
-        ) : (
-          <>
-            <div className="w-20 h-20 border-4 border-indigo-100 rounded-full" />
-            <div className="absolute inset-0 w-20 h-20 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin" />
-            <div className="absolute inset-0 flex items-center justify-center">
-              <svg
-                className="w-8 h-8 text-indigo-500"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                aria-hidden="true"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={1.5}
-                  d="M13 10V3L4 14h7v7l9-11h-7z"
-                />
-              </svg>
-            </div>
-          </>
-        )}
-      </div>
 
-      {/* メッセージ */}
-      <div className="text-center">
-        <p
-          key={completed ? "done" : messageIndex}
-          className={`text-lg font-semibold ${completed ? "text-green-700" : "text-gray-800"}`}
-          style={{ animation: "fadeSlideIn 0.4s ease both" }}
-        >
-          {completed ? COMPLETED_MESSAGE : GENERATING_MESSAGES[messageIndex]}
-        </p>
-        <p className="mt-2 text-sm text-gray-400">
-          {completed
-            ? "プレビューを表示します..."
-            : "AIがあなたのホームページを作成しています（1〜2分ほどかかります。そのままお待ちください）"}
-        </p>
-        {!completed && progress.retrying && (
-          <p className="mt-3 text-sm font-medium text-indigo-600">
-            {progress.message}（{progress.attempt}/{progress.maxAttempts}回目）
+          {/* メッセージ */}
+          <p
+            key={completed ? "done" : messageIndex}
+            className={`text-lg font-semibold ${completed ? "text-green-700" : "text-gray-900"}`}
+            style={{ animation: "fadeSlideIn 0.4s ease both" }}
+          >
+            {completed ? COMPLETED_MESSAGE : GENERATING_MESSAGES[messageIndex]}
           </p>
-        )}
-      </div>
+          <p className="mt-2 text-sm leading-relaxed text-gray-500">
+            {completed
+              ? "プレビューを表示します..."
+              : "平均90秒ほどでプレビューが完成します。この画面を閉じずに、そのままお待ちください。"}
+          </p>
+          {!completed && (
+            <p className="mt-2 text-xs leading-relaxed text-gray-400">
+              他のアプリに移っても戻れば結果確認を再開しますが、この画面のまま待つのが一番安定します。
+            </p>
+          )}
+          {!completed && returnedFromBackground && (
+            <p className="mt-3 rounded-lg bg-indigo-50 px-3 py-2 text-xs font-semibold text-indigo-700">
+              戻りました。生成結果の確認を再開しています。
+            </p>
+          )}
+          {!completed && progress.retrying && (
+            <p className="mt-3 text-sm font-medium text-indigo-600">
+              {progress.message}（{progress.attempt}/{progress.maxAttempts}回目）
+            </p>
+          )}
 
-      {/* ステップインジケーター（作業中のみ） */}
-      {!completed && (
-        <div className="mt-8 flex gap-2">
-          {GENERATING_MESSAGES.map((_, i) => (
-            <div
-              key={i}
-              className={`w-2 h-2 rounded-full transition-all duration-500 ${
-                i === messageIndex ? "bg-indigo-400 scale-125" : "bg-gray-200"
-              }`}
-            />
-          ))}
+          {!completed && (
+            <div className="mt-6">
+              <div className="mb-2 flex items-center justify-between text-xs text-gray-400">
+                <span>待ち時間の目安</span>
+                <span>{elapsedSeconds}秒 / 平均{AVERAGE_GENERATION_SECONDS}秒</span>
+              </div>
+              <div className="h-2 w-full overflow-hidden rounded-full bg-gray-100">
+                <div
+                  className="h-full rounded-full bg-indigo-500 transition-all duration-500"
+                  style={{ width: `${estimatePercent}%` }}
+                />
+              </div>
+            </div>
+          )}
+
+          {/* ステップインジケーター（作業中のみ） */}
+          {!completed && (
+            <div className="mt-6 flex justify-center gap-2">
+              {GENERATING_MESSAGES.map((_, i) => (
+                <div
+                  key={i}
+                  className={`h-2 w-2 rounded-full transition-all duration-500 ${
+                    i === messageIndex ? "scale-125 bg-indigo-400" : "bg-gray-200"
+                  }`}
+                />
+              ))}
+            </div>
+          )}
         </div>
-      )}
+      </div>
 
       {/* アニメーション定義 */}
       <style>{`
