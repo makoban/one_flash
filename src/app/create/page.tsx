@@ -76,10 +76,8 @@ const MESSAGE_INTERVAL_MS = 2000;
 const AVERAGE_GENERATION_SECONDS = 90;
 
 const GENERATING_GUIDE = {
-  desktopGif: "/onboarding/opf-generating-guide-desktop.gif",
-  mobileGif: "/onboarding/opf-generating-guide-mobile.gif",
-  desktopFallback: "/onboarding/opf-generating-guide-desktop.jpg",
-  mobileFallback: "/onboarding/opf-generating-guide-mobile.jpg",
+  desktopImage: "/onboarding/opf-generating-guide-desktop.jpg",
+  mobileImage: "/onboarding/opf-generating-guide-mobile.jpg",
   alt: "ホームページ生成中にこのまま待つよう案内する女性ガイド",
 };
 
@@ -625,10 +623,10 @@ function GeneratingView({
         <picture>
           <source
             media="(max-width: 640px)"
-            srcSet={completed ? GENERATING_GUIDE.mobileFallback : GENERATING_GUIDE.mobileGif}
+            srcSet={GENERATING_GUIDE.mobileImage}
           />
           <img
-            src={completed ? GENERATING_GUIDE.desktopFallback : GENERATING_GUIDE.desktopGif}
+            src={GENERATING_GUIDE.desktopImage}
             alt={GENERATING_GUIDE.alt}
             className="h-52 w-full object-cover sm:h-64"
             loading="eager"

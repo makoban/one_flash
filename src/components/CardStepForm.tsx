@@ -282,16 +282,6 @@ export default function CardStepForm({
     await onSubmit(submitData);
   }
 
-  // Enterキーで次へ進む（textareaは除く）
-  function handleKeyDown(e: React.KeyboardEvent, isTextarea = false): void {
-    if (e.key === "Enter" && !isTextarea) {
-      e.preventDefault();
-      if (currentStep < totalSteps) {
-        void handleNext();
-      }
-    }
-  }
-
   const progressPercent = Math.round((currentStep / totalSteps) * 100);
   const remainingAfterAnswer = Math.max(totalSteps - currentStep, 0);
   const remainingLabel =
@@ -345,7 +335,6 @@ export default function CardStepForm({
             value={formData.siteName}
             error={errors.siteName}
             onChange={(v) => handleChange("siteName", v)}
-            onKeyDown={handleKeyDown}
             inputRef={(el) => { firstInputRef.current = el; }}
           />
         )}
@@ -355,7 +344,6 @@ export default function CardStepForm({
             value={formData.catchphrase}
             error={errors.catchphrase}
             onChange={(v) => handleChange("catchphrase", v)}
-            onKeyDown={handleKeyDown}
             inputRef={(el) => { firstInputRef.current = el; }}
           />
         )}
@@ -390,7 +378,6 @@ export default function CardStepForm({
             email={formData.email}
             emailError={errors.email}
             onEmailChange={(v) => handleChange("email", v)}
-            onKeyDown={handleKeyDown}
             inputRef={(el) => { firstInputRef.current = el; }}
           />
         )}
@@ -464,11 +451,10 @@ interface StepSiteNameProps {
   value: string;
   error?: string;
   onChange: (v: string) => void;
-  onKeyDown: (e: React.KeyboardEvent) => void;
   inputRef: (el: HTMLInputElement | null) => void;
 }
 
-function StepSiteName({ guide, value, error, onChange, onKeyDown, inputRef }: StepSiteNameProps) {
+function StepSiteName({ guide, value, error, onChange, inputRef }: StepSiteNameProps) {
   return (
     <div>
       <GuidePanel guide={guide} />
@@ -482,7 +468,6 @@ function StepSiteName({ guide, value, error, onChange, onKeyDown, inputRef }: St
         type="text"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        onKeyDown={onKeyDown}
         placeholder="例: 山田太郎整体院"
         maxLength={100}
         className={`w-full px-4 py-3 rounded-xl border text-sm text-gray-900 bg-white transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-400 ${
@@ -510,11 +495,10 @@ interface StepCatchphraseProps {
   value: string;
   error?: string;
   onChange: (v: string) => void;
-  onKeyDown: (e: React.KeyboardEvent) => void;
   inputRef: (el: HTMLInputElement | null) => void;
 }
 
-function StepCatchphrase({ guide, value, error, onChange, onKeyDown, inputRef }: StepCatchphraseProps) {
+function StepCatchphrase({ guide, value, error, onChange, inputRef }: StepCatchphraseProps) {
   return (
     <div>
       <GuidePanel guide={guide} />
@@ -528,7 +512,6 @@ function StepCatchphrase({ guide, value, error, onChange, onKeyDown, inputRef }:
         type="text"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        onKeyDown={onKeyDown}
         placeholder="例: 10年以上の実績。つらい痛みを根本から改善します"
         maxLength={200}
         className={`w-full px-4 py-3 rounded-xl border text-sm text-gray-900 bg-white transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-400 ${
@@ -700,7 +683,6 @@ interface StepEmailProps {
   email: string;
   emailError?: string;
   onEmailChange: (v: string) => void;
-  onKeyDown: (e: React.KeyboardEvent) => void;
   inputRef: (el: HTMLInputElement | null) => void;
 }
 
@@ -709,7 +691,6 @@ function StepEmail({
   email,
   emailError,
   onEmailChange,
-  onKeyDown,
   inputRef,
 }: StepEmailProps) {
   return (
@@ -726,7 +707,6 @@ function StepEmail({
         type="email"
         value={email}
         onChange={(e) => onEmailChange(e.target.value)}
-        onKeyDown={onKeyDown}
         placeholder="info@example.com"
         className={`w-full px-4 py-3 rounded-xl border text-sm text-gray-900 bg-white transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-400 ${
           emailError ? "border-red-400 bg-red-50" : "border-gray-200 focus:border-indigo-400"
