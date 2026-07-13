@@ -175,6 +175,44 @@ const jsonLd = {
       "provider": providerJsonLd,
       "offers": offerJsonLd,
     },
+    {
+      "@type": "FAQPage",
+      "@id": "https://oneflash.bantex.jp/#faq",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "HP制作を格安で依頼するといくらですか？",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "OnePage-Flashは初期制作費3,980円（税込）と月額480円（税込・初月無料）で、画像無し・1ページ超シンプル・発行URLなんでもOKのホームページ制作を提供します。"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "ホームページの仕上がりを見てから購入できますか？",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "はい。6つの質問に答えると無料でプレビューを作成し、内容を確認してから決済へ進めます。"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "格安ホームページ制作の対象範囲は何ですか？",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "画像無し、1ページ構成、発行URLでの公開に割り切った範囲です。複雑な下層ページ、独自ドメイン、写真素材の用意などに強くこだわる場合は対象外です。"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "スマホだけでもホームページを作れますか？",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "はい。屋号、サービス内容、強み、連絡先などをスマホから入力すると、AIが文章とデザインを組み立てます。"
+          }
+        }
+      ]
+    },
   ],
 };
 
