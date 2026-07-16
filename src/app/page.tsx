@@ -149,6 +149,7 @@ const jsonLd = {
       "@type": "SoftwareApplication",
       "@id": "https://oneflash.bantex.jp/#app",
       "name": "OnePage-Flash",
+      "alternateName": ["OnePage Flash", "onepage flash"],
       "applicationCategory": "WebApplication",
       "description": "HP制作を格安で始めたい方向け。6つの質問に答えるだけで、AIが文章とデザインを作成する1ページホームページ制作サービス。初期3,980円（税込）+ 月額480円（税込・初月無料）。",
       "url": "https://oneflash.bantex.jp",
