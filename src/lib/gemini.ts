@@ -2,9 +2,9 @@
  * Gemini API クライアント初期化モジュール
  *
  * 使用モデル:
- *   - 生成・修正の第一候補: gemini-2.5-flash
- *   - /api/generate のフォールバック候補: gemini-2.5-flash-lite
- *   - モデレーションの第一候補: gemini-2.5-flash-lite
+ *   - 生成・修正の第一候補: GEMINI_MODEL（既定: gemini-flash-latest）
+ *   - フォールバック候補: GEMINI_FALLBACK_MODEL（既定: gemini-pro-latest）
+ *   - モデレーションも同じ2候補を軽量設定で使用
  * 用途:
  *   - コンテンツモデレーション (prompts/moderation.ts)
  *   - HTML/CSS生成 (prompts/generator.ts)
@@ -35,9 +35,9 @@ export interface GeminiModelCandidate {
 
 const GENERATION_MODEL_CONFIG = {
   temperature: 0.7,
-  // 8192 では本命 gemini-2.5-flash のリッチなHTMLが </html> 到達前に打ち切られ、
+  // 8192 ではFlash系モデルのリッチなHTMLが </html> 到達前に打ち切られ、
   // 「Generated HTML does not contain closing </html> tag」で予備モデルに交代していた。
-  // gemini-2.5系は最大65536まで対応。余裕を持たせて完走させる。
+  // 現行Flash系の出力上限内で余裕を持たせて完走させる。
   maxOutputTokens: 32768,
 };
 
@@ -46,6 +46,11 @@ const MODERATION_MODEL_CONFIG = {
   maxOutputTokens: 256,
   responseMimeType: "application/json",
 };
+
+const GENERATION_MODEL_NAME =
+  process.env.GEMINI_MODEL || "gemini-flash-latest";
+const FALLBACK_MODEL_NAME =
+  process.env.GEMINI_FALLBACK_MODEL || "gemini-pro-latest";
 
 function createGeminiModel(
   modelName: string,
@@ -64,36 +69,36 @@ function createGeminiModel(
 
 /** コンテンツ生成・修正に使用する第一候補モデル */
 export const geminiModel: GenerativeModel = createGeminiModel(
-  "gemini-2.5-flash",
+  GENERATION_MODEL_NAME,
   GENERATION_MODEL_CONFIG
 );
 
 /** コンテンツ生成・修正に使用するフォールバックモデル */
 export const geminiFallbackModel: GenerativeModel = createGeminiModel(
-  "gemini-2.5-flash-lite",
+  FALLBACK_MODEL_NAME,
   GENERATION_MODEL_CONFIG
 );
 
 export const geminiGenerationModels: GeminiModelCandidate[] = [
-  { modelName: "gemini-2.5-flash", model: geminiModel },
-  { modelName: "gemini-2.5-flash-lite", model: geminiFallbackModel },
+  { modelName: GENERATION_MODEL_NAME, model: geminiModel },
+  { modelName: FALLBACK_MODEL_NAME, model: geminiFallbackModel },
 ];
 
 /** コンテンツモデレーション専用の第一候補モデル（低temperature・JSON出力）*/
 export const moderationModel: GenerativeModel = createGeminiModel(
-  "gemini-2.5-flash-lite",
+  GENERATION_MODEL_NAME,
   MODERATION_MODEL_CONFIG
 );
 
 /** コンテンツモデレーション専用のフォールバックモデル */
 export const moderationFallbackModel: GenerativeModel = createGeminiModel(
-  "gemini-2.5-flash",
+  FALLBACK_MODEL_NAME,
   MODERATION_MODEL_CONFIG
 );
 
 export const geminiModerationModels: GeminiModelCandidate[] = [
-  { modelName: "gemini-2.5-flash-lite", model: moderationModel },
-  { modelName: "gemini-2.5-flash", model: moderationFallbackModel },
+  { modelName: GENERATION_MODEL_NAME, model: moderationModel },
+  { modelName: FALLBACK_MODEL_NAME, model: moderationFallbackModel },
 ];
 
 // ---------------------------------------------------------------------------
