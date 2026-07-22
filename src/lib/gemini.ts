@@ -2,8 +2,8 @@
  * Gemini API クライアント初期化モジュール
  *
  * 使用モデル:
- *   - 生成・修正の第一候補: GEMINI_MODEL（既定: gemini-flash-latest）
- *   - フォールバック候補: GEMINI_FALLBACK_MODEL（既定: gemini-pro-latest）
+ *   - 生成・修正の第一候補: GEMINI_MODEL（既定: gemini-2.5-flash）
+ *   - フォールバック候補: GEMINI_FALLBACK_MODEL（既定: gemini-3.1-pro-preview）
  *   - モデレーションも同じ2候補を軽量設定で使用
  * 用途:
  *   - コンテンツモデレーション (prompts/moderation.ts)
@@ -47,10 +47,24 @@ const MODERATION_MODEL_CONFIG = {
   responseMimeType: "application/json",
 };
 
-const GENERATION_MODEL_NAME =
-  process.env.GEMINI_MODEL || "gemini-flash-latest";
-const FALLBACK_MODEL_NAME =
-  process.env.GEMINI_FALLBACK_MODEL || "gemini-pro-latest";
+const PINNED_FLASH_MODEL = "gemini-2.5-flash";
+const PINNED_PRO_MODEL = "gemini-3.1-pro-preview";
+
+function pinGeminiModel(configured: string | undefined, fallback: string): string {
+  const modelName = configured?.trim() || fallback;
+  if (modelName === "gemini-flash-latest") return PINNED_FLASH_MODEL;
+  if (modelName === "gemini-pro-latest") return PINNED_PRO_MODEL;
+  return modelName;
+}
+
+const GENERATION_MODEL_NAME = pinGeminiModel(
+  process.env.GEMINI_MODEL,
+  PINNED_FLASH_MODEL
+);
+const FALLBACK_MODEL_NAME = pinGeminiModel(
+  process.env.GEMINI_FALLBACK_MODEL,
+  PINNED_PRO_MODEL
+);
 
 function createGeminiModel(
   modelName: string,
