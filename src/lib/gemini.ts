@@ -66,6 +66,14 @@ const FALLBACK_MODEL_NAME = pinGeminiModel(
   PINNED_PRO_MODEL
 );
 
+const PINNED_MODERATION_MODEL = "gemini-3.5-flash-lite";
+
+/** モデレーション第一候補は軽量モデル（出力256上限でもthinking消費が無い） */
+const MODERATION_MODEL_NAME = pinGeminiModel(
+  process.env.GEMINI_MODERATION_MODEL,
+  PINNED_MODERATION_MODEL
+);
+
 function createGeminiModel(
   modelName: string,
   generationConfig: Record<string, string | number>
@@ -100,7 +108,7 @@ export const geminiGenerationModels: GeminiModelCandidate[] = [
 
 /** コンテンツモデレーション専用の第一候補モデル（低temperature・JSON出力）*/
 export const moderationModel: GenerativeModel = createGeminiModel(
-  GENERATION_MODEL_NAME,
+  MODERATION_MODEL_NAME,
   MODERATION_MODEL_CONFIG
 );
 
@@ -111,7 +119,7 @@ export const moderationFallbackModel: GenerativeModel = createGeminiModel(
 );
 
 export const geminiModerationModels: GeminiModelCandidate[] = [
-  { modelName: GENERATION_MODEL_NAME, model: moderationModel },
+  { modelName: MODERATION_MODEL_NAME, model: moderationModel },
   { modelName: FALLBACK_MODEL_NAME, model: moderationFallbackModel },
 ];
 
