@@ -28,6 +28,7 @@ import {
 import { getDraftHTML, deleteDraftHTML, deactivateSite, getSiteHTML } from "@/lib/r2";
 import { sendSiteCompletionEmail, sendPaymentFailureEmail } from "@/lib/email";
 import { notifyCustomerError } from "@/lib/slack";
+import { isOnePageFlashCheckoutMetadata } from "@/lib/stripe-checkout-ownership.mjs";
 import crypto from "crypto";
 import type Stripe from "stripe";
 
@@ -176,6 +177,14 @@ async function ensureFreeSubdomain(preferred: string): Promise<string> {
 
 async function handleCheckoutCompleted(session: Stripe.Checkout.Session): Promise<void> {
   const metadata = session.metadata;
+
+  // BANTEX共通Stripeアカウントでは、他サービスのCheckout完了イベントも
+  // このWebhookへ届く。OnePage-Flash所有と判定できない決済は正常系として無視する。
+  if (!isOnePageFlashCheckoutMetadata(metadata)) {
+    console.log(`[webhook/stripe] Ignoring checkout session for another service: ${session.id}`);
+    return;
+  }
+
   if (!metadata?.draftId || !metadata?.subdomain) {
     console.error("[webhook/stripe] Missing metadata in session:", session.id);
     await notifyCustomerError("webhook/stripe", "メタデータ不足で公開処理スキップ", {

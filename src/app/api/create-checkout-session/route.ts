@@ -17,6 +17,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { stripe, INITIAL_FEE, MONTHLY_FEE, CURRENCY } from "@/lib/stripe";
+import { ONEPAGE_FLASH_CHECKOUT_APP } from "@/lib/stripe-checkout-ownership.mjs";
 import { uploadDraftHTML } from "@/lib/r2";
 import type { SiteFormData } from "@/lib/gemini";
 import { notifyCustomerError } from "@/lib/slack";
@@ -103,11 +104,15 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       mode: "subscription",
       subscription_data: {
         trial_period_days: 30,
+        metadata: {
+          app: ONEPAGE_FLASH_CHECKOUT_APP,
+        },
       },
       success_url: `${appUrl}/complete?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${appUrl}/create`,
       customer_email: formData.email || undefined,
       metadata: {
+        app: ONEPAGE_FLASH_CHECKOUT_APP,
         draftId,
         subdomain: formData.subdomain,
         siteName: formData.siteName,
