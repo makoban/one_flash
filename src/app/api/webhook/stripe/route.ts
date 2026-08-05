@@ -181,7 +181,9 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session): Promis
   // BANTEX共通Stripeアカウントでは、他サービスのCheckout完了イベントも
   // このWebhookへ届く。OnePage-Flash所有と判定できない決済は正常系として無視する。
   if (!isOnePageFlashCheckoutMetadata(metadata)) {
-    console.log(`[webhook/stripe] Ignoring checkout session for another service: ${session.id}`);
+    console.log(
+      `[webhook/stripe] Ignoring checkout session for another service: ${session.id} (app=${metadata?.app ?? "none"})`
+    );
     return;
   }
 
