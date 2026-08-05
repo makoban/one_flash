@@ -1,12 +1,13 @@
 import type { MetadataRoute } from "next";
 
+const homepageLastModified = new Date("2026-07-16T00:00:00+09:00");
 const lastModified = new Date("2026-07-13T00:00:00+09:00");
 
 export default function sitemap(): MetadataRoute.Sitemap {
   return [
     {
       url: "https://oneflash.bantex.jp",
-      lastModified,
+      lastModified: homepageLastModified,
       changeFrequency: "weekly",
       priority: 1,
     },
