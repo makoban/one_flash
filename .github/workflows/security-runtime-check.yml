@@ -1,0 +1,28 @@
+name: Security runtime validation
+on:
+  push:
+    branches: [codex/stripe-security-20261025]
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      PUPPETEER_SKIP_DOWNLOAD: 'true'
+      NEXT_TELEMETRY_DISABLED: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.4'
+      - name: Resolve security update lockfile
+        run: npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+      - uses: actions/upload-artifact@v4
+        with:
+          name: security-lockfile
+          path: package-lock.json
+          retention-days: 3
+      - run: npm ci --no-audit --no-fund
+      - run: npm test
+      - run: npm run build
